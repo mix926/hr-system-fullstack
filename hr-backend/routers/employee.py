@@ -27,3 +27,9 @@ def create_new_employee(employee: schemas.EmployeeCreate, db: Session = Depends(
 def read_employees(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     employees = crud.get_employees(db, skip=skip, limit=limit)
     return employees
+@router.delete("/{employee_id}")
+def delete_employee(employee_id: int, db: Session = Depends(get_db)):
+    deleted_employee = crud.delete_employee(db=db, employee_id=employee_id)
+    if not deleted_employee:
+        raise HTTPException(status_code=404, detail="Employee not found")
+    return {"message": "Employee deleted successfully"}

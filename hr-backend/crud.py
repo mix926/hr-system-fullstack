@@ -13,3 +13,9 @@ def create_employee(db: Session, employee: schemas.EmployeeCreate):
     db.commit()
     db.refresh(new_employee)
     return new_employee
+def delete_employee(db: Session, employee_id: int):
+    db_employee = db.query(models.Employee).filter(models.Employee.id == employee_id).first()
+    if db_employee:
+        db.delete(db_employee)
+        db.commit()
+    return db_employee

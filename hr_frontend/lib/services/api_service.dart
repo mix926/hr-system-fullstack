@@ -33,6 +33,14 @@ class ApiService {
       return Employee.fromJson(json.decode(response.body));
     } else {
       throw Exception('Failed to create employee');
+      
+    }
+  }
+  // DELETE /employees/{id}
+  Future<void> deleteEmployee(int id) async {
+    final response = await http.delete(Uri.parse('$baseUrl/employees/$id'));
+    if (response.statusCode != 200) {
+      throw Exception('Failed to delete employee');
     }
   }
 }

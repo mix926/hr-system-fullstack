@@ -58,10 +58,26 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ),
                   title: Text('${emp.firstName} ${emp.lastName}'),
                   subtitle: Text('${emp.position} | ${emp.email}'),
-                  trailing: Icon(
-                    Icons.circle,
-                    color: emp.isActive ? Colors.green : Colors.red,
-                    size: 12,
+                  // NEW DELETE BUTTON | ប៊ូតុងលុបថ្មី
+                  trailing: IconButton(
+                    icon: const Icon(Icons.delete, color: Colors.red),
+                    onPressed: () async {
+                      try {
+                        await apiService.deleteEmployee(emp.id!);
+                        _loadEmployees(); // Reload list after deleting
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Employee deleted successfully!')),
+                          );
+                        }
+                      } catch (e) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Error: $e')),
+                          );
+                        }
+                      }
+                    },
                   ),
                 ),
               );
