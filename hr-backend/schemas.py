@@ -6,6 +6,7 @@ class EmployeeBase(BaseModel):
     last_name: str
     email: str
     position: str
+    role: str = "Employee"
 
 # Data required to create an employee
 class EmployeeCreate(EmployeeBase):
