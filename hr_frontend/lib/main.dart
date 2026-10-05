@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'screens/dashboard.dart';
+import 'screens/login.dart';
 
 void main() {
   runApp(const HRApp());
@@ -17,7 +17,7 @@ class HRApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         useMaterial3: true,
       ),
-      home: const DashboardScreen(),
+      home: const LoginScreen(),
     );
   }
 }
