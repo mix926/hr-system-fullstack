@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+
 import 'dashboard.dart';
+import 'register.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -16,8 +18,7 @@ class _LoginScreenState extends State<LoginScreen> {
   void _login() {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
-      
-      
+
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const DashboardScreen()),
@@ -34,7 +35,9 @@ class _LoginScreenState extends State<LoginScreen> {
           padding: const EdgeInsets.all(24.0),
           child: Card(
             elevation: 4,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
             child: Padding(
               padding: const EdgeInsets.all(24.0),
               child: Form(
@@ -46,7 +49,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     const SizedBox(height: 16),
                     const Text(
                       'HR System Login',
-                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: 32),
                     TextFormField(
@@ -56,7 +62,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         border: OutlineInputBorder(),
                       ),
                       keyboardType: TextInputType.emailAddress,
-                      validator: (value) => value!.isEmpty ? 'Please enter email' : null,
+                      validator: (value) =>
+                          value!.isEmpty ? 'Please enter email' : null,
                       onSaved: (value) => email = value!,
                     ),
                     const SizedBox(height: 16),
@@ -67,8 +74,21 @@ class _LoginScreenState extends State<LoginScreen> {
                         border: OutlineInputBorder(),
                       ),
                       obscureText: true,
-                      validator: (value) => value!.isEmpty ? 'Please enter password' : null,
+                      validator: (value) =>
+                          value!.isEmpty ? 'Please enter password' : null,
                       onSaved: (value) => password = value!,
+                    ),
+                    const SizedBox(height: 16),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const RegisterScreen(),
+                          ),
+                        );
+                      },
+                      child: const Text("Don't have an account? Register here"),
                     ),
                     const SizedBox(height: 32),
                     SizedBox(
@@ -83,7 +103,10 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                         onPressed: _login,
-                        child: const Text('Login', style: TextStyle(fontSize: 18)),
+                        child: const Text(
+                          'Login',
+                          style: TextStyle(fontSize: 18),
+                        ),
                       ),
                     ),
                   ],

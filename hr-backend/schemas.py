@@ -10,7 +10,7 @@ class EmployeeBase(BaseModel):
 
 # Data required to create an employee
 class EmployeeCreate(EmployeeBase):
-    pass
+    password: str
 
 # Data returned from the database (includes ID and active status)
 class EmployeeResponse(EmployeeBase):
