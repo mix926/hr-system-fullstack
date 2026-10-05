@@ -10,4 +10,5 @@ class Employee(Base):
     email = Column(String(100), unique=True, index=True)
     position = Column(String(50))
     hashed_password = Column(String(255))
+    role = Column(String(50), default="Employee")
     is_active = Column(Boolean, default=True)
