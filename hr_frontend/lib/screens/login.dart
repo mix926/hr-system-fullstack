@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'dashboard.dart';
 import 'register.dart';
+import '../services/api_service.dart'; // NEW: Import ApiService
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -12,17 +13,53 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
+  final ApiService apiService = ApiService(); // NEW: Add API Service
+
   String email = '';
   String password = '';
+  bool isLoading = false; // NEW: Track loading state
 
-  void _login() {
+  // NEW: Updated to async function to call backend
+  // ថ្មី៖ កែប្រែជាមុខងារ async ដើម្បីហៅទៅកាន់ Backend
+  Future<void> _login() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const DashboardScreen()),
-      );
+      setState(() {
+        isLoading = true; // Show loading spinner
+      });
+
+      try {
+        // Send login request to FastAPI
+        // បញ្ជូនសំណើ Login ទៅកាន់ FastAPI
+        await apiService.login(email, password);
+
+        if (mounted) {
+          // Success! Go to Dashboard
+          // ជោគជ័យ! ចូលទៅកាន់ផ្ទាំង Dashboard
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const DashboardScreen()),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          // Show error message (like "Invalid password")
+          // បង្ហាញសារកំហុស (ឧទាហរណ៍ "លេខសម្ងាត់មិនត្រឹមត្រូវ")
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(e.toString().replaceAll('Exception: ', '')),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      } finally {
+        if (mounted) {
+          setState(() {
+            isLoading = false; // Hide loading spinner
+          });
+        }
+      }
     }
   }
 
@@ -102,11 +139,21 @@ class _LoginScreenState extends State<LoginScreen> {
                             borderRadius: BorderRadius.circular(8),
                           ),
                         ),
-                        onPressed: _login,
-                        child: const Text(
-                          'Login',
-                          style: TextStyle(fontSize: 18),
-                        ),
+                        // Disable button while loading / បិទប៊ូតុងពេលកំពុងផ្ទុក
+                        onPressed: isLoading ? null : _login,
+                        child: isLoading
+                            ? const SizedBox(
+                                height: 24,
+                                width: 24,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2.5,
+                                ),
+                              )
+                            : const Text(
+                                'Login',
+                                style: TextStyle(fontSize: 18),
+                              ),
                       ),
                     ),
                   ],

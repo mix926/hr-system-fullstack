@@ -3,12 +3,14 @@ from fastapi.middleware.cors import CORSMiddleware
 import models
 from database import engine
 from routers import employee
+from routers import employee, auth
 
 # Create tables
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="HR System API")
-
+app.include_router(employee.router)
+app.include_router(auth.router)
 # Allow Flutter to connect (CORS)
 app.add_middleware(
     CORSMiddleware,

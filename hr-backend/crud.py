@@ -39,3 +39,5 @@ def delete_employee(db: Session, employee_id: int):
         db.delete(db_employee)
         db.commit()
     return db_employee
+def verify_password(plain_password: str, hashed_password: str):
+    return pwd_context.verify(plain_password,hashed_password)
