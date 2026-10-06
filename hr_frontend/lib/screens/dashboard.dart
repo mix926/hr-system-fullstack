@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../models/employee.dart';
 import '../services/api_service.dart';
 import 'add_employee.dart';
+import 'login.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -33,6 +35,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
         title: const Text('HR Dashboard'),
         backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () async {
+              // 1. Clear the saved token and role / លុបទិន្នន័យ Token និង Role ដែលបានរក្សាទុក
+              final prefs = await SharedPreferences.getInstance();
+              await prefs.clear();
+              
+              if (context.mounted) {
+                // 2. Navigate back to Login Screen / ត្រឡប់ទៅកាន់ផ្ទាំង Login វិញ
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const LoginScreen()),
+                );
+              }
+            },
+          )
+        ],
       ),
       body: FutureBuilder<List<Employee>>(
         future: futureEmployees,

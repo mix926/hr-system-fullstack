@@ -5,9 +5,9 @@ import '../utils/constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
-  // Use the URL from AppConstants | ប្រើប្រាស់ URL ពី AppConstants
   static const String baseUrl = AppConstants.baseUrl;
- // POST /login
+
+  // POST /login
   Future<Map<String, dynamic>> login(String email, String password) async {
     final response = await http.post(
       Uri.parse('$baseUrl/login'),
@@ -21,8 +21,6 @@ class ApiService {
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       
-      // Save the token and role securely on the device
-      // រក្សាទុក Token និង Role ក្នុងម៉ាស៊ីនឱ្យមានសុវត្ថិភាព
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('token', data['access_token']);
       await prefs.setString('role', data['user']['role']);
@@ -33,9 +31,20 @@ class ApiService {
       throw Exception(error['detail'] ?? 'Login failed');
     }
   }
+
   // GET /employees/
   Future<List<Employee>> getEmployees() async {
-    final response = await http.get(Uri.parse('$baseUrl/employees/'));
+    // 1. Get the saved token / ទាញយក Token ដែលបានរក្សាទុក
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
+    final response = await http.get(
+      Uri.parse('$baseUrl/employees/'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token', // <-- SEND TOKEN HERE / បញ្ជូន Token នៅទីនេះ
+      },
+    );
 
     if (response.statusCode == 200) {
       List jsonResponse = json.decode(response.body);
@@ -47,10 +56,14 @@ class ApiService {
 
   // POST /employees/
   Future<Employee> createEmployee(Employee employee) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token'); // <-- GET TOKEN
+
     final response = await http.post(
       Uri.parse('$baseUrl/employees/'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer $token', // <-- SEND TOKEN HERE / បញ្ជូន Token នៅទីនេះ
       },
       body: jsonEncode(employee.toJson()),
     );
@@ -59,12 +72,21 @@ class ApiService {
       return Employee.fromJson(json.decode(response.body));
     } else {
       throw Exception('Failed to create employee');
-      
     }
   }
+
   // DELETE /employees/{id}
   Future<void> deleteEmployee(int id) async {
-    final response = await http.delete(Uri.parse('$baseUrl/employees/$id'));
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token'); // <-- GET TOKEN
+
+    final response = await http.delete(
+      Uri.parse('$baseUrl/employees/$id'),
+      headers: {
+        'Authorization': 'Bearer $token', // <-- SEND TOKEN HERE / បញ្ជូន Token នៅទីនេះ
+      },
+    );
+    
     if (response.statusCode != 200) {
       throw Exception('Failed to delete employee');
     }
