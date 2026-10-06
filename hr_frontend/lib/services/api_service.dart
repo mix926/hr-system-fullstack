@@ -7,8 +7,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 class ApiService {
   // Use the URL from AppConstants | ប្រើប្រាស់ URL ពី AppConstants
   static const String baseUrl = AppConstants.baseUrl;
-
-Future<Map<String, dynamic>> login(String email, String password) async {
+ // POST /login
+  Future<Map<String, dynamic>> login(String email, String password) async {
     final response = await http.post(
       Uri.parse('$baseUrl/login'),
       headers: {'Content-Type': 'application/json'},
@@ -29,7 +29,6 @@ Future<Map<String, dynamic>> login(String email, String password) async {
       
       return data;
     } else {
-      // If login fails, throw an error to show in the UI
       final error = jsonDecode(response.body);
       throw Exception(error['detail'] ?? 'Login failed');
     }

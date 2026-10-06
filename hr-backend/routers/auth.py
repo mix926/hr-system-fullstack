@@ -5,13 +5,16 @@ import crud, models
 from database import SessionLocal
 import jwt
 from datetime import datetime, timedelta
+from fastapi.security import OAuth2PasswordBearer
 
 router = APIRouter(tags=["Authentication"])
+
 
 # Secret key for JWT (In a real app, hide this in a .env file!)
 # កូដសម្ងាត់សម្រាប់បង្កើត Token (ក្នុងកម្មវិធីពិត ត្រូវលាក់វាក្នុងឯកសារ .env!)
 SECRET_KEY = "my_super_secret_hr_key"
 ALGORITHM = "HS256"
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
 
 def get_db():
     db = SessionLocal()
@@ -54,3 +57,18 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
             "last_name": user.last_name
         }
     }
+def get_current_user(token: str = Depends(oauth2_scheme)):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials or token expired",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        # Try to decode the token / ព្យាយាមបំប្លែង Token
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        email: str = payload.get("sub")
+        if email is None:
+            raise credentials_exception
+        return payload # Returns the user's data (email, role)
+    except jwt.PyJWTError:
+        raise credentials_exception
