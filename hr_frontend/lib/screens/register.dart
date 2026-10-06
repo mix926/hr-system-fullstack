@@ -19,9 +19,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
   String email = '';
   String password = '';
   String position = '';
-  String role = 'Employee'; // Default role
+  String role = 'Employee'; // Default role - lowercase to match backend
 
-  final List<String> roles = ['Admin', 'HR', 'Employee']; // 3 Roles
+  final List<String> roles = ['admin', 'HR', 'Employee']; // 3 Roles - must match backend role values
 
   void _register() async {
     if (_formKey.currentState!.validate()) {

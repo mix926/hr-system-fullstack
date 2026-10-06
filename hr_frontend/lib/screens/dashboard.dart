@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+
 import '../models/employee.dart';
 import '../services/api_service.dart';
 import 'add_employee.dart';
 import 'login.dart';
+
 import 'package:shared_preferences/shared_preferences.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -15,13 +17,21 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   final ApiService apiService = ApiService();
   late Future<List<Employee>> futureEmployees;
+  String userRole = '';
 
   @override
   void initState() {
     super.initState();
     _loadEmployees();
+    _loadUserRole();
   }
 
+  Future<void> _loadUserRole() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      userRole = prefs.getString('role') ?? '';
+    });
+  }
   void _loadEmployees() {
     setState(() {
       futureEmployees = apiService.getEmployees();
@@ -42,7 +52,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               // 1. Clear the saved token and role / លុបទិន្នន័យ Token និង Role ដែលបានរក្សាទុក
               final prefs = await SharedPreferences.getInstance();
               await prefs.clear();
-              
+
               if (context.mounted) {
                 // 2. Navigate back to Login Screen / ត្រឡប់ទៅកាន់ផ្ទាំង Login វិញ
                 Navigator.pushReplacement(
@@ -51,7 +61,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 );
               }
             },
-          )
+          ),
         ],
       ),
       body: FutureBuilder<List<Employee>>(
@@ -69,6 +79,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             itemCount: snapshot.data!.length,
             itemBuilder: (context, index) {
               final emp = snapshot.data![index];
+              
               return Card(
                 margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                 child: ListTile(
@@ -79,45 +90,53 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   title: Text('${emp.firstName} ${emp.lastName}'),
                   subtitle: Text('${emp.position} | ${emp.email}'),
                   // NEW DELETE BUTTON | ប៊ូតុងលុបថ្មី
-                  trailing: IconButton(
-                    icon: const Icon(Icons.delete, color: Colors.red),
-                    onPressed: () async {
-                      try {
-                        await apiService.deleteEmployee(emp.id!);
-                        _loadEmployees(); // Reload list after deleting
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Employee deleted successfully!')),
-                          );
-                        }
-                      } catch (e) {
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Error: $e')),
-                          );
-                        }
-                      }
-                    },
-                  ),
+                 trailing: userRole == 'admin'
+                      ? IconButton(
+                          icon: const Icon(Icons.delete, color: Colors.red),
+                          onPressed: () async {
+                            try {
+                              await apiService.deleteEmployee(emp.id!);
+                              _loadEmployees(); // Reload list after deleting
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Employee deleted successfully!'),
+                                  ),
+                                );
+                              }
+                            } catch (e) {
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('Error: $e'))
+                                );
+                              }
+                            }
+                          },
+                        )
+                      : null, // Hide if not admin | លាក់វាបើមិនមែន admin
                 ),
               );
             },
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          final result = await Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const AddEmployeeScreen()),
-          );
-          // Refresh the list if a new employee was added
-          if (result == true) {
-            _loadEmployees();
-          }
-        },
-        child: const Icon(Icons.add),
-      ),
+      // ONLY show Add button if role is admin | បង្ហាញប៊ូតុង Add តែពេលសិទ្ធិជា admin ប៉ុណ្ណោះ
+      floatingActionButton: userRole == 'admin'
+          ? FloatingActionButton(
+              onPressed: () async {
+                final result = await Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const AddEmployeeScreen()),
+                );
+                // Refresh the list if a new employee was added
+                if (result == true) {
+                  _loadEmployees();
+                }
+              },
+              child: const Icon(Icons.add),
+            )
+          : null, // Hide if not admin | លាក់វាបើមិនមែន admin
     );
   }
 }
+     

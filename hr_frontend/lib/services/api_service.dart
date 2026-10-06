@@ -39,7 +39,7 @@ class ApiService {
     final token = prefs.getString('token');
 
     final response = await http.get(
-      Uri.parse('$baseUrl/employees/'),
+      Uri.parse('$baseUrl/employees'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token', // <-- SEND TOKEN HERE / បញ្ជូន Token នៅទីនេះ
@@ -57,13 +57,15 @@ class ApiService {
   // POST /employees/
   Future<Employee> createEmployee(Employee employee) async {
     final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token'); // <-- GET TOKEN
+    final token = prefs.getString('token'); // 1. Get the token / ទាញយក Token
+
+    print("POST TOKEN CHECK: $token"); // Debug check / ពិនិត្យមើលក្នុង Terminal
 
     final response = await http.post(
-      Uri.parse('$baseUrl/employees/'),
+      Uri.parse('$baseUrl/employees'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
-        'Authorization': 'Bearer $token', // <-- SEND TOKEN HERE / បញ្ជូន Token នៅទីនេះ
+        'Authorization': 'Bearer $token', // 2. SEND THE TOKEN / បញ្ជូន Token 
       },
       body: jsonEncode(employee.toJson()),
     );
