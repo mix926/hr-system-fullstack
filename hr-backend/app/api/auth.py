@@ -1,8 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
-import crud, models
-from database import SessionLocal
+from app.repositories import crud
+from app.models import models
+from app.core.database import SessionLocal
 import jwt
 # NEW: Imported timezone to fix the instant-expiration bug / នាំចូល timezone 
 from datetime import datetime, timedelta, timezone 

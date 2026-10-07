@@ -1,0 +1,6 @@
+{
+  "python.defaultInterpreterPath": "/Users/moengmix/Desktop/hr-system-fullstack/hr-backend/venv/bin/python",
+  "python.analysis.extraPaths": [
+    "/Users/moengmix/Library/Python/3.9/lib/python/site-packages"
+  ]
+}
