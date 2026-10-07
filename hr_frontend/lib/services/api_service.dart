@@ -10,7 +10,7 @@ class ApiService {
   // POST /login
   Future<Map<String, dynamic>> login(String email, String password) async {
     final response = await http.post(
-      Uri.parse('$baseUrl/login'),
+      Uri.parse('$baseUrl/api/v1/login'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
         'email': email,
@@ -39,10 +39,10 @@ class ApiService {
     final token = prefs.getString('token');
 
     final response = await http.get(
-      Uri.parse('$baseUrl/employees'),
+      Uri.parse('$baseUrl/api/v1/employees/'),
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token', // <-- SEND TOKEN HERE / បញ្ជូន Token នៅទីនេះ
+        'Authorization': 'Bearer $token',
       },
     );
 
@@ -62,7 +62,7 @@ class ApiService {
     print("POST TOKEN CHECK: $token"); // Debug check / ពិនិត្យមើលក្នុង Terminal
 
     final response = await http.post(
-      Uri.parse('$baseUrl/employees'),
+      Uri.parse('$baseUrl/api/v1/employees/'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
         'Authorization': 'Bearer $token', // 2. SEND THE TOKEN / បញ្ជូន Token 
@@ -78,12 +78,12 @@ class ApiService {
   }
 
   // DELETE /employees/{id}
-  Future<void> deleteEmployee(int id) async {
+  Future<void> deleteEmployee(String id) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token'); // <-- GET TOKEN
 
     final response = await http.delete(
-      Uri.parse('$baseUrl/employees/$id'),
+      Uri.parse('$baseUrl/api/v1/employees/$id'),
       headers: {
         'Authorization': 'Bearer $token', // <-- SEND TOKEN HERE / បញ្ជូន Token នៅទីនេះ
       },

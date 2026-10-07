@@ -90,7 +90,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   title: Text('${emp.firstName} ${emp.lastName}'),
                   subtitle: Text('${emp.position} | ${emp.email}'),
                   // NEW DELETE BUTTON | ប៊ូតុងលុបថ្មី
-                 trailing: userRole == 'admin'
+                 trailing: userRole == 'ADMIN'
                       ? IconButton(
                           icon: const Icon(Icons.delete, color: Colors.red),
                           onPressed: () async {
@@ -121,7 +121,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         },
       ),
       // ONLY show Add button if role is admin | បង្ហាញប៊ូតុង Add តែពេលសិទ្ធិជា admin ប៉ុណ្ណោះ
-      floatingActionButton: userRole == 'admin'
+      floatingActionButton: userRole == 'ADMIN'
           ? FloatingActionButton(
               onPressed: () async {
                 final result = await Navigator.push(

@@ -4,6 +4,7 @@ from pydantic import BaseModel
 from app.repositories import crud
 from app.models import models
 from app.core.database import SessionLocal
+from app.core.security import verify_password
 import jwt
 # NEW: Imported timezone to fix the instant-expiration bug / នាំចូល timezone 
 from datetime import datetime, timedelta, timezone 
@@ -15,7 +16,7 @@ router = APIRouter(tags=["Authentication"])
 SECRET_KEY = "my_super_secret_hr_key_1234567890" 
 ALGORITHM = "HS256"
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/login")
 
 def get_db():
     db = SessionLocal()
@@ -34,7 +35,7 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid email")
     
-    if not crud.verify_password(request.password, user.hashed_password):
+    if not verify_password(request.password, user.hashed_password):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid password")
         
     # NEW: Use timezone-aware UTC time / ប្រើប្រាស់ពេលវេលា UTC ច្បាស់លាស់
