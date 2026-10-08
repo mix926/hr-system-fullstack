@@ -1,7 +1,10 @@
+// ខ្មែរ: ទីតាំងឯកសារ lib/features/auth/presentation/register.dart
 import 'package:flutter/material.dart';
-import '../models/employee.dart';
-import '../services/api_service.dart';
+import 'package:get_it/get_it.dart';
+
 import 'login.dart';
+import '../data/auth_api_service.dart';
+import '../../employee/data/models/employee_model.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -12,49 +15,62 @@ class RegisterScreen extends StatefulWidget {
 
 class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
-  final ApiService apiService = ApiService();
-  
+
+  // ខ្មែរ: ទទួលយក AuthApiService ពី GetIt Service Locator
+  final AuthApiService _authApiService = GetIt.instance<AuthApiService>();
+
   String firstName = '';
   String lastName = '';
   String email = '';
   String password = '';
   String position = '';
-  String role = 'Employee'; // Default role - lowercase to match backend
 
-  final List<String> roles = ['admin', 'HR', 'Employee']; // 3 Roles - must match backend role values
+  // ខ្មែរ: តួនាទីដើម (Default) ត្រូវតែជា STAFF ដើម្បីត្រូវនឹង Backend
+  String role = 'STAFF';
+  bool isLoading = false;
 
-  void _register() async {
-    if (_formKey.currentState!.validate()) {
-      _formKey.currentState!.save();
-      
-      final newEmployee = Employee(
-        firstName: firstName,
-        lastName: lastName,
-        email: email,
-        position: position,
-        password: password,
-        role: role,
-      );
+  // ខ្មែរ: បញ្ជីតួនាទីត្រូវតែជាអក្សរធំ ឱ្យដូចគ្នាទៅនឹង RoleEnum នៅក្នុង FastAPI
+  final List<String> roles = ['ADMIN', 'MANAGER', 'STAFF'];
 
-      try {
-        await apiService.createEmployee(newEmployee);
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Registration Successful! Please login.')),
-          );
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const LoginScreen()),
-          );
-        }
-      } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error: $e')),
-          );
-        }
-      }
-    }
+  Future<void> _register() async {
+    if (!_formKey.currentState!.validate()) return;
+    _formKey.currentState!.save();
+
+    setState(() => isLoading = true);
+
+    final newEmployee = Employee(
+      firstName: firstName,
+      lastName: lastName,
+      email: email,
+      position: position,
+      password: password,
+      role: role,
+    );
+
+    final result = await _authApiService.registerEmployee(newEmployee);
+
+    if (!mounted) return;
+    setState(() => isLoading = false);
+
+    result.fold(
+      (failure) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(failure.message), backgroundColor: Colors.red),
+        );
+      },
+      (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Registration Successful! Please login.'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const LoginScreen()),
+        );
+      },
+    );
   }
 
   @override
@@ -81,14 +97,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
               const SizedBox(height: 16),
               TextFormField(
                 decoration: const InputDecoration(labelText: 'Email', border: OutlineInputBorder()),
-                validator: (value) => value!.isEmpty ? 'Enter email' : null,
+                keyboardType: TextInputType.emailAddress,
+                validator: (value) {
+                  if (value == null || value.isEmpty) return 'Enter email';
+                  if (!value.contains('@')) return 'Invalid email';
+                  return null;
+                },
                 onSaved: (value) => email = value!,
               ),
               const SizedBox(height: 16),
               TextFormField(
                 decoration: const InputDecoration(labelText: 'Password', border: OutlineInputBorder()),
                 obscureText: true,
-                validator: (value) => value!.length < 6 ? 'Min 6 characters' : null,
+                validator: (value) => value!.length < 8 ? 'Min 8 characters required' : null,
                 onSaved: (value) => password = value!,
               ),
               const SizedBox(height: 16),
@@ -98,9 +119,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 onSaved: (value) => position = value!,
               ),
               const SizedBox(height: 16),
-              // ROLE DROPDOWN / ប្រអប់ជ្រើសរើសសិទ្ធិ
               DropdownButtonFormField<String>(
-                value: role,
+                initialValue: role,
                 decoration: const InputDecoration(labelText: 'System Role', border: OutlineInputBorder()),
                 items: roles.map((String value) {
                   return DropdownMenuItem<String>(
@@ -108,19 +128,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     child: Text(value),
                   );
                 }).toList(),
-                onChanged: (newValue) {
-                  setState(() {
-                    role = newValue!;
-                  });
-                },
+                onChanged: (newValue) => setState(() => role = newValue!),
               ),
               const SizedBox(height: 32),
               SizedBox(
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-                  onPressed: _register,
-                  child: const Text('Register', style: TextStyle(fontSize: 18)),
+                  onPressed: isLoading ? null : _register,
+                  child: isLoading
+                      ? const SizedBox(
+                          height: 24,
+                          width: 24,
+                          child: CircularProgressIndicator(strokeWidth: 2.5),
+                        )
+                      : const Text('Register', style: TextStyle(fontSize: 18)),
                 ),
               ),
             ],

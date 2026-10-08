@@ -1,8 +1,10 @@
+// ខ្មែរ: ទីតាំងឯកសារ lib/features/auth/presentation/login.dart
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 
-import 'dashboard.dart';
 import 'register.dart';
-import '../services/api_service.dart'; // NEW: Import ApiService
+import '../../employee/presentation/dashboard.dart';
+import '../data/auth_api_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -13,54 +15,41 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final ApiService apiService = ApiService(); // NEW: Add API Service
+
+  // ខ្មែរ: ទទួលយក AuthApiService ពី GetIt Service Locator ជំនួសការបង្កើត Dio ដោយផ្ទាល់
+  final AuthApiService _authApiService = GetIt.instance<AuthApiService>();
 
   String email = '';
   String password = '';
-  bool isLoading = false; // NEW: Track loading state
+  bool isLoading = false;
 
-  // NEW: Updated to async function to call backend
-  // ថ្មី៖ កែប្រែជាមុខងារ async ដើម្បីហៅទៅកាន់ Backend
   Future<void> _login() async {
-    if (_formKey.currentState!.validate()) {
-      _formKey.currentState!.save();
+    if (!_formKey.currentState!.validate()) return;
+    _formKey.currentState!.save();
 
-      setState(() {
-        isLoading = true; // Show loading spinner
-      });
+    setState(() => isLoading = true);
 
-      try {
-        // Send login request to FastAPI
-        // បញ្ជូនសំណើ Login ទៅកាន់ FastAPI
-        await apiService.login(email, password);
+    final result = await _authApiService.login(email, password);
 
-        if (mounted) {
-          // Success! Go to Dashboard
-          // ជោគជ័យ! ចូលទៅកាន់ផ្ទាំង Dashboard
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const DashboardScreen()),
-          );
-        }
-      } catch (e) {
-        if (mounted) {
-          // Show error message (like "Invalid password")
-          // បង្ហាញសារកំហុស (ឧទាហរណ៍ "លេខសម្ងាត់មិនត្រឹមត្រូវ")
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(e.toString().replaceAll('Exception: ', '')),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
-      } finally {
-        if (mounted) {
-          setState(() {
-            isLoading = false; // Hide loading spinner
-          });
-        }
-      }
-    }
+    if (!mounted) return;
+    setState(() => isLoading = false);
+
+    result.fold(
+      (failure) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(failure.message),
+            backgroundColor: Colors.red,
+          ),
+        );
+      },
+      (data) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const DashboardScreen()),
+        );
+      },
+    );
   }
 
   @override
@@ -72,9 +61,7 @@ class _LoginScreenState extends State<LoginScreen> {
           padding: const EdgeInsets.all(24.0),
           child: Card(
             elevation: 4,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             child: Padding(
               padding: const EdgeInsets.all(24.0),
               child: Form(
@@ -86,10 +73,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     const SizedBox(height: 16),
                     const Text(
                       'HR System Login',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 32),
                     TextFormField(
@@ -99,8 +83,11 @@ class _LoginScreenState extends State<LoginScreen> {
                         border: OutlineInputBorder(),
                       ),
                       keyboardType: TextInputType.emailAddress,
-                      validator: (value) =>
-                          value!.isEmpty ? 'Please enter email' : null,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) return 'Please enter email';
+                        if (!value.contains('@')) return 'Invalid email format';
+                        return null;
+                      },
                       onSaved: (value) => email = value!,
                     ),
                     const SizedBox(height: 16),
@@ -111,8 +98,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         border: OutlineInputBorder(),
                       ),
                       obscureText: true,
-                      validator: (value) =>
-                          value!.isEmpty ? 'Please enter password' : null,
+                      validator: (value) => value!.isEmpty ? 'Please enter password' : null,
                       onSaved: (value) => password = value!,
                     ),
                     const SizedBox(height: 16),
@@ -120,9 +106,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(
-                            builder: (context) => const RegisterScreen(),
-                          ),
+                          MaterialPageRoute(builder: (context) => const RegisterScreen()),
                         );
                       },
                       child: const Text("Don't have an account? Register here"),
@@ -135,25 +119,16 @@ class _LoginScreenState extends State<LoginScreen> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.blue,
                           foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                         ),
-                        // Disable button while loading / បិទប៊ូតុងពេលកំពុងផ្ទុក
                         onPressed: isLoading ? null : _login,
                         child: isLoading
                             ? const SizedBox(
                                 height: 24,
                                 width: 24,
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                  strokeWidth: 2.5,
-                                ),
+                                child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
                               )
-                            : const Text(
-                                'Login',
-                                style: TextStyle(fontSize: 18),
-                              ),
+                            : const Text('Login', style: TextStyle(fontSize: 18)),
                       ),
                     ),
                   ],
