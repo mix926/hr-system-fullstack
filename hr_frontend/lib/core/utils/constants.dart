@@ -1,3 +1,5 @@
+// lib/core/utils/constants.dart
+
 import 'package:flutter/material.dart';
 
 class AppConstants {
@@ -6,6 +8,15 @@ class AppConstants {
   // Android Emulator: 'http://10.0.2.2:8000'
   // Physical Phone: Use your Mac's Wi-Fi IP address (e.g., 'http://192.168.1.15:8000')
   static const String baseUrl = 'http://127.0.0.1:8000';
+
+  // API Endpoints
+  static const String loginEndpoint = '/auth/login';
+  static const String registerEndpoint = '/auth/register';
+  static const String employeesEndpoint = '/employees';
+
+  // Secure Storage Keys
+  static const String tokenKey = 'jwt_token';
+  static const String refreshTokenKey = 'refresh_token';
 
   // Theme Colors
   static const Color primaryColor = Colors.blue;

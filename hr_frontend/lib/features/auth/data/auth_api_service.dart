@@ -2,9 +2,8 @@
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-// ខ្មែរ: ទាញយក Result និង Failure
 import '../../../core/errors/result.dart';
-// ខ្មែរ: ទាញយក Employee Model
+import '../../../core/utils/constants.dart';
 import '../../employee/data/models/employee_model.dart';
 
 class AuthApiService {
@@ -16,14 +15,18 @@ class AuthApiService {
   Future<Result<Map<String, dynamic>>> login(String email, String password) async {
     try {
       final response = await _dio.post(
-        '/api/v1/login',
+        AppConstants.loginEndpoint,
         data: {'email': email, 'password': password},
       );
       
       // ខ្មែរ: រក្សាទុក Token និង Role ពេល Login ជោគជ័យ
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('token', response.data['access_token']);
-      await prefs.setString('role', response.data['user']['role']);
+      if (response.data['access_token'] != null) {
+        await prefs.setString('token', response.data['access_token']);
+      }
+      if (response.data['user'] != null && response.data['user']['role'] != null) {
+        await prefs.setString('role', response.data['user']['role']);
+      }
       
       return Result.success(response.data);
     } on DioException catch (e) {
@@ -37,7 +40,10 @@ class AuthApiService {
 
   Future<Result<Employee>> registerEmployee(Employee employee) async {
     try {
-      final response = await _dio.post('/api/v1/employees/', data: employee.toJson());
+      final response = await _dio.post(
+        AppConstants.employeesEndpoint, 
+        data: employee.toJson(),
+      );
       return Result.success(Employee.fromJson(response.data));
     } on DioException catch (e) {
       return Result.failure(ServerFailure(
