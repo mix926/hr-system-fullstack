@@ -10,19 +10,19 @@ class AppConstants {
   static const String baseUrl = 'http://127.0.0.1:8000';
 
   // API Endpoints
-  static const String loginEndpoint = '/auth/login';
-  static const String registerEndpoint = '/auth/register';
-  static const String employeesEndpoint = '/employees';
+  static const String loginEndpoint = '/api/v1/login';
+  static const String registerEndpoint = '/api/v1/employees';
+  static const String employeesEndpoint = '/api/v1/employees';
 
   // Secure Storage Keys
   static const String tokenKey = 'jwt_token';
   static const String refreshTokenKey = 'refresh_token';
 
-  // Theme Colors
-  static const Color primaryColor = Colors.blue;
-  static const Color successColor = Colors.green;
-  static const Color errorColor = Colors.red;
-  static const Color backgroundColor = Color(0xFFF5F5F5);
+  // Enterprise Theme Colors
+  static const Color primaryColor = Color(0xFF2563EB); // Modern Professional Blue
+  static const Color successColor = Color(0xFF16A34A); // Emerald Green
+  static const Color errorColor = Color(0xFFDC2626);   // Modern Red
+  static const Color backgroundColor = Color(0xFFF8FAFC); // Slate Light Background
 
   // Layout Constraints
   static const double defaultPadding = 16.0;

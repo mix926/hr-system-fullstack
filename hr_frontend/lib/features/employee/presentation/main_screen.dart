@@ -89,7 +89,7 @@ class _MainScreenState extends State<MainScreen> {
             const SizedBox(height: 20),
             CircleAvatar(
               radius: 45,
-              backgroundColor: AppConstants.primaryColor.withOpacity(0.1),
+              backgroundColor: AppConstants.primaryColor.withValues(alpha: 0.1),
               child: const Icon(Icons.person, size: 50, color: AppConstants.primaryColor),
             ),
             const SizedBox(height: 12),

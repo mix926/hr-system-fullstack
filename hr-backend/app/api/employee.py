@@ -43,7 +43,7 @@ def read_employees(
 # 3. DELETE ROUTE (Delete Employee) / ផ្លូវសម្រាប់លុបបុគ្គលិក
 @router.delete("/{employee_id}")
 def delete_employee(
-    employee_id: int, 
+    employee_id: str, 
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user)
 ):
