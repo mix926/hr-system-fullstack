@@ -516,9 +516,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
               _deleteEmployee(id);
             },
             child: const Text('Delete'),
+            
           ),
         ],
       ),
     );
+    
   }
 }
