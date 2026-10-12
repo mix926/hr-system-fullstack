@@ -1,59 +1,60 @@
-// Location: lib/features/employee/presentation/bloc/employee_bloc.dart
+import 'package:flutter/foundation.dart';
 
-import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../data/employee_api_service.dart';
+import '../data/employee_api_service.dart';
 import 'employee_event.dart';
 import 'employee_state.dart';
 
-class EmployeeBloc extends Bloc<EmployeeEvent, EmployeeState> {
+class EmployeeBloc extends ChangeNotifier {
   final EmployeeApiService _apiService;
 
-  EmployeeBloc(this._apiService) : super(EmployeeInitialState()) {
-    on<LoadEmployeesEvent>(_onLoadEmployees);
-    on<CreateEmployeeEvent>(_onCreateEmployee);
-    on<DeleteEmployeeEvent>(_onDeleteEmployee);
+  EmployeeState _state = EmployeeInitialState();
+  EmployeeState get state => _state;
+
+  EmployeeBloc(this._apiService);
+
+  void _emit(EmployeeState newState) {
+    _state = newState;
+    notifyListeners();
   }
 
-  Future<void> _onLoadEmployees(
-    LoadEmployeesEvent event,
-    Emitter<EmployeeState> emit,
-  ) async {
-    emit(EmployeeLoadingState());
-    final result = await _apiService.getEmployees();
+  Future<void> add(EmployeeEvent event) async {
+    if (event is LoadEmployeesEvent) {
+      await _onLoadEmployees();
+    } else if (event is CreateEmployeeEvent) {
+      await _onCreateEmployee(event);
+    } else if (event is DeleteEmployeeEvent) {
+      await _onDeleteEmployee(event);
+    }
+  }
 
+  Future<void> _onLoadEmployees() async {
+    _emit(EmployeeLoadingState());
+    final result = await _apiService.getEmployees();
     result.fold(
-      (failure) => emit(EmployeeErrorState(failure.message)),
-      (employees) => emit(EmployeeLoadedState(employees)),
+      (failure) => _emit(EmployeeErrorState(failure.message)),
+      (employees) => _emit(EmployeeLoadedState(employees)),
     );
   }
 
-  Future<void> _onCreateEmployee(
-    CreateEmployeeEvent event,
-    Emitter<EmployeeState> emit,
-  ) async {
-    emit(EmployeeLoadingState());
+  Future<void> _onCreateEmployee(CreateEmployeeEvent event) async {
+    _emit(EmployeeLoadingState());
     final result = await _apiService.createEmployee(event.employee);
-
     result.fold(
-      (failure) => emit(EmployeeErrorState(failure.message)),
-      (success) {
-        emit(EmployeeOperationSuccessState('បង្កើតបុគ្គលិកបានជោគជ័យ!'));
-        add(LoadEmployeesEvent()); // Refresh បញ្ជីបន្ទាប់ពីបង្កើតរួច
+      (failure) => _emit(EmployeeErrorState(failure.message)),
+      (success) async {
+        _emit(EmployeeOperationSuccessState('បង្កើតបុគ្គលិកបានជោគជ័យ!'));
+        await _onLoadEmployees();
       },
     );
   }
 
-  Future<void> _onDeleteEmployee(
-    DeleteEmployeeEvent event,
-    Emitter<EmployeeState> emit,
-  ) async {
+  Future<void> _onDeleteEmployee(DeleteEmployeeEvent event) async {
     final result = await _apiService.deleteEmployee(event.id);
-
     result.fold(
-      (failure) => emit(EmployeeErrorState(failure.message)),
-      (success) {
-        emit(EmployeeOperationSuccessState('លុบบុគ្គលិកបានជោគជ័យ!'));
-        add(LoadEmployeesEvent()); // Refresh បញ្ជីបន្ទាប់ពីលុបរួច
+      (failure) => _emit(EmployeeErrorState(failure.message)),
+      (success) async {
+        _emit(EmployeeOperationSuccessState('លុបបុគ្គលិកបានជោគជ័យ!'));
+        await _onLoadEmployees();
       },
     );
   }

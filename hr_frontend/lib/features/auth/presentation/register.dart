@@ -172,7 +172,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ),
                         const SizedBox(height: 16),
                         DropdownButtonFormField<String>(
-                          value: _role,
+                          initialValue: _role,
                           decoration: _inputDecoration('System Role', Icons.badge_outlined),
                           items: _roles.map((role) {
                             return DropdownMenuItem(value: role, child: Text(role));
