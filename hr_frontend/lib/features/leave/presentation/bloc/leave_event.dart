@@ -12,3 +12,10 @@ class CreateLeaveEvent extends LeaveEvent {
   final LeaveModel leave;
   CreateLeaveEvent(this.leave);
 }
+
+/// ខ្មែរ: Event សម្រាប់ ADMIN/MANAGER អនុម័ត ឬ បដិសេធ
+class UpdateLeaveStatusEvent extends LeaveEvent {
+  final String leaveId;
+  final String status; // "APPROVED" or "REJECTED"
+  UpdateLeaveStatusEvent(this.leaveId, this.status);
+}

@@ -38,4 +38,21 @@ class LeaveApiService {
       return Result.failure(ServerFailure(message: e.toString()));
     }
   }
+
+  /// ខ្មែរ: ADMIN/MANAGER អនុម័ត ឬ បដិសេធ សំណើសុំច្បាប់
+  Future<Result<LeaveModel>> updateLeaveStatus(String leaveId, String status) async {
+    try {
+      final response = await _dio.patch(
+        '/api/v1/leaves/$leaveId/status',
+        data: {'status': status},
+      );
+      return Result.success(LeaveModel.fromJson(response.data));
+    } on DioException catch (e) {
+      return Result.failure(ServerFailure(
+        message: e.response?.data['detail'] ?? 'Failed to update leave status',
+      ));
+    } catch (e) {
+      return Result.failure(ServerFailure(message: e.toString()));
+    }
+  }
 }

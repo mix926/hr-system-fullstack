@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../data/models/leave_model.dart';
@@ -21,8 +22,26 @@ class LeaveScreen extends StatelessWidget {
   }
 }
 
-class _LeaveScreenBody extends StatelessWidget {
+class _LeaveScreenBody extends StatefulWidget {
   const _LeaveScreenBody();
+
+  @override
+  State<_LeaveScreenBody> createState() => _LeaveScreenBodyState();
+}
+
+class _LeaveScreenBodyState extends State<_LeaveScreenBody> {
+  String _userRole = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRole();
+  }
+
+  Future<void> _loadRole() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() => _userRole = prefs.getString('role') ?? 'STAFF');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -172,16 +191,18 @@ class _LeaveScreenBody extends StatelessWidget {
       child: ListView.builder(
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 120),
         itemCount: leaves.length,
-        itemBuilder: (_, i) => _buildLeaveCard(leaves[i]),
+        itemBuilder: (_, i) => _buildLeaveCard(context, leaves[i]),
       ),
     );
   }
 
   // ── Leave card ────────────────────────────────────────────────
-  Widget _buildLeaveCard(LeaveModel leave) {
+  Widget _buildLeaveCard(BuildContext context, LeaveModel leave) {
     final statusColor = _statusColor(leave.status);
     final statusBg    = _statusBg(leave.status);
     final statusIcon  = _statusIcon(leave.status);
+    final canAct = (_userRole == 'ADMIN' || _userRole == 'MANAGER') &&
+        leave.status.toUpperCase() == 'PENDING';
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
@@ -262,6 +283,52 @@ class _LeaveScreenBody extends StatelessWidget {
                         style: AppTextStyles.bodyMedium,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis),
+                  ),
+                ],
+              ),
+            ],
+            // ── Approve / Reject buttons for ADMIN/MANAGER ──────
+            if (canAct) ...[
+              const SizedBox(height: 12),
+              const Divider(height: 1),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.error,
+                        side: const BorderSide(color: AppColors.error),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8)),
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                      ),
+                      onPressed: () => context.read<LeaveBloc>().add(
+                            UpdateLeaveStatusEvent(leave.id!, 'REJECTED'),
+                          ),
+                      icon: const Icon(Icons.cancel_outlined, size: 16),
+                      label: const Text('Reject',
+                          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.success,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8)),
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                      ),
+                      onPressed: () => context.read<LeaveBloc>().add(
+                            UpdateLeaveStatusEvent(leave.id!, 'APPROVED'),
+                          ),
+                      icon: const Icon(Icons.check_circle_outline, size: 16),
+                      label: const Text('Approve',
+                          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                    ),
                   ),
                 ],
               ),
