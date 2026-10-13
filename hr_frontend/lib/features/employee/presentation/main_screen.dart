@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/constants.dart';
 import '../../auth/presentation/login.dart';
+import '../../leave/data/leave_api_service.dart';
 import '../../leave/presentation/leave_screen.dart';
 import 'dashboard.dart';
 
@@ -19,6 +22,9 @@ class _MainScreenState extends State<MainScreen> {
   String _userEmail    = '';
   String _firstName    = '';
   String _lastName     = '';
+  int    _pendingLeaves = 0;
+
+  final LeaveApiService _leaveApiService = GetIt.instance<LeaveApiService>();
 
   @override
   void initState() {
@@ -33,6 +39,14 @@ class _MainScreenState extends State<MainScreen> {
       _userEmail = prefs.getString('email')      ?? '';
       _firstName = prefs.getString('first_name') ?? '';
       _lastName  = prefs.getString('last_name')  ?? '';
+    });
+    _loadPendingCount();
+  }
+
+  Future<void> _loadPendingCount() async {
+    final result = await _leaveApiService.getLeaveStats();
+    result.fold((_) {}, (stats) {
+      if (mounted) setState(() => _pendingLeaves = stats['pending'] ?? 0);
     });
   }
 
@@ -117,24 +131,58 @@ class _MainScreenState extends State<MainScreen> {
         indicatorColor: AppColors.primaryLight,
         elevation: 0,
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-        destinations: const [
-          NavigationDestination(
+        destinations: [
+          const NavigationDestination(
             icon: Icon(Icons.dashboard_outlined, color: AppColors.textHint),
             selectedIcon: Icon(Icons.dashboard_rounded, color: AppColors.primary),
             label: 'Dashboard',
           ),
           NavigationDestination(
-            icon: Icon(Icons.beach_access_outlined, color: AppColors.textHint),
-            selectedIcon: Icon(Icons.beach_access_rounded, color: AppColors.primary),
+            icon: _leaveIcon(false),
+            selectedIcon: _leaveIcon(true),
             label: 'Leaves',
           ),
-          NavigationDestination(
+          const NavigationDestination(
             icon: Icon(Icons.person_outline_rounded, color: AppColors.textHint),
             selectedIcon: Icon(Icons.person_rounded, color: AppColors.primary),
             label: 'Profile',
           ),
         ],
       ),
+    );
+  }
+
+  // ── Leave icon with badge ─────────────────────────────────────
+  Widget _leaveIcon(bool selected) {
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Icon(
+          selected ? Icons.beach_access_rounded : Icons.beach_access_outlined,
+          color: selected ? AppColors.primary : AppColors.textHint,
+        ),
+        if (_pendingLeaves > 0)
+          Positioned(
+            right: -6,
+            top: -4,
+            child: Container(
+              padding: const EdgeInsets.all(3),
+              decoration: const BoxDecoration(
+                color: AppColors.error,
+                shape: BoxShape.circle,
+              ),
+              constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+              child: Text(
+                _pendingLeaves > 9 ? '9+' : '$_pendingLeaves',
+                style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 9,
+                    fontWeight: FontWeight.w800),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+      ],
     );
   }
 
