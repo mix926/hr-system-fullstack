@@ -331,6 +331,23 @@ class _LeaveScreenBodyState extends State<_LeaveScreenBody> {
                 ],
               ),
             ],
+            // ── Show employee name for ADMIN/MANAGER ────────────
+            if ((_userRole == 'ADMIN' || _userRole == 'MANAGER') &&
+                leave.employeeName != null &&
+                leave.employeeName!.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  const Icon(Icons.person_outline_rounded,
+                      size: 14, color: AppColors.textHint),
+                  const SizedBox(width: 6),
+                  Text('By: ${leave.employeeName}',
+                      style: AppTextStyles.bodySmall.copyWith(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.w600)),
+                ],
+              ),
+            ],
             // ── Approve / Reject buttons for ADMIN/MANAGER ──────
             if (canAct) ...[
               const SizedBox(height: 12),
