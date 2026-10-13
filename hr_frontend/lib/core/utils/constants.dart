@@ -9,21 +9,31 @@ class AppConstants {
   // Physical Phone: Use your Mac's Wi-Fi IP address (e.g., 'http://192.168.1.15:8000')
   static const String baseUrl = 'http://127.0.0.1:8000';
 
-  // API Endpoints
-  static const String loginEndpoint = '/api/v1/login';
+  // ── Auth Endpoints ────────────────────────────────────────────
+  static const String loginEndpoint    = '/api/v1/login';
   static const String registerEndpoint = '/api/v1/employees';
+
+  // ── Employee Endpoints ────────────────────────────────────────
   static const String employeesEndpoint = '/api/v1/employees';
 
-  // Secure Storage Keys
-  static const String tokenKey = 'jwt_token';
+  // ── Leave Endpoints ───────────────────────────────────────────
+  static const String leavesEndpoint      = '/api/v1/leaves';
+  static const String leaveStatsEndpoint  = '/api/v1/leaves/stats';
+  static String leaveStatusEndpoint(String id) => '/api/v1/leaves/$id/status';
+
+  // ── Department Endpoints ──────────────────────────────────────
+  static const String departmentsEndpoint = '/api/v1/departments';
+
+  // ── Secure Storage Keys ───────────────────────────────────────
+  static const String tokenKey        = 'jwt_token';
   static const String refreshTokenKey = 'refresh_token';
 
-  // Enterprise Theme Colors
-  static const Color primaryColor = Color(0xFF2563EB); // Modern Professional Blue
-  static const Color successColor = Color(0xFF16A34A); // Emerald Green
-  static const Color errorColor = Color(0xFFDC2626);   // Modern Red
-  static const Color backgroundColor = Color(0xFFF8FAFC); // Slate Light Background
+  // ── Enterprise Theme Colors ───────────────────────────────────
+  static const Color primaryColor     = Color(0xFF2563EB);
+  static const Color successColor     = Color(0xFF16A34A);
+  static const Color errorColor       = Color(0xFFDC2626);
+  static const Color backgroundColor  = Color(0xFFF8FAFC);
 
-  // Layout Constraints
-  static const double defaultPadding = 16.0;
+  // ── Layout ────────────────────────────────────────────────────
+  static const double defaultPadding  = 16.0;
 }
