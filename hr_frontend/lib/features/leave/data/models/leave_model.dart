@@ -1,0 +1,43 @@
+// Location: lib/features/leave/data/models/leave_model.dart
+
+class LeaveModel {
+  // ខ្មែរ: Backend ប្រើ UUID (String) ជា Primary Key ដូច្នេះប្រើ String? មិនមែន int?
+  final String? id;
+  final String? employeeId;
+  final String leaveType;
+  final String startDate;
+  final String endDate;
+  final String? reason;
+  final String status;
+
+  LeaveModel({
+    this.id,
+    this.employeeId,
+    required this.leaveType,
+    required this.startDate,
+    required this.endDate,
+    this.reason,
+    required this.status,
+  });
+
+  factory LeaveModel.fromJson(Map<String, dynamic> json) {
+    return LeaveModel(
+      id: json['id']?.toString(),
+      employeeId: json['employee_id']?.toString(),
+      leaveType: json['leave_type'],
+      startDate: json['start_date'],
+      endDate: json['end_date'],
+      reason: json['reason'],
+      status: json['status'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'leave_type': leaveType,
+      'start_date': startDate,
+      'end_date': endDate,
+      'reason': reason,
+    };
+  }
+}
