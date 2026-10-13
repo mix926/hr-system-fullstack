@@ -37,6 +37,8 @@ dependencies:
   dio: ^5.8.0+1
   get_it: ^8.0.3
   shared_preferences: ^2.5.6
+  # ខ្មែរ: ជួសជុល — LeaveBloc ប្រើ flutter_bloc ប៉ុន្តែវាខ្វះក្នុង pubspec.yaml
+  flutter_bloc: ^8.1.6
 
 dev_dependencies:
   flutter_test:
