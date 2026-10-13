@@ -4,6 +4,7 @@ from app.repositories import crud
 from app.schemas import schemas
 from app.core.database import SessionLocal
 from app.api.auth import get_current_user
+
 router = APIRouter(
     prefix="/employees",
     tags=["Employees"]
@@ -20,7 +21,7 @@ def get_db():
 # 1. POST ROUTE (Create Employee) / ផ្លូវសម្រាប់បង្កើតបុគ្គលិក
 @router.post("/", response_model=schemas.EmployeeResponse)
 def create_new_employee(
-    employee: schemas.EmployeeCreate, 
+    employee: schemas.EmployeeCreate,
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user)
 ):
@@ -29,21 +30,34 @@ def create_new_employee(
         raise HTTPException(status_code=400, detail="Email already registered")
     return crud.create_employee(db=db, employee=employee)
 
-# 2. GET ROUTE (Read Employees) / ផ្លូវសម្រាប់អានទិន្នន័យបុគ្គលិក (THIS WAS MISSING!)
+# 2. GET ALL ROUTE (Read Employees) / ផ្លូវសម្រាប់អានទិន្នន័យបុគ្គលិកទាំងអស់
 @router.get("/", response_model=list[schemas.EmployeeResponse])
 def read_employees(
-    skip: int = 0, 
-    limit: int = 100, 
+    skip: int = 0,
+    limit: int = 100,
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user)
 ):
     employees = crud.get_employees(db, skip=skip, limit=limit)
     return employees
 
-# 3. DELETE ROUTE (Delete Employee) / ផ្លូវសម្រាប់លុបបុគ្គលិក
+# 3. GET SINGLE ROUTE (Read Employee by ID) / ផ្លូវសម្រាប់អានបុគ្គលិកតាម ID
+@router.get("/{employee_id}", response_model=schemas.EmployeeResponse)
+def read_employee(
+    employee_id: str,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user)
+):
+    # ខ្មែរ: ទាញបុគ្គលិកតាម UUID ។ 404 ប្រសិនបើមិនរក
+    db_employee = crud.get_employee_by_id(db, employee_id=employee_id)
+    if not db_employee:
+        raise HTTPException(status_code=404, detail="Employee not found")
+    return db_employee
+
+# 4. DELETE ROUTE (Delete Employee) / ផ្លូវសម្រាប់លុបបុគ្គលិក
 @router.delete("/{employee_id}")
 def delete_employee(
-    employee_id: str, 
+    employee_id: str,
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user)
 ):

@@ -11,6 +11,10 @@ from app.core.security import get_password_hash
 def get_employee_by_email(db: Session, email: str):
     return db.query(Employee).filter(Employee.email == email).first()
 
+# ខ្មែរ: ទាញយកបុគ្គលិកតែមួយតាមរយៈ UUID
+def get_employee_by_id(db: Session, employee_id: str):
+    return db.query(Employee).filter(Employee.id == employee_id).first()
+
 # ខ្មែរ: ទាញយកបុគ្គលិកទាំងអស់ជាមួយ Pagination (skip, limit)
 def get_employees(db: Session, skip: int = 0, limit: int = 100):
     return db.query(Employee).offset(skip).limit(limit).all()
