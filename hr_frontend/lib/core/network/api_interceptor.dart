@@ -8,7 +8,8 @@ class AuthInterceptor extends Interceptor {
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
     // ខ្មែរ: ទាញយក Token ពីម៉ាស៊ីន (Local Storage)
     final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token');
+    // ខ្មែរ: ជួសជុល — ប្រើ 'jwt_token' ឱ្យត្រូវគ្នាទៅនឹង AppConstants.tokenKey
+    final token = prefs.getString('jwt_token');
 
     // ខ្មែរ: បើមាន Token, ភ្ជាប់វាទៅក្នុង Header
     if (token != null) {
