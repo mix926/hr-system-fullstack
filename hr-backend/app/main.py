@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.models.models import Base
 from app.models import leave as leave_model  # noqa: F401 — ត្រូវ import ដើម្បីឱ្យ Base.metadata ដឹង
 from app.core.database import engine
-from app.api import employee, auth, leave
+from app.api import employee, auth, leave, department
 
 # ខ្មែរ: បង្កើតតារាងក្នុង Database (រួមមានតារាង leaves ផងដែរ)
 Base.metadata.create_all(bind=engine)
@@ -31,6 +31,7 @@ app.add_middleware(
 app.include_router(auth.router, prefix="/api/v1", tags=["Authentication"])
 app.include_router(employee.router, prefix="/api/v1", tags=["Employees"])
 app.include_router(leave.router, prefix="/api/v1", tags=["Leaves"])
+app.include_router(department.router, prefix="/api/v1", tags=["Departments"])
 
 # ខ្មែរ: Health Check Endpoint សម្រាប់អោយ Server (ដូចជា AWS/Docker) ឆែកមើលថា App នៅរស់ឬអត់
 @app.get("/", tags=["Health Check"])
