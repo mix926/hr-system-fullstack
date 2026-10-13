@@ -1,0 +1,36 @@
+# ខ្មែរ: ឯកសារ Environment Variables (លេខសម្ងាត់ Database, API Keys)
+.env
+.env.*
+!.env.example
+
+# ខ្មែរ: Virtual Environment
+venv/
+env/
+.venv/
+ENV/
+
+# ខ្មែរ: Python cache files
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+
+# ខ្មែរ: Pytest / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# ខ្មែរ: Distribution / packaging
+*.egg-info/
+dist/
+build/
+*.egg
+
+# ខ្មែរ: IDE files
+.vscode/settings.json
+.idea/
+*.iml
+
+# ខ្មែរ: macOS system files
+.DS_Store
