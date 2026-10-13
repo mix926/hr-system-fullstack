@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/theme/app_theme.dart';
 import '../data/employee_api_service.dart';
 import '../data/models/employee_model.dart';
+import '../../leave/data/leave_api_service.dart';
 import 'add_employee.dart';
 import 'employee_detail_screen.dart';
 
@@ -17,6 +18,7 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   final EmployeeApiService _apiService = GetIt.instance<EmployeeApiService>();
+  final LeaveApiService _leaveApiService = GetIt.instance<LeaveApiService>();
   final TextEditingController _searchController = TextEditingController();
 
   List<Employee> _allEmployees      = [];
@@ -25,6 +27,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
   String _errorMessage = '';
   String _userRole     = '';
   String _userEmail    = '';
+
+  // Leave stats
+  int _leavePending  = 0;
+  int _leaveApproved = 0;
+  int _leaveRejected = 0;
 
   @override
   void initState() {
@@ -45,6 +52,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
       _userEmail = prefs.getString('email') ?? '';
     });
     await _loadEmployees();
+    await _loadLeaveStats();
+  }
+
+  Future<void> _loadLeaveStats() async {
+    final result = await _leaveApiService.getLeaveStats();
+    if (!mounted) return;
+    result.fold(
+      (_) {},
+      (stats) => setState(() {
+        _leavePending  = stats['pending']  ?? 0;
+        _leaveApproved = stats['approved'] ?? 0;
+        _leaveRejected = stats['rejected'] ?? 0;
+      }),
+    );
   }
 
   Future<void> _loadEmployees() async {
@@ -143,6 +164,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
             child: Padding(
               padding: const EdgeInsets.fromLTRB(20, 0, 20, 4),
               child: _buildStatRow(),
+            ),
+          ),
+
+          // ── Leave Stats ───────────────────────────────────────
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 4),
+              child: _buildLeaveStatRow(),
             ),
           ),
 
@@ -302,6 +331,51 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   // ── Search bar ────────────────────────────────────────────────
+  Widget _buildLeaveStatRow() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Icon(Icons.beach_access_rounded, size: 14, color: AppColors.textHint),
+            const SizedBox(width: 6),
+            Text('Leave Overview', style: AppTextStyles.labelBold.copyWith(
+                color: AppColors.textHint, letterSpacing: 1)),
+          ],
+        ),
+        const SizedBox(height: 10),
+        Row(
+          children: [
+            Expanded(child: _leaveStatCard('Pending',  '$_leavePending',  AppColors.warning)),
+            const SizedBox(width: 10),
+            Expanded(child: _leaveStatCard('Approved', '$_leaveApproved', AppColors.success)),
+            const SizedBox(width: 10),
+            Expanded(child: _leaveStatCard('Rejected', '$_leaveRejected', AppColors.error)),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _leaveStatCard(String label, String value, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withValues(alpha: 0.25)),
+      ),
+      child: Column(
+        children: [
+          Text(value, style: AppTextStyles.displayMedium.copyWith(
+              color: color, fontSize: 22)),
+          const SizedBox(height: 2),
+          Text(label, style: AppTextStyles.bodySmall.copyWith(color: color)),
+        ],
+      ),
+    );
+  }
+
   Widget _buildSearchBar() {
     return TextField(
       controller: _searchController,

@@ -39,6 +39,26 @@ class LeaveApiService {
     }
   }
 
+  /// ខ្មែរ: ទាញយករាប់ចំនួនច្បាប់តាម Status
+  Future<Result<Map<String, int>>> getLeaveStats() async {
+    try {
+      final response = await _dio.get('/api/v1/leaves/stats');
+      final data = response.data as Map<String, dynamic>;
+      return Result.success({
+        'total':    (data['total']    as num).toInt(),
+        'pending':  (data['pending']  as num).toInt(),
+        'approved': (data['approved'] as num).toInt(),
+        'rejected': (data['rejected'] as num).toInt(),
+      });
+    } on DioException catch (e) {
+      return Result.failure(ServerFailure(
+        message: e.response?.data['detail'] ?? 'Failed to load leave stats',
+      ));
+    } catch (e) {
+      return Result.failure(ServerFailure(message: e.toString()));
+    }
+  }
+
   /// ខ្មែរ: ADMIN/MANAGER អនុម័ត ឬ បដិសេធ សំណើសុំច្បាប់
   Future<Result<LeaveModel>> updateLeaveStatus(String leaveId, String status) async {
     try {
