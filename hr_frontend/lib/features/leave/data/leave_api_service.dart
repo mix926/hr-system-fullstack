@@ -1,0 +1,41 @@
+// Location: lib/features/leave/data/leave_api_service.dart
+
+import 'package:dio/dio.dart';
+import '../../../core/errors/result.dart';
+// ខ្មែរ: ជួសជុល — ទីតាំងត្រឹមត្រូវ models/ ស្ថិតក្នុង data/ folder ដូចគ្នា
+import 'models/leave_model.dart';
+
+class LeaveApiService {
+  final Dio _dio;
+
+  LeaveApiService(this._dio);
+
+  /// ខ្មែរ: ទាញយកបញ្ជីសំណើសុំច្បាប់
+  Future<Result<List<LeaveModel>>> getLeaves() async {
+    try {
+      final response = await _dio.get('/api/v1/leaves/');
+      final List<dynamic> data = response.data;
+      return Result.success(data.map((json) => LeaveModel.fromJson(json)).toList());
+    } on DioException catch (e) {
+      return Result.failure(ServerFailure(
+        message: e.response?.data['detail'] ?? 'Failed to load leave requests',
+      ));
+    } catch (e) {
+      return Result.failure(ServerFailure(message: e.toString()));
+    }
+  }
+
+  /// ខ្មែរ: បង្កើតសំណើសុំច្បាប់ថ្មី
+  Future<Result<LeaveModel>> createLeave(LeaveModel leave) async {
+    try {
+      final response = await _dio.post('/api/v1/leaves/', data: leave.toJson());
+      return Result.success(LeaveModel.fromJson(response.data));
+    } on DioException catch (e) {
+      return Result.failure(ServerFailure(
+        message: e.response?.data['detail'] ?? 'Failed to create leave request',
+      ));
+    } catch (e) {
+      return Result.failure(ServerFailure(message: e.toString()));
+    }
+  }
+}

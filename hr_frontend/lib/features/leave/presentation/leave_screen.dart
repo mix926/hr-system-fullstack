@@ -505,7 +505,7 @@ class _LeaveFormSheetState extends State<_LeaveFormSheet> {
               children: [
                 // Leave type dropdown
                 DropdownButtonFormField<String>(
-                  value: _leaveType,
+                  initialValue: _leaveType,
                   decoration: AppTheme.inputDecoration(
                     'Leave Type',
                     icon: Icons.category_outlined,

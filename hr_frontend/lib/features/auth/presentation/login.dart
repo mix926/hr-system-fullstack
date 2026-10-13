@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 
 import '../../../core/theme/app_theme.dart';
-import '../../employee/presentation/dashboard.dart';
+import '../../employee/presentation/main_screen.dart';
 import '../data/auth_api_service.dart';
 import 'register.dart';
 
@@ -57,7 +57,7 @@ class _LoginScreenState extends State<LoginScreen> {
       },
       (_) => Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => const DashboardScreen()),
+        MaterialPageRoute(builder: (_) => const MainScreen()),
       ),
     );
   }

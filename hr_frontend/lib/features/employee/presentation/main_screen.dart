@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../auth/presentation/login.dart';
+import '../../leave/presentation/leave_screen.dart';
 import 'dashboard.dart';
 
 class MainScreen extends StatefulWidget {
@@ -93,6 +94,7 @@ class _MainScreenState extends State<MainScreen> {
         index: _currentIndex,
         children: [
           const DashboardScreen(),
+          const LeaveScreen(),
           _buildProfilePage(),
         ],
       ),
@@ -120,6 +122,11 @@ class _MainScreenState extends State<MainScreen> {
             icon: Icon(Icons.dashboard_outlined, color: AppColors.textHint),
             selectedIcon: Icon(Icons.dashboard_rounded, color: AppColors.primary),
             label: 'Dashboard',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.beach_access_outlined, color: AppColors.textHint),
+            selectedIcon: Icon(Icons.beach_access_rounded, color: AppColors.primary),
+            label: 'Leaves',
           ),
           NavigationDestination(
             icon: Icon(Icons.person_outline_rounded, color: AppColors.textHint),

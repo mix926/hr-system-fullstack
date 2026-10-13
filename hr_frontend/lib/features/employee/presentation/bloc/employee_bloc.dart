@@ -4,7 +4,7 @@ import '../../data/employee_api_service.dart';
 import 'employee_event.dart';
 import 'employee_state.dart';
 
-/// ខ្មែរ: EmployeeBloc ប្រើ flutter_bloc (Bloc<Event,State>) ដូចគ្នាទៅ LeaveBloc
+/// ខ្មែរ: EmployeeBloc ប្រើ flutter_bloc (Bloc with Event and State) ដូចគ្នាទៅ LeaveBloc
 class EmployeeBloc extends Bloc<EmployeeEvent, EmployeeState> {
   final EmployeeApiService _apiService;
 
