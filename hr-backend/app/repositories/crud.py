@@ -45,3 +45,14 @@ def delete_employee(db: Session, employee_id: str):
         db.delete(db_employee)
         db.commit()
     return db_employee
+
+# ខ្មែរ: កែប្រែព័ត៌មានបុគ្គលិក (partial update)
+def update_employee(db: Session, employee_id: str, updates: dict):
+    db_employee = db.query(Employee).filter(Employee.id == employee_id).first()
+    if not db_employee:
+        return None
+    for key, value in updates.items():
+        setattr(db_employee, key, value)
+    db.commit()
+    db.refresh(db_employee)
+    return db_employee
