@@ -1,4 +1,4 @@
-// Location: lib/features/auth/employee/data/employee_api_service.dart
+// Location: lib/features/employee/data/employee_api_service.dart
 import 'package:dio/dio.dart';
 
 import '../../../core/errors/result.dart';
@@ -12,13 +12,26 @@ class EmployeeApiService {
 
   Future<Result<List<Employee>>> getEmployees() async {
     try {
-      // ខ្មែរ: Interceptor ដោះស្រាយ Token ដោយស្វ័យប្រវត្តិ
       final response = await _dio.get('/api/v1/employees/');
       final List<dynamic> data = response.data;
       return Result.success(data.map((json) => Employee.fromJson(json)).toList());
     } on DioException catch (e) {
       return Result.failure(ServerFailure(
         message: e.response?.data['detail'] ?? 'Failed to load employees',
+      ));
+    } catch (e) {
+      return Result.failure(ServerFailure(message: e.toString()));
+    }
+  }
+
+  // ខ្មែរ: ទាញបុគ្គលិកតែមួយតាម UUID (ត្រូវជាមួយ GET /api/v1/employees/{id})
+  Future<Result<Employee>> getEmployeeById(String id) async {
+    try {
+      final response = await _dio.get('/api/v1/employees/$id');
+      return Result.success(Employee.fromJson(response.data));
+    } on DioException catch (e) {
+      return Result.failure(ServerFailure(
+        message: e.response?.data['detail'] ?? 'Employee not found',
       ));
     } catch (e) {
       return Result.failure(ServerFailure(message: e.toString()));

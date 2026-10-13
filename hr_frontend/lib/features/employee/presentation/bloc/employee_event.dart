@@ -1,6 +1,6 @@
+// Location: lib/features/employee/presentation/bloc/employee_event.dart
 import 'package:flutter/foundation.dart';
-
-import '../data/models/employee_model.dart';
+import '../../data/models/employee_model.dart';
 
 @immutable
 abstract class EmployeeEvent {}
