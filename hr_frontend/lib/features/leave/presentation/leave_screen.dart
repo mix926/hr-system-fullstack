@@ -30,7 +30,8 @@ class _LeaveScreenBody extends StatefulWidget {
 }
 
 class _LeaveScreenBodyState extends State<_LeaveScreenBody> {
-  String _userRole = '';
+  String _userRole   = '';
+  String _filterStatus = 'ALL'; // ALL | PENDING | APPROVED | REJECTED
 
   @override
   void initState() {
@@ -74,6 +75,7 @@ class _LeaveScreenBodyState extends State<_LeaveScreenBody> {
             child: Column(
               children: [
                 _buildHeader(context),
+                _buildFilterBar(),
                 Expanded(child: _buildContent(context, state)),
               ],
             ),
@@ -88,6 +90,44 @@ class _LeaveScreenBodyState extends State<_LeaveScreenBody> {
         icon: const Icon(Icons.add_rounded, color: Colors.white),
         label: const Text('Request Leave',
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+      ),
+    );
+  }
+
+  // ── Filter bar ────────────────────────────────────────────────
+  Widget _buildFilterBar() {
+    const filters = ['ALL', 'PENDING', 'APPROVED', 'REJECTED'];
+    return Container(
+      color: AppColors.surface,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: filters.map((f) {
+            final selected = _filterStatus == f;
+            return Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: FilterChip(
+                label: Text(f),
+                selected: selected,
+                onSelected: (_) => setState(() => _filterStatus = f),
+                backgroundColor: AppColors.background,
+                selectedColor: AppColors.primaryLight,
+                checkmarkColor: AppColors.primary,
+                labelStyle: TextStyle(
+                  fontSize: 12,
+                  fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                  color: selected ? AppColors.primary : AppColors.textSecondary,
+                ),
+                side: BorderSide(
+                  color: selected ? AppColors.primary : AppColors.border,
+                ),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20)),
+              ),
+            );
+          }).toList(),
+        ),
       ),
     );
   }
@@ -184,14 +224,18 @@ class _LeaveScreenBodyState extends State<_LeaveScreenBody> {
       );
     }
 
+    final filtered = _filterStatus == 'ALL'
+        ? leaves
+        : leaves.where((l) => l.status.toUpperCase() == _filterStatus).toList();
+
     return RefreshIndicator(
       onRefresh: () async =>
           context.read<LeaveBloc>().add(LoadLeavesEvent()),
       color: AppColors.primary,
       child: ListView.builder(
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 120),
-        itemCount: leaves.length,
-        itemBuilder: (_, i) => _buildLeaveCard(context, leaves[i]),
+        itemCount: filtered.length,
+        itemBuilder: (_, i) => _buildLeaveCard(context, filtered[i]),
       ),
     );
   }
