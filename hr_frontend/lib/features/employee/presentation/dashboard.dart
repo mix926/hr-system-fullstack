@@ -6,6 +6,7 @@ import '../../../core/theme/app_theme.dart';
 import '../data/employee_api_service.dart';
 import '../data/models/employee_model.dart';
 import 'add_employee.dart';
+import 'employee_detail_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -327,6 +328,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
       margin: const EdgeInsets.only(bottom: 10),
       decoration: AppTheme.cardDecoration(radius: 14),
       child: ListTile(
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (_) => EmployeeDetailScreen(employee: emp)),
+        ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         leading: CircleAvatar(
           radius: 22,
