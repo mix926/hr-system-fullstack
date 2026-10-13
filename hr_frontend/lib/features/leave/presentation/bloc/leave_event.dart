@@ -1,0 +1,14 @@
+// Location: lib/features/leave/presentation/bloc/leave_event.dart
+import 'package:flutter/foundation.dart';
+// ខ្មែរ: ជួសជុលទីតាំង import ត្រឹមត្រូវ (bloc/ → ../../data/models/)
+import '../../data/models/leave_model.dart';
+
+@immutable
+abstract class LeaveEvent {}
+
+class LoadLeavesEvent extends LeaveEvent {}
+
+class CreateLeaveEvent extends LeaveEvent {
+  final LeaveModel leave;
+  CreateLeaveEvent(this.leave);
+}
