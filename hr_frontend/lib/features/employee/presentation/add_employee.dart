@@ -4,6 +4,8 @@ import 'package:get_it/get_it.dart';
 import '../../../core/theme/app_theme.dart';
 import '../data/employee_api_service.dart';
 import '../data/models/employee_model.dart';
+import '../../department/data/department_api_service.dart';
+import '../../department/data/models/department_model.dart';
 
 class AddEmployeeScreen extends StatefulWidget {
   const AddEmployeeScreen({super.key});
@@ -15,6 +17,7 @@ class AddEmployeeScreen extends StatefulWidget {
 class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
   final _formKey    = GlobalKey<FormState>();
   final _apiService = GetIt.instance<EmployeeApiService>();
+  final _deptService = GetIt.instance<DepartmentApiService>();
 
   final _firstNameController = TextEditingController();
   final _lastNameController  = TextEditingController();
@@ -22,15 +25,29 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
   final _positionController  = TextEditingController();
   final _passwordController  = TextEditingController();
 
-  String _role            = 'STAFF';
-  bool   _isLoading       = false;
-  bool   _obscurePassword = true;
+  String  _role            = 'STAFF';
+  bool    _isLoading       = false;
+  bool    _obscurePassword = true;
+
+  List<DepartmentModel> _departments  = [];
+  String?               _departmentId;
 
   static const List<Map<String, dynamic>> _roleOptions = [
     {'value': 'STAFF',   'label': 'Staff',   'icon': Icons.person_rounded,          'color': Color(0xFF2563EB)},
     {'value': 'MANAGER', 'label': 'Manager', 'icon': Icons.manage_accounts_rounded, 'color': Color(0xFFEA580C)},
     {'value': 'ADMIN',   'label': 'Admin',   'icon': Icons.shield_rounded,          'color': Color(0xFF7C3AED)},
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadDepartments();
+  }
+
+  Future<void> _loadDepartments() async {
+    final result = await _deptService.getDepartments();
+    result.fold((_) {}, (depts) => setState(() => _departments = depts));
+  }
 
   @override
   void dispose() {
@@ -47,12 +64,13 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
     setState(() => _isLoading = true);
 
     final result = await _apiService.createEmployee(Employee(
-      firstName: _firstNameController.text.trim(),
-      lastName:  _lastNameController.text.trim(),
-      email:     _emailController.text.trim(),
-      position:  _positionController.text.trim(),
-      password:  _passwordController.text,
-      role:      _role,
+      firstName:    _firstNameController.text.trim(),
+      lastName:     _lastNameController.text.trim(),
+      email:        _emailController.text.trim(),
+      position:     _positionController.text.trim(),
+      password:     _passwordController.text,
+      role:         _role,
+      departmentId: _departmentId,
     ));
 
     if (!mounted) return;
@@ -199,16 +217,38 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
                     Container(
                       decoration: AppTheme.cardDecoration(),
                       padding: const EdgeInsets.all(20),
-                      child: TextFormField(
-                        controller: _positionController,
-                        textInputAction: TextInputAction.next,
-                        textCapitalization: TextCapitalization.words,
-                        decoration: AppTheme.inputDecoration(
-                          'Job Position / Title',
-                          icon: Icons.work_outline_rounded,
-                        ),
-                        validator: (v) => (v == null || v.trim().isEmpty)
-                            ? 'Position is required' : null,
+                      child: Column(
+                        children: [
+                          TextFormField(
+                            controller: _positionController,
+                            textInputAction: TextInputAction.next,
+                            textCapitalization: TextCapitalization.words,
+                            decoration: AppTheme.inputDecoration(
+                              'Job Position / Title',
+                              icon: Icons.work_outline_rounded,
+                            ),
+                            validator: (v) => (v == null || v.trim().isEmpty)
+                                ? 'Position is required' : null,
+                          ),
+                          if (_departments.isNotEmpty) ...[
+                            const SizedBox(height: 14),
+                            DropdownButtonFormField<String>(
+                              initialValue: _departmentId,
+                              decoration: AppTheme.inputDecoration(
+                                'Department (optional)',
+                                icon: Icons.corporate_fare_rounded,
+                              ),
+                              items: [
+                                const DropdownMenuItem(
+                                    value: null, child: Text('No Department')),
+                                ..._departments.map((d) => DropdownMenuItem(
+                                    value: d.id, child: Text(d.name))),
+                              ],
+                              onChanged: (v) =>
+                                  setState(() => _departmentId = v),
+                            ),
+                          ],
+                        ],
                       ),
                     ),
                     const SizedBox(height: 20),

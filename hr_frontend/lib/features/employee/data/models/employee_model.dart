@@ -6,8 +6,9 @@ class Employee {
   final String lastName;
   final String email;
   final String position;
-  final String? password; // ខ្មែរ: ប្រើតែពេល Create/Register
+  final String? password;
   final String role;
+  final String? departmentId;
 
   Employee({
     this.id,
@@ -17,6 +18,7 @@ class Employee {
     required this.position,
     this.password,
     this.role = 'STAFF',
+    this.departmentId,
   });
 
   // ខ្មែរ: Helper Getter សម្រាប់ទាញយកឈ្មោះពេញមកបង្ហាញលើ UI
@@ -25,31 +27,33 @@ class Employee {
   // ខ្មែរ: បំប្លែងទិន្នន័យពី JSON (FastAPI Backend) ទៅជា Employee Object
   factory Employee.fromJson(Map<String, dynamic> json) {
     return Employee(
-      id: json['id']?.toString(),
-      firstName: json['first_name'] ?? '',
-      lastName: json['last_name'] ?? '',
-      email: json['email'] ?? '',
-      position: json['position'] ?? '',
-      role: json['role'] ?? 'STAFF',
+      id:           json['id']?.toString(),
+      firstName:    json['first_name'] ?? '',
+      lastName:     json['last_name'] ?? '',
+      email:        json['email'] ?? '',
+      position:     json['position'] ?? '',
+      role:         json['role'] ?? 'STAFF',
+      departmentId: json['department_id']?.toString(),
     );
   }
 
-  // ខ្មែរ: បំប្លែង Employee Object ទៅជា JSON ដើម្បីផ្ញើទៅ FastAPI Backend
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = {
       'first_name': firstName,
-      'last_name': lastName,
-      'email': email,
-      'position': position,
-      'role': role,
+      'last_name':  lastName,
+      'email':      email,
+      'position':   position,
+      'role':       role,
     };
     if (password != null && password!.isNotEmpty) {
       data['password'] = password;
     }
+    if (departmentId != null) {
+      data['department_id'] = departmentId;
+    }
     return data;
   }
 
-  // ខ្មែរ: copyWith សម្រាប់ Update State ដោយមិនប៉ះពាល់ Original Object
   Employee copyWith({
     String? id,
     String? firstName,
@@ -58,15 +62,17 @@ class Employee {
     String? position,
     String? password,
     String? role,
+    String? departmentId,
   }) {
     return Employee(
-      id: id ?? this.id,
-      firstName: firstName ?? this.firstName,
-      lastName: lastName ?? this.lastName,
-      email: email ?? this.email,
-      position: position ?? this.position,
-      password: password ?? this.password,
-      role: role ?? this.role,
+      id:           id           ?? this.id,
+      firstName:    firstName    ?? this.firstName,
+      lastName:     lastName     ?? this.lastName,
+      email:        email        ?? this.email,
+      position:     position     ?? this.position,
+      password:     password     ?? this.password,
+      role:         role         ?? this.role,
+      departmentId: departmentId ?? this.departmentId,
     );
   }
 }
