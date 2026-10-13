@@ -13,7 +13,37 @@ from app.api.auth import get_current_user
 router = APIRouter(prefix="/leaves", tags=["Leaves"])
 
 
-# ---- Request body schema for status update ----
+# ---- API Endpoints ----
+
+@router.get("/stats")
+def get_leave_stats(
+    current_user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """ខ្មែរ: ទាញយករាប់ចំនួនសំណើច្បាប់តាម Status (ADMIN/MANAGER ឃើញទាំងអស់ / STAFF ឃើញតែរបស់ខ្លួន)"""
+    role  = current_user.get("role")
+    email = current_user.get("sub")
+
+    if role in ["ADMIN", "MANAGER"]:
+        query = db.query(LeaveModel)
+    else:
+        from app.models.models import Employee as EmployeeModel
+        emp = db.query(EmployeeModel).filter(EmployeeModel.email == email).first()
+        query = db.query(LeaveModel).filter(
+            LeaveModel.employee_id == (emp.id if emp else "")
+        )
+
+    total    = query.count()
+    pending  = query.filter(LeaveModel.status == LeaveStatus.PENDING).count()
+    approved = query.filter(LeaveModel.status == LeaveStatus.APPROVED).count()
+    rejected = query.filter(LeaveModel.status == LeaveStatus.REJECTED).count()
+
+    return {
+        "total":    total,
+        "pending":  pending,
+        "approved": approved,
+        "rejected": rejected,
+    }
 
 class LeaveStatusUpdate(BaseModel):
     status: str  # "APPROVED" or "REJECTED"
