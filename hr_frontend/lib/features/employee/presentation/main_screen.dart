@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../auth/presentation/login.dart';
+import '../../attendance/presentation/attendance_screen.dart';
 import '../../leave/data/leave_api_service.dart';
 import '../../leave/presentation/leave_screen.dart';
 import 'dashboard.dart';
@@ -107,6 +108,7 @@ class _MainScreenState extends State<MainScreen> {
         index: _currentIndex,
         children: [
           const DashboardScreen(),
+          const AttendanceScreen(),
           const LeaveScreen(),
           _buildProfilePage(),
         ],
@@ -135,6 +137,11 @@ class _MainScreenState extends State<MainScreen> {
             icon: Icon(Icons.dashboard_outlined, color: AppColors.textHint),
             selectedIcon: Icon(Icons.dashboard_rounded, color: AppColors.primary),
             label: 'Dashboard',
+          ),
+          const NavigationDestination(
+            icon: Icon(Icons.fingerprint_outlined, color: AppColors.textHint),
+            selectedIcon: Icon(Icons.fingerprint_rounded, color: AppColors.primary),
+            label: 'Attendance',
           ),
           NavigationDestination(
             icon: _leaveIcon(false),
