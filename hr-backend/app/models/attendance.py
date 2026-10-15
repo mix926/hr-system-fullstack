@@ -1,4 +1,3 @@
-# Location: app/models/attendance.py
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
@@ -10,7 +9,7 @@ class AttendanceModel(Base):
 
   id = Column(Integer, primary_key=True, index=True)
   employee_id = Column(
-      Integer, ForeignKey("employees.id", ondelete="CASCADE")
+      String(36), ForeignKey("employees.id", ondelete="CASCADE")
   )
   date = Column(
       String, nullable=False
@@ -21,4 +20,5 @@ class AttendanceModel(Base):
       String, default="PRESENT", nullable=False
   )  # PRESENT, LATE, ABSENT
 
-  employee = relationship("EmployeeModel", backref="attendances")
+  # ជួសជុល: ឈ្មោះ class គឺ Employee មិនមែន EmployeeModel
+  employee = relationship("Employee", backref="attendances")
