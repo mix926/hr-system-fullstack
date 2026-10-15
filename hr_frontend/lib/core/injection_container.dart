@@ -1,4 +1,4 @@
-// Location: lib/core/injection_container.dart
+// lib/core/injection_container.dart
 import 'package:get_it/get_it.dart';
 import 'package:dio/dio.dart';
 
@@ -8,6 +8,8 @@ import '../features/employee/presentation/bloc/employee_bloc.dart';
 import '../features/leave/data/leave_api_service.dart';
 import '../features/leave/presentation/bloc/leave_bloc.dart';
 import '../features/department/data/department_api_service.dart';
+import '../features/attendance/data/attendance_api_service.dart';
+import '../features/attendance/presentation/bloc/attendance_bloc.dart';
 import 'network/api_interceptor.dart';
 import 'utils/constants.dart';
 
@@ -21,14 +23,15 @@ Future<void> init() async {
     return dio;
   });
 
-  // ── API Services ────────────────────────────────────────────
+  // ── API Services ─────────────────────────────────────────────
   sl.registerLazySingleton<AuthApiService>(() => AuthApiService(sl()));
   sl.registerLazySingleton<EmployeeApiService>(() => EmployeeApiService(sl()));
   sl.registerLazySingleton<LeaveApiService>(() => LeaveApiService(sl()));
   sl.registerLazySingleton<DepartmentApiService>(() => DepartmentApiService(sl()));
+  sl.registerLazySingleton<AttendanceApiService>(() => AttendanceApiService(sl()));
 
-  // ── Blocs (registerFactory so each screen gets a fresh instance) ──
-  // ខ្មែរ: ជួសជុល — ចុះឈ្មោះ EmployeeBloc ដើម្បីឱ្យ UI អាច inject បាន
+  // ── Blocs (registerFactory — each screen gets a fresh instance) ──
   sl.registerFactory<EmployeeBloc>(() => EmployeeBloc(sl()));
   sl.registerFactory<LeaveBloc>(() => LeaveBloc(sl()));
+  sl.registerFactory<AttendanceBloc>(() => AttendanceBloc(sl()));
 }
