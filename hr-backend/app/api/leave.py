@@ -21,16 +21,12 @@ def get_leave_stats(
     db: Session = Depends(get_db)
 ):
     """ខ្មែរ: ទាញយករាប់ចំនួនសំណើច្បាប់តាម Status (ADMIN/MANAGER ឃើញទាំងអស់ / STAFF ឃើញតែរបស់ខ្លួន)"""
-    role  = current_user.get("role")
-    email = current_user.get("sub")
-
+    role  = current_user.role
     if role in ["ADMIN", "MANAGER"]:
         query = db.query(LeaveModel)
     else:
-        from app.models.models import Employee as EmployeeModel
-        emp = db.query(EmployeeModel).filter(EmployeeModel.email == email).first()
         query = db.query(LeaveModel).filter(
-            LeaveModel.employee_id == (emp.id if emp else "")
+            LeaveModel.employee_id == current_user.id
         )
 
     total    = query.count()
@@ -57,18 +53,13 @@ def create_leave_request(
     current_user: dict = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    # ខ្មែរ: current_user ជា dict (JWT payload) ។ email ស្ថិតនៅ key "sub"
-    email = current_user.get("sub")
-    employee = db.query(Employee).filter(Employee.email == email).first()
-    if not employee:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Employee not found")
-
+    # ខ្មែរ: current_user ជា Employee object ។ ប្រើ attribute access បានផ្ទាល់
     db_leave = LeaveModel(
         leave_type=leave.leave_type,
         start_date=leave.start_date,
         end_date=leave.end_date,
         reason=leave.reason,
-        employee_id=employee.id,
+        employee_id=current_user.id,
         status=LeaveStatus.PENDING
     )
     db.add(db_leave)
@@ -83,17 +74,10 @@ def get_leave_requests(
     db: Session = Depends(get_db)
 ):
     # ខ្មែរ: ADMIN/MANAGER ឃើញសំណើទាំងអស់ / STAFF ឃើញតែរបស់ខ្លួន
-    role = current_user.get("role")
-    email = current_user.get("sub")
-
-    if role in ["ADMIN", "MANAGER"]:
+    if current_user.role in ["ADMIN", "MANAGER"]:
         return db.query(LeaveModel).all()
 
-    employee = db.query(Employee).filter(Employee.email == email).first()
-    if not employee:
-        return []
-
-    return db.query(LeaveModel).filter(LeaveModel.employee_id == employee.id).all()
+    return db.query(LeaveModel).filter(LeaveModel.employee_id == current_user.id).all()
 
 
 @router.patch("/{leave_id}/status", response_model=LeaveResponse)
@@ -107,7 +91,7 @@ def update_leave_status(
     ខ្មែរ: Endpoint សម្រាប់ ADMIN/MANAGER ដើម្បីអនុម័ត (APPROVED) ឬបដិសេធ (REJECTED)
     សំណើសុំច្បាប់។ STAFF មិនមានសិទ្ធិប្រើ Endpoint នេះ។
     """
-    role = current_user.get("role")
+    role = current_user.role
     if role not in ["ADMIN", "MANAGER"]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,

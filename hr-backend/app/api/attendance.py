@@ -1,6 +1,6 @@
 # Location: app/api/attendance.py
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.core.database import get_db
@@ -13,10 +13,10 @@ router = APIRouter(prefix="/api/v1/attendance", tags=["Attendance"])
 
 class AttendanceResponse(BaseModel):
   id: int
-  employee_id: int
+  employee_id: str          # UUID stored as String(36)
   date: str
-  check_in_time: str | None = None
-  check_out_time: str | None = None
+  check_in_time: Optional[datetime] = None
+  check_out_time: Optional[datetime] = None
   status: str
 
   class Config:

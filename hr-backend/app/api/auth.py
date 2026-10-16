@@ -55,7 +55,7 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
         }
     }
 
-def get_current_user(token: str = Depends(oauth2_scheme)):
+def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials or token expired",
@@ -66,10 +66,13 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
         email: str = payload.get("sub")
         if email is None:
             raise credentials_exception
-        return payload 
+        user = crud.get_employee_by_email(db, email=email)
+        if user is None:
+            raise credentials_exception
+        return user
     except jwt.ExpiredSignatureError:
-        print("JWT ERROR: Token has expired!") # Prints to your terminal / បង្ហាញក្នុង Terminal
+        print("JWT ERROR: Token has expired!")
         raise credentials_exception
     except jwt.PyJWTError as e:
-        print(f"JWT ERROR: {e}") # Prints exact error to your terminal / បង្ហាញកំហុសច្បាស់លាស់
+        print(f"JWT ERROR: {e}")
         raise credentials_exception

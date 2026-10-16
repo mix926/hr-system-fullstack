@@ -12,12 +12,12 @@ class AttendanceModel(Base):
       String(36), ForeignKey("employees.id", ondelete="CASCADE")
   )
   date = Column(
-      String, nullable=False
+      String(10), nullable=False
   )  # ថ្ងៃខែឆ្នាំ (YYYY-MM-DD) សម្រាប់ផ្ទៀងផ្ទាត់ 1 ថ្ងៃ 1 ដង
   check_in_time = Column(DateTime(timezone=True), nullable=True)
   check_out_time = Column(DateTime(timezone=True), nullable=True)
   status = Column(
-      String, default="PRESENT", nullable=False
+      String(20), default="PRESENT", nullable=False
   )  # PRESENT, LATE, ABSENT
 
   # ជួសជុល: ឈ្មោះ class គឺ Employee មិនមែន EmployeeModel
