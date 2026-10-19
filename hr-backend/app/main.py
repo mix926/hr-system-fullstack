@@ -5,8 +5,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.models.models import Base
 from app.models import leave as leave_model            # noqa: F401
 from app.models import attendance as attendance_model  # noqa: F401 — ត្រូវ import ដើម្បីឱ្យ Base.metadata ដឹង
+from app.models import performance as performance_model  # noqa: F401
 from app.core.database import engine
-from app.api import employee, auth, leave, department, attendance
+from app.api import employee, auth, leave, department, attendance, performance
 
 # ខ្មែរ: បង្កើតតារាងក្នុង Database (រួមមានតារាង attendances ផងដែរ)
 Base.metadata.create_all(bind=engine)
@@ -34,6 +35,7 @@ app.include_router(employee.router,   prefix="/api/v1", tags=["Employees"])
 app.include_router(leave.router,      prefix="/api/v1", tags=["Leaves"])
 app.include_router(department.router, prefix="/api/v1", tags=["Departments"])
 app.include_router(attendance.router)  # prefix already set inside attendance.py as /api/v1/attendance
+app.include_router(performance.router, prefix="/api/v1", tags=["Performance Reviews"])
 
 # ខ្មែរ: Health Check Endpoint សម្រាប់អោយ Server (ដូចជា AWS/Docker) ឆែកមើលថា App នៅរស់ឬអត់
 @app.get("/", tags=["Health Check"])
