@@ -1,4 +1,3 @@
-// lib/features/attendance/presentation/bloc/attendance_state.dart
 import 'package:flutter/foundation.dart';
 import '../../data/models/attendance_model.dart';
 
@@ -9,11 +8,11 @@ class AttendanceInitialState extends AttendanceState {}
 
 class AttendanceLoadingState extends AttendanceState {}
 
-/// ទិន្នន័យ Attendance ត្រូវបានទាញយកបានជោគជ័យ
+/// Attendance data loaded successfully
 class AttendanceLoadedState extends AttendanceState {
   final List<AttendanceModel> attendances;
 
-  /// Attendance ថ្ងៃនេះ (null = មិនទាន់ check-in)
+  /// Today's attendance (null = not checked in yet)
   final AttendanceModel? todayAttendance;
 
   AttendanceLoadedState({
@@ -22,7 +21,7 @@ class AttendanceLoadedState extends AttendanceState {
   });
 }
 
-/// Check-in / Check-out / ជោគជ័យ
+/// Check-in / Check-out / Operation success
 class AttendanceOperationSuccessState extends AttendanceState {
   final String message;
   final AttendanceModel attendance;
