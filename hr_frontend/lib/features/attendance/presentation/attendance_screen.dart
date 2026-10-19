@@ -496,7 +496,7 @@ class _AttendanceBody extends StatelessWidget {
       final m  = dt.minute.toString().padLeft(2, '0');
       return '$h:$m';
     } catch (_) {
-      return isoString.length >= 5 ? isoString.substring(11, 16) : isoString;
+      return isoString.length >= 16 ? isoString.substring(11, 16) : isoString;
     }
   }
 }
