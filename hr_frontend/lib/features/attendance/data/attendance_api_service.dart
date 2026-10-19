@@ -7,13 +7,26 @@ class AttendanceApiService {
 
   AttendanceApiService(this._dio);
 
+  /// Safely extract the error detail from a DioException response.
+  /// The server may return a Map (e.g. {"detail": "..."}) or a plain String.
+  String _extractDetail(DioException e, String fallback) {
+    final data = e.response?.data;
+    if (data is Map<String, dynamic>) {
+      return data['detail']?.toString() ?? fallback;
+    }
+    if (data is String && data.isNotEmpty) {
+      return data;
+    }
+    return fallback;
+  }
+
   Future<Result<AttendanceModel>> checkIn() async {
     try {
       final response = await _dio.post('/api/v1/attendance/check-in');
       return Result.success(AttendanceModel.fromJson(response.data));
     } on DioException catch (e) {
       return Result.failure(ServerFailure(
-        message: e.response?.data['detail'] ?? 'Failed to check-in',
+        message: _extractDetail(e, 'Failed to check-in'),
       ));
     } catch (e) {
       return Result.failure(ServerFailure(message: e.toString()));
@@ -26,7 +39,7 @@ class AttendanceApiService {
       return Result.success(AttendanceModel.fromJson(response.data));
     } on DioException catch (e) {
       return Result.failure(ServerFailure(
-        message: e.response?.data['detail'] ?? 'Failed to check-out',
+        message: _extractDetail(e, 'Failed to check-out'),
       ));
     } catch (e) {
       return Result.failure(ServerFailure(message: e.toString()));
@@ -40,7 +53,7 @@ class AttendanceApiService {
       return Result.success(data.map((json) => AttendanceModel.fromJson(json)).toList());
     } on DioException catch (e) {
       return Result.failure(ServerFailure(
-        message: e.response?.data['detail'] ?? 'Failed to load attendances',
+        message: _extractDetail(e, 'Failed to load attendances'),
       ));
     } catch (e) {
       return Result.failure(ServerFailure(message: e.toString()));
