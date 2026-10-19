@@ -1,4 +1,3 @@
-# Location: app/api/attendance.py
 from datetime import datetime
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -29,7 +28,7 @@ def check_in(
 ):
   today_str = datetime.now().strftime("%Y-%m-%d")
 
-  # ពិនិត្យមើលថាតើធ្លាប់ Check-in ថ្ងៃនេះរួចរាល់ហើយឬยัง
+  # Check whether the employee has already checked in today
   existing = (
       db.query(AttendanceModel)
       .filter(
@@ -41,7 +40,7 @@ def check_in(
 
   if existing:
     raise HTTPException(
-        status_code=400, detail="คุณได้ Check-in ในวันนี้เรียบร้อยแล้ว"
+        status_code=400, detail="You have already checked in today"
     )
 
   db_attendance = AttendanceModel(
@@ -73,12 +72,12 @@ def check_out(
 
   if not attendance:
     raise HTTPException(
-        status_code=400, detail="คุณยังไม่ได้ Check-in ในวันนี้"
+        status_code=400, detail="You have not checked in today"
     )
 
   if attendance.check_out_time:
     raise HTTPException(
-        status_code=400, detail="คุณได้ Check-out ไปแล้วในวันนี้"
+        status_code=400, detail="You have already checked out today"
     )
 
   attendance.check_out_time = datetime.now()
@@ -91,7 +90,9 @@ def check_out(
 def get_attendances(
     current_user=Depends(get_current_user), db: Session = Depends(get_db)
 ):
-  if current_user.role in ["ADMIN", "MANAGER"]:
+  # Compare role value as string to handle both plain strings and RoleEnum
+  role = current_user.role.value if hasattr(current_user.role, "value") else current_user.role
+  if role in ["ADMIN", "MANAGER"]:
     return db.query(AttendanceModel).all()
   return (
       db.query(AttendanceModel)
