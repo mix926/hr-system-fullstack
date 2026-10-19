@@ -1,4 +1,3 @@
-// lib/features/attendance/presentation/bloc/attendance_bloc.dart
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../data/attendance_api_service.dart';
 import '../../data/models/attendance_model.dart';
@@ -14,7 +13,7 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
     on<CheckOutEvent>(_onCheckOut);
   }
 
-  /// ទាញទិន្នន័យ Attendance ទាំងអស់ ហើយរកថ្ងៃនេះ
+  /// Load all attendance data and find today's record
   Future<void> _onLoadAttendances(
     LoadAttendancesEvent event,
     Emitter<AttendanceState> emit,
@@ -40,7 +39,7 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
     );
   }
 
-  /// Check-in ហើយ reload list
+  /// Check in and reload the list
   Future<void> _onCheckIn(
     CheckInEvent event,
     Emitter<AttendanceState> emit,
@@ -60,7 +59,7 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
     );
   }
 
-  /// Check-out ហើយ reload list
+  /// Check out and reload the list
   Future<void> _onCheckOut(
     CheckOutEvent event,
     Emitter<AttendanceState> emit,
