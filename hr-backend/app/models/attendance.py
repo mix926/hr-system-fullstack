@@ -13,12 +13,12 @@ class AttendanceModel(Base):
   )
   date = Column(
       String(10), nullable=False
-  )  # ថ្ងៃខែឆ្នាំ (YYYY-MM-DD) សម្រាប់ផ្ទៀងផ្ទាត់ 1 ថ្ងៃ 1 ដង
+  )  # Date string (YYYY-MM-DD) for one check-in per day
   check_in_time = Column(DateTime(timezone=True), nullable=True)
   check_out_time = Column(DateTime(timezone=True), nullable=True)
   status = Column(
       String(20), default="PRESENT", nullable=False
   )  # PRESENT, LATE, ABSENT
 
-  # ជួសជុល: ឈ្មោះ class គឺ Employee មិនមែន EmployeeModel
+  # Note: The class name is Employee, not EmployeeModel
   employee = relationship("Employee", backref="attendances")
