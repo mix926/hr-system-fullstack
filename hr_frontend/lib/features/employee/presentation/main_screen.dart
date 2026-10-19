@@ -7,6 +7,7 @@ import '../../auth/presentation/login.dart';
 import '../../attendance/presentation/attendance_screen.dart';
 import '../../leave/data/leave_api_service.dart';
 import '../../leave/presentation/leave_screen.dart';
+import '../../performance/presentation/performance_screen.dart';
 import 'dashboard.dart';
 
 class MainScreen extends StatefulWidget {
@@ -110,6 +111,7 @@ class _MainScreenState extends State<MainScreen> {
           const DashboardScreen(),
           const AttendanceScreen(),
           const LeaveScreen(),
+          const PerformanceScreen(),
           _buildProfilePage(),
         ],
       ),
@@ -147,6 +149,11 @@ class _MainScreenState extends State<MainScreen> {
             icon: _leaveIcon(false),
             selectedIcon: _leaveIcon(true),
             label: 'Leaves',
+          ),
+          const NavigationDestination(
+            icon: Icon(Icons.rate_review_outlined, color: AppColors.textHint),
+            selectedIcon: Icon(Icons.rate_review_rounded, color: AppColors.primary),
+            label: 'Reviews',
           ),
           const NavigationDestination(
             icon: Icon(Icons.person_outline_rounded, color: AppColors.textHint),
