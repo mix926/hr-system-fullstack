@@ -37,7 +37,6 @@ class _PerformanceView extends StatefulWidget {
 
 class _PerformanceViewState extends State<_PerformanceView> {
   String _userRole = '';
-  String _userEmail = '';
 
   @override
   void initState() {
@@ -50,7 +49,6 @@ class _PerformanceViewState extends State<_PerformanceView> {
     if (mounted) {
       setState(() {
         _userRole = prefs.getString('role') ?? 'STAFF';
-        _userEmail = prefs.getString('email') ?? '';
       });
     }
   }
@@ -268,7 +266,6 @@ class _PerformanceViewState extends State<_PerformanceView> {
   void _showCreateDialog(BuildContext context) async {
     final bloc = context.read<PerformanceBloc>();
     List<Employee> employees = [];
-    bool isLoadingEmployees = true;
 
     // Fetch employees for the dropdown
     final empService = GetIt.instance<EmployeeApiService>();
@@ -277,7 +274,6 @@ class _PerformanceViewState extends State<_PerformanceView> {
       (_) => employees = [],
       (emps) => employees = emps,
     );
-    isLoadingEmployees = false;
 
     if (!mounted) return;
 
