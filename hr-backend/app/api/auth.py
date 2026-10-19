@@ -6,13 +6,13 @@ from app.models import models
 from app.core.database import SessionLocal
 from app.core.security import verify_password
 import jwt
-# NEW: Imported timezone to fix the instant-expiration bug / នាំចូល timezone 
+# Import timezone to fix the instant-expiration bug
 from datetime import datetime, timedelta, timezone 
 from fastapi.security import OAuth2PasswordBearer
 
 router = APIRouter(tags=["Authentication"])
 
-# NEW: Made the key 32+ characters long to remove the warning / បង្កើនប្រវែងកូដសម្ងាត់
+# Make the key 32+ characters long to remove the warning
 SECRET_KEY = "my_super_secret_hr_key_1234567890" 
 ALGORITHM = "HS256"
 
@@ -38,9 +38,11 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
     if not verify_password(request.password, user.hashed_password):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid password")
         
-    # NEW: Use timezone-aware UTC time / ប្រើប្រាស់ពេលវេលា UTC ច្បាស់លាស់
+    # Use timezone-aware UTC time
     expire = datetime.now(timezone.utc) + timedelta(hours=24) 
-    to_encode = {"sub": user.email, "role": user.role, "exp": expire}
+    # Store the role value as a plain string so it survives JWT round-trip
+    role_value = user.role.value if hasattr(user.role, "value") else user.role
+    to_encode = {"sub": user.email, "role": role_value, "exp": expire}
     token = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     
     return {
@@ -49,7 +51,7 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
         "user": {
             "id": user.id,
             "email": user.email,
-            "role": user.role,
+            "role": role_value,
             "first_name": user.first_name,
             "last_name": user.last_name
         }
