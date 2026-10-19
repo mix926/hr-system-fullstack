@@ -1,6 +1,6 @@
-// ខ្មែរ: ទីតាំងឯកសារ lib/core/errors/result.dart
+// File: lib/core/errors/result.dart
 
-// ខ្មែរ: Base class សម្រាប់គ្រប់ប្រភេទកំហុស (Errors) ទាំងអស់នៅក្នុង App
+// Base class for all error types in the app
 abstract class Failure {
   final String message;
   final String? code;
@@ -8,28 +8,28 @@ abstract class Failure {
   Failure({required this.message, this.code});
 }
 
-// ខ្មែរ: កំហុសដែលត្រលប់មកពី API (Server) ដូចជា 404, 500, ឬ 422
+// Error returned from the API (Server), e.g. 404, 500, or 422
 class ServerFailure extends Failure {
   ServerFailure({required super.message, super.code});
 }
 
-// ខ្មែរ: ថ្នាក់ Result ប្រើសម្រាប់ទប់ស្កាត់ការប្រើប្រាស់ try-catch នៅលើ UI
+// Result class to avoid try-catch in the UI layer
 class Result<T> {
   final Failure? _failure;
   final T? _data;
   final bool _isSuccess;
 
-  // ខ្មែរ: បង្កើត Result ពេលទិន្នន័យត្រលប់មកជោគជ័យ
+  // Create a Result when the data is returned successfully
   Result.success(this._data)
       : _isSuccess = true,
         _failure = null;
 
-  // ខ្មែរ: បង្កើត Result ពេលមានកំហុស ឬបរាជ័យ
+  // Create a Result when there is an error or failure
   Result.failure(this._failure)
       : _isSuccess = false,
         _data = null;
 
-  // ខ្មែរ: អនុគមន៍ fold បង្ខំអោយ UI ត្រូវតែសរសេរកូដដោះស្រាយទាំង២ករណីជានិច្ច
+  // fold forces the UI to always handle both cases (success and failure)
   R fold<R>(
     R Function(Failure failure) onFailure,
     R Function(T data) onSuccess,
@@ -41,4 +41,3 @@ class Result<T> {
     }
   }
 }
-//hello
