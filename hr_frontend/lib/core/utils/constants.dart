@@ -36,4 +36,9 @@ class AppConstants {
 
   // ── Layout ────────────────────────────────────────────────────
   static const double defaultPadding  = 16.0;
+
+  // ── App Metadata ──────────────────────────────────────────────
+  static const String kAppName = 'HR System Pro';
+  static const String kAppVersion = '2.0.0';
+  static const String kAppBuild = '200';
 }
