@@ -12,6 +12,13 @@ class AuthApiService {
   // ខ្មែរ: ទទួលយក Dio ពី GetIt Service Locator
   AuthApiService(this._dio);
 
+  String _extractDetail(DioException e, String fallback) {
+    final data = e.response?.data;
+    if (data is Map<String, dynamic>) return data['detail']?.toString() ?? fallback;
+    if (data is String && data.isNotEmpty) return data;
+    return fallback;
+  }
+
   Future<Result<Map<String, dynamic>>> login(String email, String password) async {
     try {
       final response = await _dio.post(
@@ -38,7 +45,7 @@ class AuthApiService {
       return Result.success(response.data);
     } on DioException catch (e) {
       return Result.failure(ServerFailure(
-        message: e.response?.data['detail'] ?? 'Login failed',
+        message: _extractDetail(e, 'Login failed'),
       ));
     } catch (e) {
       return Result.failure(ServerFailure(message: e.toString()));
@@ -54,7 +61,7 @@ class AuthApiService {
       return Result.success(Employee.fromJson(response.data));
     } on DioException catch (e) {
       return Result.failure(ServerFailure(
-        message: e.response?.data['detail'] ?? 'Registration failed',
+        message: _extractDetail(e, 'Registration failed'),
       ));
     } catch (e) {
       return Result.failure(ServerFailure(message: e.toString()));
