@@ -252,24 +252,35 @@ class _LeaveScreenBodyState extends State<_LeaveScreenBody> {
   // ── Leave list ────────────────────────────────────────────────
   Widget _buildList(BuildContext context, List<LeaveModel> leaves) {
     if (leaves.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
+      return RefreshIndicator(
+        onRefresh: () async =>
+            context.read<LeaveBloc>().add(LoadLeavesEvent()),
+        color: AppColors.primary,
+        backgroundColor: AppColors.surface,
+        child: ListView(
           children: [
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: const BoxDecoration(
-                color: AppColors.primaryLight,
-                shape: BoxShape.circle,
+            const SizedBox(height: 120),
+            Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: const BoxDecoration(
+                      color: AppColors.primaryLight,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.beach_access_rounded,
+                        size: 40, color: AppColors.primary),
+                  ),
+                  const SizedBox(height: 16),
+                  const Text('No leave requests yet', style: AppTextStyles.titleMedium),
+                  const SizedBox(height: 6),
+                  const Text('Tap + to submit a new request',
+                      style: AppTextStyles.bodyMedium),
+                ],
               ),
-              child: const Icon(Icons.beach_access_rounded,
-                  size: 40, color: AppColors.primary),
             ),
-            const SizedBox(height: 16),
-            const Text('No leave requests yet', style: AppTextStyles.titleMedium),
-            const SizedBox(height: 6),
-            const Text('Tap + to submit a new request',
-                style: AppTextStyles.bodyMedium),
           ],
         ),
       );
@@ -294,6 +305,7 @@ class _LeaveScreenBodyState extends State<_LeaveScreenBody> {
       onRefresh: () async =>
           context.read<LeaveBloc>().add(LoadLeavesEvent()),
       color: AppColors.primary,
+      backgroundColor: AppColors.surface,
       child: ListView.builder(
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 120),
         itemCount: filtered.length,
