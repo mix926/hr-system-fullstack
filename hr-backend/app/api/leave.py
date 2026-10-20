@@ -53,6 +53,7 @@ def create_leave_request(
     current_user: dict = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
+    """Create a new leave request for the current user. Status defaults to PENDING."""
     # ខ្មែរ: current_user ជា Employee object ។ ប្រើ attribute access បានផ្ទាល់
     db_leave = LeaveModel(
         leave_type=leave.leave_type,
@@ -73,6 +74,7 @@ def get_leave_requests(
     current_user: dict = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
+    """Retrieve leave requests. ADMIN/MANAGER see all; STAFF sees only their own."""
     # ខ្មែរ: ADMIN/MANAGER ឃើញសំណើទាំងអស់ / STAFF ឃើញតែរបស់ខ្លួន
     if current_user.role in ["ADMIN", "MANAGER"]:
         return db.query(LeaveModel).all()
