@@ -32,7 +32,7 @@ def get_departments(
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user)
 ):
-    """ខ្មែរ: ទាញយកនាយកដ្ឋានទាំងអស់"""
+    """List all departments. Only authenticated users can access."""
     return db.query(Department).all()
 
 
@@ -42,7 +42,7 @@ def create_department(
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user)
 ):
-    """ខ្មែរ: បង្កើតនាយកដ្ឋានថ្មី (ADMIN ប៉ុណ្ណោះ)"""
+    """Create a new department. Only ADMIN users can access."""
     role = current_user.get("role")
     if role != "ADMIN":
         raise HTTPException(
@@ -66,7 +66,7 @@ def delete_department(
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user)
 ):
-    """ខ្មែរ: លុបនាយកដ្ឋាន (ADMIN ប៉ុណ្ណោះ)"""
+    """Delete a department by ID. Only ADMIN users can access."""
     role = current_user.get("role")
     if role != "ADMIN":
         raise HTTPException(
