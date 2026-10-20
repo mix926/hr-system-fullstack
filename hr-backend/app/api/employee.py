@@ -74,6 +74,20 @@ def search_employees(
     ).all()
 
 
+@router.get("/stats")
+def get_employee_stats(
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user)
+):
+    """Get employee count statistics grouped by role."""
+    from app.models.models import Employee as Emp, RoleEnum
+    total = db.query(Emp).count()
+    admins = db.query(Emp).filter(Emp.role == RoleEnum.ADMIN).count()
+    managers = db.query(Emp).filter(Emp.role == RoleEnum.MANAGER).count()
+    staff = db.query(Emp).filter(Emp.role == RoleEnum.STAFF).count()
+    return {"total": total, "admins": admins, "managers": managers, "staff": staff}
+
+
 @router.get("/{employee_id}", response_model=schemas.EmployeeResponse)
 def read_employee(
     employee_id: str,
