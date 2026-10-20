@@ -98,6 +98,11 @@ class EmployeeDetailScreen extends StatelessWidget {
                           employee.position),
                       const Divider(height: 1),
                       _row(Icons.badge_outlined, 'Role', employee.role),
+                      if (employee.departmentId != null) ...[
+                        const Divider(height: 1),
+                        _row(Icons.corporate_fare_rounded, 'Department ID',
+                            employee.departmentId!),
+                      ],
                       if (employee.id != null) ...[
                         const Divider(height: 1),
                         _row(Icons.fingerprint_rounded, 'Employee ID',
