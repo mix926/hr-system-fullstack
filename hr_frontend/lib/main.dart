@@ -16,8 +16,9 @@ class HRApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+// App version: 2.0.0
     return MaterialApp(
-      title: 'HR System',
+      title: 'HR System Pro',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.themeData,
       home: const LoginScreen(),
