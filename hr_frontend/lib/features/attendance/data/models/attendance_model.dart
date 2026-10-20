@@ -25,4 +25,22 @@ class AttendanceModel {
       status: json['status'],
     );
   }
+
+  AttendanceModel copyWith({
+    int? id,
+    int? employeeId,
+    String? date,
+    String? checkInTime,
+    String? checkOutTime,
+    String? status,
+  }) {
+    return AttendanceModel(
+      id: id ?? this.id,
+      employeeId: employeeId ?? this.employeeId,
+      date: date ?? this.date,
+      checkInTime: checkInTime ?? this.checkInTime,
+      checkOutTime: checkOutTime ?? this.checkOutTime,
+      status: status ?? this.status,
+    );
+  }
 }
