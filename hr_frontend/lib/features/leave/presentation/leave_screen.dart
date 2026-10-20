@@ -32,6 +32,8 @@ class _LeaveScreenBody extends StatefulWidget {
 class _LeaveScreenBodyState extends State<_LeaveScreenBody> {
   String _userRole   = '';
   String _filterStatus = 'ALL'; // ALL | PENDING | APPROVED | REJECTED
+  String _searchQuery = '';
+  final _searchController = TextEditingController();
 
   @override
   void initState() {
@@ -42,6 +44,12 @@ class _LeaveScreenBodyState extends State<_LeaveScreenBody> {
   Future<void> _loadRole() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() => _userRole = prefs.getString('role') ?? 'STAFF');
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   @override
@@ -75,6 +83,7 @@ class _LeaveScreenBodyState extends State<_LeaveScreenBody> {
             child: Column(
               children: [
                 _buildHeader(context),
+                _buildSearchBar(),
                 _buildFilterBar(),
                 Expanded(child: _buildContent(context, state)),
               ],
@@ -90,6 +99,48 @@ class _LeaveScreenBodyState extends State<_LeaveScreenBody> {
         icon: const Icon(Icons.add_rounded, color: Colors.white),
         label: const Text('Request Leave',
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+      ),
+    );
+  }
+
+  // ── Search bar ────────────────────────────────────────────────
+  Widget _buildSearchBar() {
+    return Container(
+      color: AppColors.surface,
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+      child: TextField(
+        controller: _searchController,
+        decoration: InputDecoration(
+          hintText: 'Search by leave type or status…',
+          hintStyle: AppTextStyles.bodyMedium.copyWith(color: AppColors.textHint),
+          prefixIcon: const Icon(Icons.search_rounded, size: 18, color: AppColors.textHint),
+          suffixIcon: _searchQuery.isNotEmpty
+              ? IconButton(
+                  icon: const Icon(Icons.clear_rounded, size: 18, color: AppColors.textHint),
+                  onPressed: () {
+                    _searchController.clear();
+                    setState(() => _searchQuery = '');
+                  },
+                )
+              : null,
+          isDense: true,
+          contentPadding: const EdgeInsets.symmetric(vertical: 8),
+          filled: true,
+          fillColor: AppColors.background,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: const BorderSide(color: AppColors.border),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: const BorderSide(color: AppColors.border),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: const BorderSide(color: AppColors.primary),
+          ),
+        ),
+        onChanged: (v) => setState(() => _searchQuery = v),
       ),
     );
   }
@@ -224,9 +275,20 @@ class _LeaveScreenBodyState extends State<_LeaveScreenBody> {
       );
     }
 
-    final filtered = _filterStatus == 'ALL'
+    final statusFiltered = _filterStatus == 'ALL'
         ? leaves
         : leaves.where((l) => l.status.toUpperCase() == _filterStatus).toList();
+
+    final q = _searchQuery.toLowerCase().trim();
+    final filtered = q.isEmpty
+        ? statusFiltered
+        : statusFiltered.where((l) {
+            final typeMatch = l.leaveType.toLowerCase().contains(q);
+            final statusMatch = l.status.toLowerCase().contains(q);
+            final nameMatch =
+                (l.employeeName ?? '').toLowerCase().contains(q);
+            return typeMatch || statusMatch || nameMatch;
+          }).toList();
 
     return RefreshIndicator(
       onRefresh: () async =>
