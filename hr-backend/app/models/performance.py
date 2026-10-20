@@ -19,14 +19,10 @@ class PerformanceReview(Base):
                 default=lambda: __import__('uuid').uuid4().__str__())
 
     # Employee being reviewed
-    employee_id = Column(
-        String(36), ForeignKey("employees.id", ondelete="CASCADE"), nullable=False
-    )
+    employee_id = Column(String(36), ForeignKey("employees.id", ondelete="CASCADE"), nullable=False, index=True)
 
     # Employee who submitted the review (reviewer)
-    reviewer_id = Column(
-        String(36), ForeignKey("employees.id", ondelete="CASCADE"), nullable=False
-    )
+    reviewer_id = Column(String(36), ForeignKey("employees.id", ondelete="CASCADE"), nullable=False, index=True)
 
     # Review period, e.g. "2025-Q3", "2025 Annual"
     review_period = Column(String(50), nullable=False)
