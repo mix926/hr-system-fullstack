@@ -26,6 +26,7 @@ class AttendanceResponse(BaseModel):
 def check_in(
     current_user=Depends(get_current_user), db: Session = Depends(get_db)
 ):
+  """Record a check-in for the current user. Raises 400 if already checked in today."""
   today_str = datetime.now().strftime("%Y-%m-%d")
 
   # Check whether the employee has already checked in today
@@ -59,6 +60,7 @@ def check_in(
 def check_out(
     current_user=Depends(get_current_user), db: Session = Depends(get_db)
 ):
+  """Record a check-out for the current user. Raises 400 if not checked in or already checked out."""
   today_str = datetime.now().strftime("%Y-%m-%d")
 
   attendance = (
@@ -90,6 +92,7 @@ def check_out(
 def get_attendances(
     current_user=Depends(get_current_user), db: Session = Depends(get_db)
 ):
+  """Retrieve attendance records. ADMIN/MANAGER see all; STAFF sees only their own."""
   # Compare role value as string to handle both plain strings and RoleEnum
   role = current_user.role.value if hasattr(current_user.role, "value") else current_user.role
   if role in ["ADMIN", "MANAGER"]:
