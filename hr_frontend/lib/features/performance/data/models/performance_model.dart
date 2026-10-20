@@ -1,6 +1,15 @@
 // lib/features/performance/data/models/performance_model.dart
 
 class PerformanceReview {
+  // ── Review Period Constants ─────────────────────────────────
+  static const String periodQ1 = 'Q1';
+  static const String periodQ2 = 'Q2';
+  static const String periodQ3 = 'Q3';
+  static const String periodQ4 = 'Q4';
+  static const String periodAnnual = 'Annual Review';
+  static const String periodMidYear = 'Mid-Year Review';
+  static const List<String> reviewPeriods = [periodQ1, periodQ2, periodQ3, periodQ4, periodAnnual, periodMidYear];
+
   final String? id;
   final String? employeeId;
   final String? reviewerId;
