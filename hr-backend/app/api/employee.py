@@ -1,10 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from sqlalchemy import or_
 from typing import Optional
 from pydantic import BaseModel
 from app.repositories import crud
 from app.schemas import schemas
 from app.core.database import SessionLocal
+from app.models.models import Employee
 from app.api.auth import get_current_user
 
 router = APIRouter(
@@ -55,6 +57,23 @@ def read_employees(
     return employees
 
 # 3. GET SINGLE ROUTE (Read Employee by ID) / ផ្លូវសម្រាប់អានបុគ្គលិកតាម ID
+@router.get("/search", response_model=list[schemas.EmployeeResponse])
+def search_employees(
+    q: str,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user)
+):
+    """Search employees by first name, last name, email, or position."""
+    return db.query(Employee).filter(
+        or_(
+            Employee.first_name.ilike(f"%{q}%"),
+            Employee.last_name.ilike(f"%{q}%"),
+            Employee.email.ilike(f"%{q}%"),
+            Employee.position.ilike(f"%{q}%"),
+        )
+    ).all()
+
+
 @router.get("/{employee_id}", response_model=schemas.EmployeeResponse)
 def read_employee(
     employee_id: str,
