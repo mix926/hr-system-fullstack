@@ -1,5 +1,6 @@
 // Location: lib/features/employee/presentation/employee_detail_screen.dart
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../../core/theme/app_theme.dart';
 import '../data/models/employee_model.dart';
 
@@ -88,7 +89,24 @@ class EmployeeDetailScreen extends StatelessWidget {
                     _sectionLabel('Contact'),
                     const SizedBox(height: 10),
                     _infoCard([
-                      _row(Icons.email_outlined, 'Email', employee.email),
+                      InkWell(
+                        onTap: () {
+                          Clipboard.setData(
+                              ClipboardData(text: employee.email));
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            content: Row(children: [
+                              const Icon(Icons.check_circle_outline,
+                                  color: Colors.white, size: 18),
+                              const SizedBox(width: 8),
+                              Expanded(child: Text('Email copied: ${employee.email}')),
+                            ]),
+                            backgroundColor: AppColors.success,
+                          ));
+                        },
+                        child: _row(
+                            Icons.email_outlined, 'Email', employee.email,
+                            valueColor: AppColors.primary),
+                      ),
                     ]),
                     const SizedBox(height: 20),
                     _sectionLabel('Employment'),
