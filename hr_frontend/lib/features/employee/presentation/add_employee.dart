@@ -202,7 +202,8 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
                             ),
                             validator: (v) {
                               if (v == null || v.isEmpty) return 'Email is required';
-                              if (!v.contains('@')) return 'Enter a valid email';
+                              final emailRegex = RegExp(r'^[\w\-\.]+@([\w\-]+\.)+[\w\-]{2,}$');
+                              if (!emailRegex.hasMatch(v)) return 'Enter a valid email address';
                               return null;
                             },
                           ),
