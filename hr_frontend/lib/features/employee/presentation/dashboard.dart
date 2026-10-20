@@ -426,6 +426,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
             Text(emp.position, style: AppTextStyles.bodyMedium),
             const SizedBox(height: 2),
             Text(emp.email, style: AppTextStyles.bodySmall),
+            if (emp.departmentId != null) ...[
+              const SizedBox(height: 2),
+              Row(children: [
+                const Icon(Icons.corporate_fare_rounded, size: 10, color: AppColors.textHint),
+                const SizedBox(width: 4),
+                Text('Dept: ${emp.departmentId!.length > 8 ? emp.departmentId!.substring(0, 8) + "..." : emp.departmentId!}',
+                    style: AppTextStyles.bodySmall),
+              ]),
+            ],
           ],
         ),
         trailing: Column(
