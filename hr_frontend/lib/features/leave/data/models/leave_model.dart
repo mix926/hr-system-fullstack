@@ -1,6 +1,20 @@
 // Location: lib/features/leave/data/models/leave_model.dart
 
 class LeaveModel {
+  // Leave type constants
+  static const String typeAnnual = 'Annual Leave';
+  static const String typeSick = 'Sick Leave';
+  static const String typeUnpaid = 'Unpaid Leave';
+  static const String typeMaternity = 'Maternity Leave';
+  static const String typePaternity = 'Paternity Leave';
+
+  static const List<String> leaveTypes = [
+    typeAnnual,
+    typeSick,
+    typeUnpaid,
+    typeMaternity,
+    typePaternity,
+  ];
   // ខ្មែរ: Backend ប្រើ UUID (String) ជា Primary Key ដូច្នេះប្រើ String? មិនមែន int?
   final String? id;
   final String? employeeId;
