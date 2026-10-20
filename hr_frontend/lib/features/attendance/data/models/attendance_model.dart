@@ -5,6 +5,7 @@ class AttendanceModel {
   final String? checkInTime;
   final String? checkOutTime;
   final String status;
+  final String? createdAt;
 
   AttendanceModel({
     this.id,
@@ -13,6 +14,7 @@ class AttendanceModel {
     this.checkInTime,
     this.checkOutTime,
     required this.status,
+    this.createdAt,
   });
 
   factory AttendanceModel.fromJson(Map<String, dynamic> json) {
@@ -23,6 +25,7 @@ class AttendanceModel {
       checkInTime: json['check_in_time'],
       checkOutTime: json['check_out_time'],
       status: json['status'],
+      createdAt: json['created_at']?.toString(),
     );
   }
 
@@ -34,6 +37,7 @@ class AttendanceModel {
       'check_in_time': checkInTime,
       'check_out_time': checkOutTime,
       'status': status,
+      'created_at': createdAt,
     };
   }
 
@@ -44,6 +48,7 @@ class AttendanceModel {
     String? checkInTime,
     String? checkOutTime,
     String? status,
+    String? createdAt,
   }) {
     return AttendanceModel(
       id: id ?? this.id,
@@ -52,6 +57,7 @@ class AttendanceModel {
       checkInTime: checkInTime ?? this.checkInTime,
       checkOutTime: checkOutTime ?? this.checkOutTime,
       status: status ?? this.status,
+      createdAt: createdAt ?? this.createdAt,
     );
   }
 }
