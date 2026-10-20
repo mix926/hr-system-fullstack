@@ -1,17 +1,29 @@
-# hr_frontend
+# HR System Frontend
 
-A new Flutter project.
+Enterprise HR mobile app built with Flutter.
 
-## Getting Started
+## Tech Stack
+- **Flutter** — Cross-platform UI framework
+- **flutter_bloc** — State management
+- **Dio** — HTTP client
+- **GetIt** — Dependency injection
+- **shared_preferences** — Local storage
 
-This project is a starting point for a Flutter application.
+## Features
+- Employee directory with search
+- Leave request management
+- Attendance tracking
+- Performance reviews
+- Role-based UI (ADMIN, MANAGER, STAFF)
 
-A few resources to get you started if this is your first Flutter project:
+## Setup
+```bash
+cd hr_frontend
+flutter pub get
+flutter run
+```
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Architecture
+Clean architecture with feature-based folder structure:
+- `core/` — Shared utilities, theme, DI
+- `features/` — Feature modules (auth, employee, leave, attendance, performance)
