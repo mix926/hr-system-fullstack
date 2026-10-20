@@ -26,6 +26,17 @@ class AttendanceModel {
     );
   }
 
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'employee_id': employeeId,
+      'date': date,
+      'check_in_time': checkInTime,
+      'check_out_time': checkOutTime,
+      'status': status,
+    };
+  }
+
   AttendanceModel copyWith({
     int? id,
     int? employeeId,
