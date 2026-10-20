@@ -36,6 +36,7 @@ def create_new_employee(
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user)
 ):
+    """Create a new employee. Only authenticated users can access."""
     db_employee = crud.get_employee_by_email(db, email=employee.email)
     if db_employee:
         raise HTTPException(status_code=400, detail="Email already registered")
@@ -49,6 +50,7 @@ def read_employees(
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user)
 ):
+    """List all employees. Only authenticated users can access."""
     employees = crud.get_employees(db, skip=skip, limit=limit)
     return employees
 
@@ -59,6 +61,7 @@ def read_employee(
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user)
 ):
+    """Retrieve a single employee by ID. Returns 404 if not found."""
     # ខ្មែរ: ទាញបុគ្គលិកតាម UUID ។ 404 ប្រសិនបើមិនរក
     db_employee = crud.get_employee_by_id(db, employee_id=employee_id)
     if not db_employee:
@@ -72,6 +75,7 @@ def delete_employee(
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user)
 ):
+    """Delete an employee by ID. Returns 404 if not found."""
     deleted_employee = crud.delete_employee(db=db, employee_id=employee_id)
     if not deleted_employee:
         raise HTTPException(status_code=404, detail="Employee not found")
