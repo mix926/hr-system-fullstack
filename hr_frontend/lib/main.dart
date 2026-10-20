@@ -14,6 +14,9 @@ void main() async {
 class HRApp extends StatelessWidget {
   const HRApp({super.key});
 
+  static const String version = '2.0.0';
+  static const String appName = 'HR System Pro';
+
   @override
   Widget build(BuildContext context) {
 // App version: 2.0.0
