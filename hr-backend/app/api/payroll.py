@@ -1,10 +1,8 @@
-# Location: app/api/payroll.py
 from typing import List
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.models.payroll import PayrollModel
-from app.models.employee import EmployeeModel
 from app.api.auth import get_current_user
 from pydantic import BaseModel
 
@@ -12,7 +10,8 @@ router = APIRouter(prefix="/api/v1/payroll", tags=["Payroll"])
 
 
 class PayrollCreate(BaseModel):
-  employee_id: int
+  # Employee.id is a UUID String, not Integer
+  employee_id: str
   month_year: str
   base_salary: float
   bonus: float = 0.0
@@ -21,7 +20,7 @@ class PayrollCreate(BaseModel):
 
 class PayrollResponse(BaseModel):
   id: int
-  employee_id: int
+  employee_id: str
   month_year: str
   base_salary: float
   bonus: float
@@ -30,7 +29,8 @@ class PayrollResponse(BaseModel):
   status: str
 
   class Config:
-    orm_mode = True
+    # Pydantic V2 uses from_attributes instead of orm_mode
+    from_attributes = True
 
 
 @router.post("/", response_model=PayrollResponse)
@@ -44,7 +44,7 @@ def create_payroll(
         status_code=403, detail="เฉพาะ ADMIN เท่านั้นที่สามารถจัดการ Payroll ได้"
     )
 
-  # គណនា Net Salary 自动
+  # Auto-calculate net salary
   net = payroll.base_salary + payroll.bonus - payroll.deductions
 
   db_payroll = PayrollModel(

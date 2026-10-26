@@ -9,8 +9,9 @@ class PayrollModel(Base):
   __tablename__ = "payrolls"
 
   id = Column(Integer, primary_key=True, index=True)
+  # Employee.id is a UUID String(36), so ForeignKey type must also be String
   employee_id = Column(
-      Integer, ForeignKey("employees.id", ondelete="CASCADE")
+      String(36), ForeignKey("employees.id", ondelete="CASCADE")
   )
   month_year = Column(
       String, nullable=False
@@ -24,4 +25,5 @@ class PayrollModel(Base):
   )  # PENDING, PAID
   created_at = Column(DateTime(timezone=True), server_default=func.now())
 
-  employee = relationship("EmployeeModel", backref="payrolls")
+  # Must reference the class name "Employee" from models/models.py
+  employee = relationship("Employee", backref="payrolls")
