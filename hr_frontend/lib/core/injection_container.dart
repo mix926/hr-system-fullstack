@@ -12,6 +12,8 @@ import '../features/attendance/data/attendance_api_service.dart';
 import '../features/attendance/presentation/bloc/attendance_bloc.dart';
 import '../features/performance/data/performance_api_service.dart';
 import '../features/performance/presentation/bloc/performance_bloc.dart';
+import '../features/payroll/data/payroll_api_service.dart';
+import '../features/payroll/presentation/bloc/payroll_bloc.dart';
 import 'network/api_interceptor.dart';
 import 'utils/constants.dart';
 
@@ -32,10 +34,12 @@ Future<void> init() async {
   sl.registerLazySingleton<DepartmentApiService>(() => DepartmentApiService(sl()));
   sl.registerLazySingleton<AttendanceApiService>(() => AttendanceApiService(sl()));
   sl.registerLazySingleton<PerformanceApiService>(() => PerformanceApiService(sl()));
+  sl.registerLazySingleton<PayrollApiService>(() => PayrollApiService(sl()));
 
   // ── Blocs (registerFactory — each screen gets a fresh instance) ──
   sl.registerFactory<EmployeeBloc>(() => EmployeeBloc(sl()));
   sl.registerFactory<LeaveBloc>(() => LeaveBloc(sl()));
   sl.registerFactory<AttendanceBloc>(() => AttendanceBloc(sl()));
   sl.registerFactory<PerformanceBloc>(() => PerformanceBloc(sl()));
+  sl.registerFactory<PayrollBloc>(() => PayrollBloc(sl()));
 }

@@ -8,6 +8,7 @@ import '../../attendance/presentation/attendance_screen.dart';
 import '../../leave/data/leave_api_service.dart';
 import '../../leave/presentation/leave_screen.dart';
 import '../../performance/presentation/performance_screen.dart';
+import '../../payroll/presentation/payroll_screen.dart';
 import 'dashboard.dart';
 
 class MainScreen extends StatefulWidget {
@@ -112,6 +113,7 @@ class _MainScreenState extends State<MainScreen> {
           const AttendanceScreen(),
           const LeaveScreen(),
           const PerformanceScreen(),
+          const PayrollScreen(),
           _buildProfilePage(),
         ],
       ),
@@ -154,6 +156,11 @@ class _MainScreenState extends State<MainScreen> {
             icon: Icon(Icons.rate_review_outlined, color: AppColors.textHint),
             selectedIcon: Icon(Icons.rate_review_rounded, color: AppColors.primary),
             label: 'Reviews',
+          ),
+          const NavigationDestination(
+            icon: Icon(Icons.payments_outlined, color: AppColors.textHint),
+            selectedIcon: Icon(Icons.payments_rounded, color: AppColors.primary),
+            label: 'Payroll',
           ),
           const NavigationDestination(
             icon: Icon(Icons.person_outline_rounded, color: AppColors.textHint),
