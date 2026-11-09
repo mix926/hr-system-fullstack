@@ -66,6 +66,30 @@ class PayrollApiService {
     }
   }
 
+  /// Update salary fields of a payroll record (admin only)
+  Future<Result<PayrollModel>> updatePayroll(
+    int id, {
+    double? baseSalary,
+    double? bonus,
+    double? deductions,
+  }) async {
+    try {
+      final body = <String, dynamic>{};
+      if (baseSalary != null) body['base_salary'] = baseSalary;
+      if (bonus != null) body['bonus'] = bonus;
+      if (deductions != null) body['deductions'] = deductions;
+
+      final response = await _dio.patch('/api/v1/payroll/$id', data: body);
+      return Result.success(PayrollModel.fromJson(response.data));
+    } on DioException catch (e) {
+      return Result.failure(ServerFailure(
+        message: _extractDetail(e, 'Failed to update payroll'),
+      ));
+    } catch (e) {
+      return Result.failure(ServerFailure(message: e.toString()));
+    }
+  }
+
   /// Update payroll status (admin only)
   Future<Result<PayrollModel>> updatePayrollStatus(int id, String status) async {
     try {

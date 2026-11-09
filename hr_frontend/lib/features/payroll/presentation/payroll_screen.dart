@@ -353,13 +353,20 @@ class _PayrollViewState extends State<_PayrollView> {
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
+                TextButton.icon(
+                  onPressed: () => _showEditSalaryDialog(context, payroll),
+                  icon: const Icon(Icons.edit_outlined,
+                      size: 18, color: AppColors.primary),
+                  label: const Text('Edit Salary',
+                      style: TextStyle(color: AppColors.primary)),
+                ),
                 if (payroll.status == PayrollModel.statusPending)
                   TextButton.icon(
                     onPressed: () => _showStatusDialog(context, payroll),
                     icon: const Icon(Icons.published_with_changes_rounded,
-                        size: 18, color: AppColors.primary),
+                        size: 18, color: AppColors.warning),
                     label: const Text('Update Status',
-                        style: TextStyle(color: AppColors.primary)),
+                        style: TextStyle(color: AppColors.warning)),
                   ),
                 TextButton.icon(
                   onPressed: () => _confirmDelete(context, payroll.id ?? 0),
@@ -395,6 +402,7 @@ class _PayrollViewState extends State<_PayrollView> {
   // ── Create Payroll Dialog ─────────────────────────────────────
   void _showCreateDialog(BuildContext context) async {
     final bloc = context.read<PayrollBloc>();
+    final messenger = ScaffoldMessenger.of(context);
     List<Employee> employees = [];
 
     final empService = GetIt.instance<EmployeeApiService>();
@@ -404,10 +412,10 @@ class _PayrollViewState extends State<_PayrollView> {
       (emps) => employees = emps,
     );
 
-    if (!mounted) return;
+    if (!mounted || !context.mounted) return;
 
     if (employees.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+      messenger.showSnackBar(const SnackBar(
         content: Text('No employees found to create payroll'),
         backgroundColor: AppColors.warning,
       ));
@@ -500,7 +508,7 @@ class _PayrollViewState extends State<_PayrollView> {
               onPressed: () {
                 if (selectedEmployee == null ||
                     monthYearController.text.trim().isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                  messenger.showSnackBar(const SnackBar(
                     content: Text('Please select an employee and month/year'),
                     backgroundColor: AppColors.warning,
                   ));
@@ -513,7 +521,7 @@ class _PayrollViewState extends State<_PayrollView> {
                     double.tryParse(deductionsController.text) ?? 0.0;
 
                 if (base < 0 || bonus < 0 || deductions < 0) {
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                  messenger.showSnackBar(const SnackBar(
                     content: Text('Values cannot be negative'),
                     backgroundColor: AppColors.error,
                   ));
@@ -540,6 +548,119 @@ class _PayrollViewState extends State<_PayrollView> {
     );
   }
 
+  // ── Edit Salary Dialog ────────────────────────────────────────
+  void _showEditSalaryDialog(BuildContext context, PayrollModel payroll) {
+    final bloc = context.read<PayrollBloc>();
+    final baseSalaryController =
+        TextEditingController(text: payroll.baseSalary.toStringAsFixed(2));
+    final bonusController =
+        TextEditingController(text: payroll.bonus.toStringAsFixed(2));
+    final deductionsController =
+        TextEditingController(text: payroll.deductions.toStringAsFixed(2));
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Edit Salary', style: AppTextStyles.titleLarge),
+            const SizedBox(height: 4),
+            Text(
+              payroll.monthYear,
+              style: AppTextStyles.bodySmall.copyWith(
+                  color: AppColors.textHint),
+            ),
+          ],
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: baseSalaryController,
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
+                decoration: AppTheme.inputDecoration(
+                  'Base Salary',
+                  icon: Icons.monetization_on_outlined,
+                  suffix: Text('\$', style: AppTextStyles.bodyMedium),
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: bonusController,
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
+                decoration: AppTheme.inputDecoration(
+                  'Bonus',
+                  icon: Icons.card_giftcard_rounded,
+                  suffix: Text('\$', style: AppTextStyles.bodyMedium),
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: deductionsController,
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
+                decoration: AppTheme.inputDecoration(
+                  'Deductions',
+                  icon: Icons.remove_circle_outline,
+                  suffix: Text('\$', style: AppTextStyles.bodyMedium),
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel',
+                style: TextStyle(color: AppColors.textSecondary)),
+          ),
+          ElevatedButton(
+            style: AppTheme.primaryButtonStyle(radius: 10),
+            onPressed: () {
+              final base =
+                  double.tryParse(baseSalaryController.text.trim());
+              final bonus =
+                  double.tryParse(bonusController.text.trim());
+              final deductions =
+                  double.tryParse(deductionsController.text.trim());
+
+              if (base == null || bonus == null || deductions == null) {
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                  content: Text('Please enter valid numeric values'),
+                  backgroundColor: AppColors.error,
+                ));
+                return;
+              }
+
+              if (base < 0 || bonus < 0 || deductions < 0) {
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                  content: Text('Values cannot be negative'),
+                  backgroundColor: AppColors.error,
+                ));
+                return;
+              }
+
+              bloc.add(UpdatePayrollEvent(
+                payrollId: payroll.id ?? 0,
+                baseSalary: base,
+                bonus: bonus,
+                deductions: deductions,
+              ));
+              Navigator.pop(ctx);
+            },
+            child: const Text('Save Changes'),
+          ),
+        ],
+      ),
+    );
+  }
+
   // ── Status Update Dialog ──────────────────────────────────────
   void _showStatusDialog(BuildContext context, PayrollModel payroll) {
     String? selectedStatus = payroll.status;
@@ -554,19 +675,38 @@ class _PayrollViewState extends State<_PayrollView> {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: PayrollModel.statuses.map((status) {
-              final isSelected = selectedStatus == status;
               final color = _statusColor(status);
-              return RadioListTile<String>(
-                value: status,
-                groupValue: selectedStatus,
-                onChanged: (val) => setState(() => selectedStatus = val),
-                activeColor: color,
-                title: Row(
-                  children: [
-                    Icon(_statusIcon(status), color: color, size: 18),
-                    const SizedBox(width: 8),
-                    Text(status, style: AppTextStyles.bodyMedium),
-                  ],
+              final isSelected = selectedStatus == status;
+              return InkWell(
+                onTap: () => setState(() => selectedStatus = status),
+                borderRadius: BorderRadius.circular(10),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 12, vertical: 10),
+                  margin: const EdgeInsets.only(bottom: 6),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? color.withValues(alpha: 0.1)
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: isSelected
+                          ? color
+                          : AppColors.border,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(_statusIcon(status), color: color, size: 18),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(status, style: AppTextStyles.bodyMedium),
+                      ),
+                      if (isSelected)
+                        Icon(Icons.check_circle_rounded,
+                            color: color, size: 18),
+                    ],
+                  ),
                 ),
               );
             }).toList(),

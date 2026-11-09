@@ -6,7 +6,6 @@ import '../../../core/theme/app_theme.dart';
 import '../data/employee_api_service.dart';
 import '../data/models/employee_model.dart';
 import '../../leave/data/leave_api_service.dart';
-import '../../department/data/department_api_service.dart';
 import 'add_employee.dart';
 import 'employee_detail_screen.dart';
 
@@ -432,7 +431,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               Row(children: [
                 const Icon(Icons.corporate_fare_rounded, size: 10, color: AppColors.textHint),
                 const SizedBox(width: 4),
-                Text('Dept: ${emp.departmentId!.length > 8 ? emp.departmentId!.substring(0, 8) + "..." : emp.departmentId!}',
+                Text('Dept: ${emp.departmentId!.length > 8 ? '${emp.departmentId!.substring(0, 8)}...' : emp.departmentId!}',
                     style: AppTextStyles.bodySmall),
               ]),
             ],

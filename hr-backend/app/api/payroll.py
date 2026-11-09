@@ -19,6 +19,52 @@ def _role(current_user) -> str:
     return current_user.role.value if hasattr(current_user.role, "value") else current_user.role
 
 
+# ── Payroll statistics (must be before /{payroll_id} routes) ──
+@router.get("/stats/summary")
+def get_payroll_stats(
+    current_user=Depends(get_current_user), db: Session = Depends(get_db)
+):
+    """Get payroll summary statistics. ADMIN/MANAGER only."""
+    if _role(current_user) not in ("ADMIN", "MANAGER"):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only ADMIN or MANAGER can view payroll stats",
+        )
+
+    total = db.query(PayrollModel).count()
+    pending = (
+        db.query(PayrollModel)
+        .filter(PayrollModel.status == PayrollStatus.PENDING)
+        .count()
+    )
+    paid = (
+        db.query(PayrollModel)
+        .filter(PayrollModel.status == PayrollStatus.PAID)
+        .count()
+    )
+    cancelled = (
+        db.query(PayrollModel)
+        .filter(PayrollModel.status == PayrollStatus.CANCELLED)
+        .count()
+    )
+
+    # Total net salary across all PAID records
+    total_paid_rows = (
+        db.query(PayrollModel.net_salary)
+        .filter(PayrollModel.status == PayrollStatus.PAID)
+        .all()
+    )
+    total_paid_value = sum(row[0] for row in total_paid_rows)
+
+    return {
+        "total": total,
+        "pending": pending,
+        "paid": paid,
+        "cancelled": cancelled,
+        "total_paid_amount": total_paid_value,
+    }
+
+
 # ── Create a payroll record ────────────────────────────────────
 @router.post("/", response_model=PayrollResponse, status_code=status.HTTP_201_CREATED)
 def create_payroll(
@@ -115,7 +161,7 @@ def update_payroll_status(
     return payroll
 
 
-# ── Partially update a payroll record ──────────────────────────
+# ── Partially update salary fields of a payroll record ─────────
 @router.patch("/{payroll_id}", response_model=PayrollResponse)
 def update_payroll(
     payroll_id: int,
@@ -123,7 +169,7 @@ def update_payroll(
     current_user=Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Update salary fields of a payroll record. ADMIN only."""
+    """Update salary fields (base_salary, bonus, deductions) of a payroll record. ADMIN only."""
     if _role(current_user) != "ADMIN":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -140,7 +186,7 @@ def update_payroll(
     for key, value in updates.items():
         setattr(payroll, key, value)
 
-    # Recalculate net salary if any financial field changed
+    # Recalculate net salary whenever any financial field changes
     payroll.net_salary = payroll.base_salary + payroll.bonus - payroll.deductions
 
     db.commit()
@@ -171,38 +217,3 @@ def delete_payroll(
     db.delete(payroll)
     db.commit()
     return {"message": "Payroll record deleted successfully"}
-
-
-# ── Payroll statistics ─────────────────────────────────────────
-@router.get("/stats/summary")
-def get_payroll_stats(
-    current_user=Depends(get_current_user), db: Session = Depends(get_db)
-):
-    """Get payroll summary statistics. ADMIN/MANAGER only."""
-    if _role(current_user) not in ("ADMIN", "MANAGER"):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Only ADMIN or MANAGER can view payroll stats",
-        )
-
-    total = db.query(PayrollModel).count()
-    pending = db.query(PayrollModel).filter(PayrollModel.status == PayrollStatus.PENDING).count()
-    paid = db.query(PayrollModel).filter(PayrollModel.status == PayrollStatus.PAID).count()
-    cancelled = db.query(PayrollModel).filter(PayrollModel.status == PayrollStatus.CANCELLED).count()
-
-    # Total net salary paid
-    total_paid_amount = (
-        db.query(PayrollModel)
-        .filter(PayrollModel.status == PayrollStatus.PAID)
-        .with_entities(PayrollModel.net_salary)
-        .all()
-    )
-    total_paid_value = sum(row[0] for row in total_paid_amount)
-
-    return {
-        "total": total,
-        "pending": pending,
-        "paid": paid,
-        "cancelled": cancelled,
-        "total_paid_amount": total_paid_value,
-    }

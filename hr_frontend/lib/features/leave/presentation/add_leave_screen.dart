@@ -124,7 +124,7 @@ class _AddLeaveScreenState extends State<AddLeaveScreen> {
               children: [
                 // Leave type
                 DropdownButtonFormField<String>(
-                  value: _leaveType,
+                  initialValue: _leaveType,
                   decoration: AppTheme.inputDecoration(
                     'Leave Type',
                     icon: Icons.beach_access_rounded,

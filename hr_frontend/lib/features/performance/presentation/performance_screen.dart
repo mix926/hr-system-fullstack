@@ -265,6 +265,7 @@ class _PerformanceViewState extends State<_PerformanceView> {
   // ── Create Review Dialog ─────────────────────────────────────
   void _showCreateDialog(BuildContext context) async {
     final bloc = context.read<PerformanceBloc>();
+    final messenger = ScaffoldMessenger.of(context);
     List<Employee> employees = [];
 
     // Fetch employees for the dropdown
@@ -275,10 +276,10 @@ class _PerformanceViewState extends State<_PerformanceView> {
       (emps) => employees = emps,
     );
 
-    if (!mounted) return;
+    if (!mounted || !context.mounted) return;
 
     if (employees.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+      messenger.showSnackBar(const SnackBar(
         content: Text('No employees found to review'),
         backgroundColor: AppColors.warning,
       ));
@@ -399,7 +400,7 @@ class _PerformanceViewState extends State<_PerformanceView> {
               onPressed: () {
                 if (selectedEmployee == null ||
                     periodController.text.trim().isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                  messenger.showSnackBar(const SnackBar(
                     content: Text('Please select an employee and period'),
                     backgroundColor: AppColors.warning,
                   ));
