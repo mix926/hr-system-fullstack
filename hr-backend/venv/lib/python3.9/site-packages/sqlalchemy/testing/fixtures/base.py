@@ -1,5 +1,5 @@
 # testing/fixtures/base.py
-# Copyright (C) 2005-2026 the SQLAlchemy authors and contributors
+# Copyright (C) 2005-2024 the SQLAlchemy authors and contributors
 # <see AUTHORS file>
 #
 # This module is part of SQLAlchemy and is released under
@@ -9,15 +9,11 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
-from collections.abc import Sequence
-
 import sqlalchemy as sa
 from .. import assertions
 from .. import config
 from ..assertions import eq_
 from ..util import drop_all_tables_from_metadata
-from ..util import picklers
 from ... import Column
 from ... import func
 from ... import Integer
@@ -31,25 +27,23 @@ from ...orm import registry
 @config.mark_base_test_class()
 class TestBase:
     # A sequence of requirement names matching testing.requires decorators
-    __requires__: tuple[str, ...] = ()
+    __requires__ = ()
 
     # A sequence of dialect names to exclude from the test class.
-    __unsupported_on__: tuple[str, ...] = ()
+    __unsupported_on__ = ()
 
     # If present, test class is only runnable for the *single* specified
     # dialect.  If you need multiple, use __unsupported_on__ and invert.
-    __only_on__: tuple[str, ...] | str | None = None
+    __only_on__ = None
 
     # A sequence of no-arg callables. If any are True, the entire testcase is
     # skipped.
-    __skip_if__: Sequence[Callable[[], bool]] | None = None
+    __skip_if__ = None
 
     # if True, the testing reaper will not attempt to touch connection
     # state after a test is completed and before the outer teardown
     # starts
-    __leave_connections_for_teardown__: bool = False
-
-    __backend__: bool
+    __leave_connections_for_teardown__ = False
 
     def assert_(self, val, msg=None):
         assert val, msg
@@ -172,7 +166,10 @@ class TestBase:
         def gen_testing_engine(
             url=None,
             options=None,
+            future=None,
             asyncio=False,
+            transfer_staticpool=False,
+            share_pool=False,
         ):
             if options is None:
                 options = {}
@@ -181,6 +178,8 @@ class TestBase:
                 url=url,
                 options=options,
                 asyncio=asyncio,
+                transfer_staticpool=transfer_staticpool,
+                share_pool=share_pool,
             )
 
         yield gen_testing_engine
@@ -194,10 +193,6 @@ class TestBase:
             return testing_engine(**kw)
 
         return go
-
-    @config.fixture(params=picklers())
-    def picklers(self, request):
-        yield request.param
 
     @config.fixture()
     def metadata(self, request):
@@ -222,24 +217,6 @@ class TestBase:
                 )
         else:
             drop_all_tables_from_metadata(metadata, config.db)
-
-    @config.fixture()
-    def thirdparty_dialect(self):
-        from ...dialects import registry
-
-        name = None
-
-        def go(dialect_cls):
-            nonlocal name
-            name = dialect_cls.name
-            assert name, "name is required"
-            registry.impls[name] = dialect_cls
-            return dialect_cls
-
-        yield go
-
-        assert name is not None
-        del registry.impls[name]
 
     @config.fixture(
         params=[

@@ -1,5 +1,5 @@
 # orm/dependency.py
-# Copyright (C) 2005-2026 the SQLAlchemy authors and contributors
+# Copyright (C) 2005-2024 the SQLAlchemy authors and contributors
 # <see AUTHORS file>
 #
 # This module is part of SQLAlchemy and is released under
@@ -7,7 +7,9 @@
 # mypy: ignore-errors
 
 
-"""Relationship dependencies."""
+"""Relationship dependencies.
+
+"""
 
 from __future__ import annotations
 
@@ -190,7 +192,7 @@ class DependencyProcessor:
                     if child_state not in uow.states:
                         child_action = (None, None)
                     else:
-                        deleted, listonly = uow.states[child_state]
+                        (deleted, listonly) = uow.states[child_state]
                         if deleted:
                             child_action = (
                                 unitofwork.DeleteState(uow, child_state),
@@ -1052,7 +1054,7 @@ class ManyToManyDP(DependencyProcessor):
             # so that prop_has_changes() returns True
             for state in states:
                 if self._pks_changed(uowcommit, state):
-                    uowcommit.get_attribute_history(
+                    history = uowcommit.get_attribute_history(
                         state, self.key, attributes.PASSIVE_OFF
                     )
 

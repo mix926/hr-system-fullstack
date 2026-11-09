@@ -1,5 +1,5 @@
 # testing/config.py
-# Copyright (C) 2005-2026 the SQLAlchemy authors and contributors
+# Copyright (C) 2005-2024 the SQLAlchemy authors and contributors
 # <see AUTHORS file>
 #
 # This module is part of SQLAlchemy and is released under
@@ -80,9 +80,6 @@ else:
         def async_test(self, fn):
             return fn
 
-        def fixture_classmethod(self, fn):
-            return classmethod(fn)
-
     # default fixture functions; these are replaced by plugin_base when
     # pytest runs
     _fixture_functions = _NullFixtureFunctions()
@@ -125,9 +122,7 @@ def combinations(
      passed, each argument combination is turned into a pytest.param() object,
      mapping the elements of the argument tuple to produce an id based on a
      character value in the same position within the string template using the
-     following scheme:
-
-     .. sourcecode:: text
+     following scheme::
 
         i - the given argument is a string that is part of the id only, don't
             pass it as an argument
@@ -151,7 +146,7 @@ def combinations(
             (operator.ne, "ne"),
             (operator.gt, "gt"),
             (operator.lt, "lt"),
-            id_="na",
+            id_="na"
         )
         def test_operator(self, opfunc, name):
             pass
@@ -233,9 +228,14 @@ def variation(argname_or_fn, cases=None):
 
         @testing.variation("querytyp", ["select", "subquery", "legacy_query"])
         @testing.variation("lazy", ["select", "raise", "raise_on_sql"])
-        def test_thing(self, querytyp, lazy, decl_base):
+        def test_thing(
+            self,
+            querytyp,
+            lazy,
+            decl_base
+        ):
             class Thing(decl_base):
-                __tablename__ = "thing"
+                __tablename__ = 'thing'
 
                 # use name directly
                 rel = relationship("Rel", lazy=lazy.name)
@@ -249,6 +249,7 @@ def variation(argname_or_fn, cases=None):
                 stmt = Session.query(Thing)
             else:
                 querytyp.fail()
+
 
     The variable provided is a slots object of boolean variables, as well
     as the name of the case itself under the attribute ".name"
@@ -336,19 +337,8 @@ class Config:
             db.url.query.get("async_fallback", False)
         )
 
-        from . import provision
-
-        self.is_default_dialect = provision.is_preferred_driver(self, db)
-
     _stack = collections.deque()
     _configs = set()
-
-    def __repr__(self):
-        return (
-            f"sqlalchemy.testing.config.Config"
-            f"({self.db.name}+{self.db.driver}, "
-            f"{self.db.dialect.server_version_info})"
-        )
 
     def _set_name(self, db):
         suffix = "_async" if db.dialect.is_async else ""
@@ -435,7 +425,3 @@ def skip_test(msg):
 
 def async_test(fn):
     return _fixture_functions.async_test(fn)
-
-
-def fixture_classmethod(fn):
-    return _fixture_functions.fixture_classmethod(fn)

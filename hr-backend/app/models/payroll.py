@@ -19,7 +19,7 @@ class PayrollModel(Base):
     employee_id = Column(
         String(36), ForeignKey("employees.id", ondelete="CASCADE"), nullable=False, index=True
     )
-    month_year = Column(String, nullable=False)  # e.g. "2026-10"
+    month_year = Column(String(7), nullable=False)  # e.g. "2026-10"
     base_salary = Column(Float, nullable=False, default=0.0)
     bonus = Column(Float, nullable=False, default=0.0)
     deductions = Column(Float, nullable=False, default=0.0)

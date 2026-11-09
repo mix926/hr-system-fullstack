@@ -1,5 +1,5 @@
 # orm/loading.py
-# Copyright (C) 2005-2026 the SQLAlchemy authors and contributors
+# Copyright (C) 2005-2024 the SQLAlchemy authors and contributors
 # <see AUTHORS file>
 #
 # This module is part of SQLAlchemy and is released under
@@ -39,7 +39,6 @@ from .base import PassiveFlag
 from .context import FromStatement
 from .context import ORMCompileState
 from .context import QueryContext
-from .strategies import SelectInLoader
 from .util import _none_set
 from .util import state_str
 from .. import exc as sa_exc
@@ -109,7 +108,7 @@ def instances(cursor: CursorResult[Any], context: QueryContext) -> Result[Any]:
     )
 
     try:
-        process, labels, extra = list(
+        (process, labels, extra) = list(
             zip(
                 *[
                     query_entity.row_processor(context, cursor)
@@ -561,7 +560,7 @@ def load_on_pk_identity(
     if primary_key_identity is not None:
         mapper = query._propagate_attrs["plugin_subject"]
 
-        _get_clause, _get_params = mapper._get_clause
+        (_get_clause, _get_params) = mapper._get_clause
 
         # None present in ident - turn those comparisons
         # into "IS NULL"
@@ -1310,18 +1309,15 @@ def _load_subclass_via_in(
         if context.populate_existing:
             q2 = q2.execution_options(populate_existing=True)
 
-        while states:
-            chunk = states[0 : SelectInLoader._chunksize]
-            states = states[SelectInLoader._chunksize :]
-            context.session.execute(
-                q2,
-                dict(
-                    primary_keys=[
-                        state.key[1][0] if zero_idx else state.key[1]
-                        for state, load_attrs in chunk
-                    ]
-                ),
-            ).unique().scalars().all()
+        context.session.execute(
+            q2,
+            dict(
+                primary_keys=[
+                    state.key[1][0] if zero_idx else state.key[1]
+                    for state, load_attrs in states
+                ]
+            ),
+        ).unique().scalars().all()
 
     return do_load
 

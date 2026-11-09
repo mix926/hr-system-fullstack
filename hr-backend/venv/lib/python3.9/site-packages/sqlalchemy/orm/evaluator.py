@@ -1,5 +1,5 @@
 # orm/evaluator.py
-# Copyright (C) 2005-2026 the SQLAlchemy authors and contributors
+# Copyright (C) 2005-2024 the SQLAlchemy authors and contributors
 # <see AUTHORS file>
 #
 # This module is part of SQLAlchemy and is released under
@@ -15,6 +15,7 @@ This module is **private, for internal use by SQLAlchemy**.
    ``_EvaluatorCompiler``.
 
 """
+
 
 from __future__ import annotations
 

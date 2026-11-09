@@ -19,7 +19,7 @@ class AttendanceResponse(BaseModel):
   status: str
 
   class Config:
-    orm_mode = True
+    from_attributes = True
 
 
 @router.post("/check-in", response_model=AttendanceResponse)

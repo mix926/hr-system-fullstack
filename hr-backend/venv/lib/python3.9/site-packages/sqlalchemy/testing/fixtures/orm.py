@@ -1,5 +1,5 @@
 # testing/fixtures/orm.py
-# Copyright (C) 2005-2026 the SQLAlchemy authors and contributors
+# Copyright (C) 2005-2024 the SQLAlchemy authors and contributors
 # <see AUTHORS file>
 #
 # This module is part of SQLAlchemy and is released under
@@ -40,8 +40,8 @@ class MappedTest(ORMTest, TablesTest, assertions.AssertsExecutionResults):
     classes: Any = None
 
     @config.fixture(autouse=True, scope="class")
-    @config.fixture_classmethod
-    def _setup_tables_test_class(cls):
+    def _setup_tables_test_class(self):
+        cls = self.__class__
         cls._init_class()
 
         if cls.classes is None:

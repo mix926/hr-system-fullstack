@@ -1,5 +1,5 @@
 # util/queue.py
-# Copyright (C) 2005-2026 the SQLAlchemy authors and contributors
+# Copyright (C) 2005-2024 the SQLAlchemy authors and contributors
 # <see AUTHORS file>
 #
 # This module is part of SQLAlchemy and is released under
@@ -18,7 +18,6 @@ producing a ``put()`` inside the ``get()`` and therefore a reentrant
 condition.
 
 """
-
 from __future__ import annotations
 
 import asyncio
@@ -36,6 +35,7 @@ from typing import TypeVar
 from .concurrency import await_fallback
 from .concurrency import await_only
 from .langhelpers import memoized_property
+
 
 _T = TypeVar("_T", bound=Any)
 __all__ = ["Empty", "Full", "Queue"]

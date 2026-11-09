@@ -1,5 +1,5 @@
 # testing/plugin/pytestplugin.py
-# Copyright (C) 2005-2026 the SQLAlchemy authors and contributors
+# Copyright (C) 2005-2024 the SQLAlchemy authors and contributors
 # <see AUTHORS file>
 #
 # This module is part of SQLAlchemy and is released under
@@ -11,7 +11,6 @@ from __future__ import annotations
 import argparse
 import collections
 from functools import update_wrapper
-from functools import wraps
 import inspect
 import itertools
 import operator
@@ -271,14 +270,13 @@ def pytest_collection_modifyitems(session, config, items):
         for test_class in test_classes:
             # transfer legacy __backend__ and __sparse_backend__ symbols
             # to be markers
+            add_markers = set()
             if getattr(test_class.cls, "__backend__", False) or getattr(
                 test_class.cls, "__only_on__", False
             ):
                 add_markers = {"backend"}
             elif getattr(test_class.cls, "__sparse_backend__", False):
-                add_markers = {"sparse_backend", "backend"}
-            elif getattr(test_class.cls, "__sparse_driver_backend__", False):
-                add_markers = {"sparse_driver_backend", "backend"}
+                add_markers = {"sparse_backend"}
             else:
                 add_markers = frozenset()
 
@@ -291,15 +289,9 @@ def pytest_collection_modifyitems(session, config, items):
             for marker in add_markers:
                 test_class.add_marker(marker)
 
-            sub_tests = list(
-                plugin_base.generate_sub_tests(
-                    test_class.cls, test_class.module, all_markers
-                )
-            )
-            if not sub_tests:
-                rebuilt_items[test_class.cls]
-
-            for sub_cls in sub_tests:
+            for sub_cls in plugin_base.generate_sub_tests(
+                test_class.cls, test_class.module, all_markers
+            ):
                 if sub_cls is not test_class.cls:
                     per_cls_dict = rebuilt_items[test_class.cls]
 
@@ -438,8 +430,6 @@ def _parametrize_cls(module, cls):
 
 _current_class = None
 
-_current_warning_context = None
-
 
 def pytest_runtest_setup(item):
     from sqlalchemy.testing import asyncio
@@ -450,7 +440,7 @@ def pytest_runtest_setup(item):
     # databases, so we run this outside of the pytest fixture system altogether
     # and ensure asyncio greenlet if any engines are async
 
-    global _current_class, _current_warning_context
+    global _current_class
 
     if isinstance(item, pytest.Function) and _current_class is None:
         asyncio._maybe_async_provisioning(
@@ -458,14 +448,6 @@ def pytest_runtest_setup(item):
             item.cls,
         )
         _current_class = item.getparent(pytest.Class)
-
-        if hasattr(_current_class.cls, "__warnings__"):
-            import warnings
-
-            _current_warning_context = warnings.catch_warnings()
-            _current_warning_context.__enter__()
-            for warning_message in _current_class.cls.__warnings__:
-                warnings.filterwarnings("ignore", warning_message)
 
 
 @pytest.hookimpl(hookwrapper=True)
@@ -483,19 +465,13 @@ def pytest_runtest_teardown(item, nextitem):
     # pytest_runtest_setup since the class has not yet been setup at that
     # time.
     # See https://github.com/pytest-dev/pytest/issues/9343
-
-    global _current_class, _current_report, _current_warning_context
+    global _current_class, _current_report
 
     if _current_class is not None and (
         # last test or a new class
         nextitem is None
         or nextitem.getparent(pytest.Class) is not _current_class
     ):
-
-        if _current_warning_context is not None:
-            _current_warning_context.__exit__(None, None, None)
-            _current_warning_context = None
-
         _current_class = None
 
         try:
@@ -655,10 +631,13 @@ def _pytest_fn_decorator(target):
             __target_fn="__target_fn", __orig_fn="__orig_fn", name=fn.__name__
         )
         metadata.update(format_argspec_plus(spec, grouped=False))
-        code = """\
+        code = (
+            """\
 def %(name)s%(grouped_args)s:
     return %(__target_fn)s(%(__orig_fn)s, %(apply_kw)s)
-""" % metadata
+"""
+            % metadata
+        )
         decorated = _exec_code_in_env(
             code, {"__target_fn": target, "__orig_fn": fn}, fn.__name__
         )
@@ -680,28 +659,6 @@ def %(name)s%(grouped_args)s:
 
 
 class PytestFixtureFunctions(plugin_base.FixtureFunctions):
-
-    def fixture_classmethod(self, fn):
-        """a conditional `@classmethod` decorator that we use only on py3.10
-        on forward, for compatibility with pytest 9.1+."""
-
-        if pytest.version_tuple >= (9, 1):
-            return classmethod(fn)
-        else:
-            if inspect.isgeneratorfunction(fn):
-
-                @wraps(fn)
-                def wrap(self, *args, **kw):
-                    yield from fn(self.__class__, *args, **kw)
-
-            else:
-
-                @wraps(fn)
-                def wrap(self, *args, **kw):
-                    return fn(self.__class__, *args, **kw)
-
-            return wrap
-
     def skip_test_exception(self, *arg, **kw):
         return pytest.skip.Exception(*arg, **kw)
 
@@ -711,8 +668,7 @@ class PytestFixtureFunctions(plugin_base.FixtureFunctions):
 
     def mark_base_test_class(self):
         return pytest.mark.usefixtures(
-            "setup_class_methods",
-            "setup_test_methods",
+            "setup_class_methods", "setup_test_methods"
         )
 
     _combination_id_fns = {
@@ -885,16 +841,9 @@ class PytestFixtureFunctions(plugin_base.FixtureFunctions):
         # now apply wrappers to the function, including fixture itself
 
         def wrap(fn):
-            is_classmethod = isinstance(fn, classmethod)
-            if is_classmethod:
-                fn = fn.__func__
-
             if config.any_async:
                 fn = asyncio._maybe_async_wrapper(fn)
             # other wrappers may be added here
-
-            if is_classmethod:
-                fn = classmethod(fn)
 
             # now apply FixtureFunctionMarker
             fn = fixture(fn)

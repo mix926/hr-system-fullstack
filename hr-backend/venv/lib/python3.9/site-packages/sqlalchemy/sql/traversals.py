@@ -1,5 +1,5 @@
 # sql/traversals.py
-# Copyright (C) 2005-2026 the SQLAlchemy authors and contributors
+# Copyright (C) 2005-2024 the SQLAlchemy authors and contributors
 # <see AUTHORS file>
 #
 # This module is part of SQLAlchemy and is released under
@@ -34,6 +34,7 @@ from .visitors import HasTraverseInternals
 from .. import util
 from ..util import langhelpers
 from ..util.typing import Self
+
 
 SKIP_TRAVERSE = util.symbol("skip_traverse")
 COMPARE_FAILED = False
