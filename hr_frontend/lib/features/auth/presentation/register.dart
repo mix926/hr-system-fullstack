@@ -24,15 +24,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _passwordController  = TextEditingController();
   final _positionController  = TextEditingController();
 
-  String _role             = 'STAFF';
+  // Role is hardcoded to STAFF — registration is restricted to staff only.
+  static const String _role = 'STAFF';
   bool   _isLoading        = false;
   bool   _obscurePassword  = true;
-
-  static const List<Map<String, dynamic>> _roleOptions = [
-    {'value': 'STAFF',   'label': 'Staff',   'icon': Icons.person_rounded,           'color': Color(0xFF2563EB)},
-    {'value': 'MANAGER', 'label': 'Manager', 'icon': Icons.manage_accounts_rounded,  'color': Color(0xFFEA580C)},
-    {'value': 'ADMIN',   'label': 'Admin',   'icon': Icons.shield_rounded,           'color': Color(0xFF7C3AED)},
-  ];
 
   @override
   void dispose() {
@@ -234,60 +229,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                     const SizedBox(height: 20),
 
-                    // ── Section 4: Role Selector ──────────────────────
-                    _buildSectionLabel('System Role'),
-                    const SizedBox(height: 12),
-                    Container(
-                      decoration: AppTheme.cardDecoration(),
-                      padding: const EdgeInsets.all(16),
-                      child: Row(
-                        children: _roleOptions.map((opt) {
-                          final isSelected = _role == opt['value'];
-                          final color = opt['color'] as Color;
-                          return Expanded(
-                            child: GestureDetector(
-                              onTap: () => setState(() => _role = opt['value'] as String),
-                              child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 200),
-                                margin: const EdgeInsets.symmetric(horizontal: 4),
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 12, horizontal: 4),
-                                decoration: BoxDecoration(
-                                  color: isSelected
-                                      ? color.withValues(alpha: 0.1)
-                                      : AppColors.background,
-                                  borderRadius: BorderRadius.circular(10),
-                                  border: Border.all(
-                                    color: isSelected ? color : AppColors.border,
-                                    width: isSelected ? 1.8 : 1,
-                                  ),
-                                ),
-                                child: Column(
-                                  children: [
-                                    Icon(
-                                      opt['icon'] as IconData,
-                                      size: 22,
-                                      color: isSelected ? color : AppColors.textHint,
-                                    ),
-                                    const SizedBox(height: 6),
-                                    Text(
-                                      opt['label'] as String,
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: isSelected
-                                            ? FontWeight.w700
-                                            : FontWeight.w500,
-                                        color: isSelected ? color : AppColors.textSecondary,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          );
-                        }).toList(),
-                      ),
-                    ),
                     const SizedBox(height: 32),
 
                     // Submit button

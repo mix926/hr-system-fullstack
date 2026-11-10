@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from app.repositories import crud
 from app.schemas import schemas
 from app.core.database import SessionLocal
-from app.models.models import Employee
+from app.models.models import Employee, RoleEnum
 from app.api.auth import get_current_user
 
 router = APIRouter(
@@ -38,7 +38,14 @@ def create_new_employee(
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user)
 ):
-    """Create a new employee. Only authenticated users can access."""
+    """Create a new employee. Only ADMIN can access.
+    
+    Admin can assign any role (STAFF, MANAGER, ADMIN).
+    """
+    # Only ADMIN can create employees with any role
+    if current_user.role != RoleEnum.ADMIN:
+        raise HTTPException(status_code=403, detail="Only ADMIN can create employees")
+    
     db_employee = crud.get_employee_by_email(db, email=employee.email)
     if db_employee:
         raise HTTPException(status_code=400, detail="Email already registered")

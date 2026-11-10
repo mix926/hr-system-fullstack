@@ -55,7 +55,7 @@ class AuthApiService {
   Future<Result<Employee>> registerEmployee(Employee employee) async {
     try {
       final response = await _dio.post(
-        AppConstants.employeesEndpoint,
+        AppConstants.registerEndpoint,
         data: employee.toJson(),
       );
       return Result.success(Employee.fromJson(response.data));

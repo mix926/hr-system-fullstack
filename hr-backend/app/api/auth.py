@@ -3,6 +3,8 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from app.repositories import crud
 from app.models import models
+from app.models.models import RoleEnum
+from app.schemas import schemas
 from app.core.database import SessionLocal
 from app.core.security import verify_password
 import jwt
@@ -28,6 +30,20 @@ def get_db():
 class LoginRequest(BaseModel):
     email: str
     password: str
+
+@router.post("/register", response_model=schemas.EmployeeResponse)
+def register(employee: schemas.EmployeeCreate, db: Session = Depends(get_db)):
+    """Public registration endpoint. No auth required.
+    
+    Security: Role is always forced to STAFF regardless of client input.
+    """
+    db_employee = crud.get_employee_by_email(db, email=employee.email)
+    if db_employee:
+        raise HTTPException(status_code=400, detail="Email already registered")
+    
+    # Force role to STAFF — public registration is STAFF only
+    employee.role = RoleEnum.STAFF
+    return crud.create_employee(db=db, employee=employee)
 
 @router.post("/login")
 def login(request: LoginRequest, db: Session = Depends(get_db)):

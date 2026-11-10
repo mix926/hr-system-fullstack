@@ -11,7 +11,7 @@ class AppConstants {
 
   // ── Auth Endpoints ────────────────────────────────────────────
   static const String loginEndpoint    = '/api/v1/login';
-  static const String registerEndpoint = '/api/v1/employees';
+  static const String registerEndpoint = '/api/v1/register';
 
   // ── Employee Endpoints ────────────────────────────────────────
   static const String employeesEndpoint = '/api/v1/employees';
