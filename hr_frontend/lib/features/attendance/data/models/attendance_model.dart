@@ -1,6 +1,6 @@
 class AttendanceModel {
   final int? id;
-  final int? employeeId;
+  final String? employeeId; // UUID string from backend (String(36))
   final String date;
   final String? checkInTime;
   final String? checkOutTime;
@@ -43,7 +43,7 @@ class AttendanceModel {
 
   AttendanceModel copyWith({
     int? id,
-    int? employeeId,
+    String? employeeId,
     String? date,
     String? checkInTime,
     String? checkOutTime,

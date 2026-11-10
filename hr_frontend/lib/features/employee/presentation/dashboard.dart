@@ -1,3 +1,4 @@
+// lib/features/employee/presentation/dashboard.dart
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -10,25 +11,25 @@ import 'add_employee.dart';
 import 'employee_detail_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
-  const DashboardScreen({super.key});
+  final VoidCallback? onMenuTap;
+  const DashboardScreen({super.key, this.onMenuTap});
 
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  final EmployeeApiService _apiService = GetIt.instance<EmployeeApiService>();
-  final LeaveApiService _leaveApiService = GetIt.instance<LeaveApiService>();
-  final TextEditingController _searchController = TextEditingController();
+  final EmployeeApiService   _empService   = GetIt.instance<EmployeeApiService>();
+  final LeaveApiService      _leaveService = GetIt.instance<LeaveApiService>();
+  final TextEditingController _searchCtrl  = TextEditingController();
 
-  List<Employee> _allEmployees      = [];
-  List<Employee> _filteredEmployees = [];
-  bool   _isLoading    = true;
-  String _errorMessage = '';
-  String _userRole     = '';
-  String _userEmail    = '';
+  List<Employee> _all      = [];
+  List<Employee> _filtered = [];
+  bool   _loading  = true;
+  String _error    = '';
+  String _userRole = '';
+  String _userName = '';
 
-  // Leave stats
   int _leavePending  = 0;
   int _leaveApproved = 0;
   int _leaveRejected = 0;
@@ -41,51 +42,54 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   void dispose() {
-    _searchController.dispose();
+    _searchCtrl.dispose();
     super.dispose();
   }
 
   Future<void> _init() async {
     final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _userRole  = prefs.getString('role')  ?? 'STAFF';
-      _userEmail = prefs.getString('email') ?? '';
-    });
-    await _loadEmployees();
-    await _loadLeaveStats();
-  }
-
-  Future<void> _loadLeaveStats() async {
-    final result = await _leaveApiService.getLeaveStats();
     if (!mounted) return;
-    result.fold(
-      (_) {},
-      (stats) => setState(() {
-        _leavePending  = stats['pending']  ?? 0;
-        _leaveApproved = stats['approved'] ?? 0;
-        _leaveRejected = stats['rejected'] ?? 0;
-      }),
-    );
+    setState(() {
+      _userRole = prefs.getString('role')  ?? 'STAFF';
+      _userName = prefs.getString('first_name') ??
+          (prefs.getString('email')?.split('@').first ?? 'User');
+    });
+    await Future.wait([_loadEmployees(), _loadLeaveStats()]);
   }
 
   Future<void> _loadEmployees() async {
-    setState(() { _isLoading = true; _errorMessage = ''; });
-    final result = await _apiService.getEmployees();
+    if (!mounted) return;
+    setState(() { _loading = true; _error = ''; });
+    final result = await _empService.getEmployees();
     if (!mounted) return;
     result.fold(
-      (failure) => setState(() { _isLoading = false; _errorMessage = failure.message; }),
-      (employees) => setState(() {
-        _isLoading        = false;
-        _allEmployees     = employees;
-        _filteredEmployees = employees;
+      (f) => setState(() { _loading = false; _error = f.message; }),
+      (list) => setState(() {
+        _loading  = false;
+        _all      = list;
+        _filtered = list;
       }),
     );
+  }
+
+  Future<void> _loadLeaveStats() async {
+    final result = await _leaveService.getLeaveStats();
+    if (!mounted) return;
+    result.fold((_) {}, (stats) => setState(() {
+      _leavePending  = stats['pending']  ?? 0;
+      _leaveApproved = stats['approved'] ?? 0;
+      _leaveRejected = stats['rejected'] ?? 0;
+    }));
+  }
+
+  Future<void> _refresh() async {
+    await Future.wait([_loadEmployees(), _loadLeaveStats()]);
   }
 
   void _search(String q) {
     final lower = q.toLowerCase();
     setState(() {
-      _filteredEmployees = _allEmployees.where((e) =>
+      _filtered = _all.where((e) =>
           e.fullName.toLowerCase().contains(lower) ||
           e.email.toLowerCase().contains(lower) ||
           e.position.toLowerCase().contains(lower)).toList();
@@ -93,15 +97,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Future<void> _deleteEmployee(String id) async {
-    final result = await _apiService.deleteEmployee(id);
+    final result = await _empService.deleteEmployee(id);
     if (!mounted) return;
     result.fold(
-      (f) => _showSnack(f.message, isError: true),
-      (_) { _showSnack('Employee removed successfully'); _loadEmployees(); },
+      (f) => _snack(f.message, isError: true),
+      (_) { _snack('Employee removed'); _loadEmployees(); },
     );
   }
 
-  void _showSnack(String msg, {bool isError = false}) {
+  void _snack(String msg, {bool isError = false}) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Row(children: [
         Icon(isError ? Icons.error_outline : Icons.check_circle_outline,
@@ -113,21 +117,203 @@ class _DashboardScreenState extends State<DashboardScreen> {
     ));
   }
 
-  // ── Stats helpers ─────────────────────────────────────────────
-  int get _adminCount   => _allEmployees.where((e) => e.role == 'ADMIN').length;
-  int get _managerCount => _allEmployees.where((e) => e.role == 'MANAGER').length;
-  int get _staffCount   => _allEmployees.where((e) => e.role == 'STAFF').length;
+  int get _adminCount   => _all.where((e) => e.role == 'ADMIN').length;
+  int get _managerCount => _all.where((e) => e.role == 'MANAGER').length;
+  int get _staffCount   => _all.where((e) => e.role == 'STAFF').length;
 
+  String get _greeting {
+    final h = DateTime.now().hour;
+    if (h < 12) return 'Good morning';
+    if (h < 17) return 'Good afternoon';
+    return 'Good evening';
+  }
+
+  // ── Build ─────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
+    if (_loading) return _loadingView();
+    if (_error.isNotEmpty) return _errorView();
+    return _body();
+  }
+
+  // ── Main body ─────────────────────────────────────────────────
+  Widget _body() {
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: _isLoading
-            ? _buildLoader()
-            : _errorMessage.isNotEmpty
-                ? _buildError()
-                : _buildBody(),
+      body: RefreshIndicator(
+        color: AppColors.primary,
+        onRefresh: _refresh,
+        child: CustomScrollView(
+          slivers: [
+            // ── Sliver App Bar (collapsible hero) ─────────────
+            SliverAppBar(
+              expandedHeight: 172,
+              floating: false,
+              pinned: true,
+              snap: false,
+              backgroundColor: AppColors.primary,
+              surfaceTintColor: Colors.transparent,
+              elevation: 0,
+              leading: IconButton(
+                icon: const Icon(Icons.menu_rounded, color: Colors.white),
+                onPressed: widget.onMenuTap,
+                tooltip: 'Menu',
+              ),
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.refresh_rounded, color: Colors.white),
+                  onPressed: _refresh,
+                  tooltip: 'Refresh',
+                ),
+                const SizedBox(width: 4),
+              ],
+              flexibleSpace: FlexibleSpaceBar(
+                collapseMode: CollapseMode.parallax,
+                background: Container(
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [AppColors.primaryDark, AppColors.primary],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                  ),
+                  child: SafeArea(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 56, 20, 16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Text('$_greeting 👋',
+                              style: const TextStyle(
+                                color: Colors.white70,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
+                              )),
+                          const SizedBox(height: 4),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  _userName.length > 1
+                                      ? '${_userName[0].toUpperCase()}${_userName.substring(1)}'
+                                      : _userName.toUpperCase(),
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 26,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: -0.3,
+                                  ),
+                                ),
+                              ),
+                              AppTheme.roleBadge(_userRole),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+            // ── Summary stat cards ─────────────────────────────
+            SliverToBoxAdapter(
+              child: _StatSection(
+                total: _all.length,
+                admins: _adminCount,
+                managers: _managerCount,
+                staff: _staffCount,
+              ),
+            ),
+
+            // ── Leave overview ─────────────────────────────────
+            SliverToBoxAdapter(
+              child: _LeaveOverview(
+                pending: _leavePending,
+                approved: _leaveApproved,
+                rejected: _leaveRejected,
+              ),
+            ),
+
+            // ── Search bar ─────────────────────────────────────
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                child: TextField(
+                  controller: _searchCtrl,
+                  onChanged: _search,
+                  decoration: AppTheme.inputDecoration(
+                    'Search by name, email or position…',
+                    icon: Icons.search_rounded,
+                    suffix: _searchCtrl.text.isNotEmpty
+                        ? IconButton(
+                            icon: const Icon(Icons.clear_rounded, size: 18),
+                            onPressed: () {
+                              _searchCtrl.clear();
+                              _search('');
+                            },
+                          )
+                        : null,
+                  ),
+                ),
+              ),
+            ),
+
+            // ── Directory header ───────────────────────────────
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 20, 16, 10),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text('Employee Directory',
+                          style: AppTextStyles.titleMedium),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryLight,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        '${_filtered.length} members',
+                        style: AppTextStyles.bodySmall.copyWith(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.w700),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            // ── Employee list ──────────────────────────────────
+            _filtered.isEmpty
+                ? SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: AppTheme.emptyState(
+                      icon: Icons.search_off_rounded,
+                      title: 'No employees found',
+                      subtitle: 'Try a different search term',
+                    ),
+                  )
+                : SliverPadding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 120),
+                    sliver: SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        (ctx, i) => _EmployeeCard(
+                          employee: _filtered[i],
+                          userRole: _userRole,
+                          onDelete: _confirmDelete,
+                        ),
+                        childCount: _filtered.length,
+                      ),
+                    ),
+                  ),
+          ],
+        ),
       ),
       floatingActionButton: _userRole == 'ADMIN'
           ? FloatingActionButton.extended(
@@ -137,361 +323,37 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   context,
                   MaterialPageRoute(builder: (_) => const AddEmployeeScreen()),
                 );
-                if (added == true) _loadEmployees();
+                if (added == true && mounted) _loadEmployees();
               },
-              backgroundColor: AppColors.primary,
-              elevation: 2,
               icon: const Icon(Icons.person_add_rounded, color: Colors.white),
               label: const Text('Add Employee',
-                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+                  style: TextStyle(fontWeight: FontWeight.w600)),
             )
           : null,
     );
   }
 
-  // ── Main body ─────────────────────────────────────────────────
-  Widget _buildBody() {
-    return RefreshIndicator(
-      onRefresh: _loadEmployees,
-      color: AppColors.primary,
-      child: CustomScrollView(
-        slivers: [
-          // ── App Bar ───────────────────────────────────────────
-          SliverToBoxAdapter(child: _buildHeader()),
-
-          // ── Stat Cards ────────────────────────────────────────
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 4),
-              child: _buildStatRow(),
-            ),
-          ),
-
-          // ── Leave Stats ───────────────────────────────────────
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 4),
-              child: _buildLeaveStatRow(),
-            ),
-          ),
-
-          // ── Search ────────────────────────────────────────────
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-              child: _buildSearchBar(),
-            ),
-          ),
-
-          // ── Section title ─────────────────────────────────────
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text('Employee Directory', style: AppTextStyles.titleMedium),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: AppColors.primaryLight,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      '${_filteredEmployees.length} members',
-                      style: AppTextStyles.bodySmall.copyWith(
-                        color: AppColors.primary, fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          // ── Employee list ─────────────────────────────────────
-          _filteredEmployees.isEmpty
-              ? const SliverFillRemaining(
-                  hasScrollBody: false,
-                  child: Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.search_off_rounded, size: 48,
-                            color: AppColors.textHint),
-                        SizedBox(height: 12),
-                        Text('No employees found',
-                            style: AppTextStyles.bodyMedium),
-                      ],
-                    ),
-                  ),
-                )
-              : SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 120),
-                  sliver: SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (context, i) => _buildEmployeeCard(_filteredEmployees[i]),
-                      childCount: _filteredEmployees.length,
-                    ),
-                  ),
-                ),
-        ],
-      ),
-    );
-  }
-
-  // ── Header ────────────────────────────────────────────────────
-  Widget _buildHeader() {
-    final displayName = _userEmail.isNotEmpty
-        ? _userEmail.split('@')[0]
-        : 'User';
-    return Container(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
-      decoration: const BoxDecoration(
-        color: AppColors.surface,
-        border: Border(bottom: BorderSide(color: AppColors.border)),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Good day 👋', style: AppTextStyles.bodyMedium),
-                const SizedBox(height: 2),
-                Text(
-                  displayName.length > 1
-                      ? '${displayName[0].toUpperCase()}${displayName.substring(1)}'
-                      : displayName.toUpperCase(),
-                  style: AppTextStyles.displayMedium,
-                ),
-              ],
-            ),
-          ),
-          AppTheme.roleBadge(_userRole),
-          const SizedBox(width: 8),
-          _buildIconBtn(Icons.refresh_rounded, _loadEmployees),
-        ],
-      ),
-    );
-  }
-
-  // ── Stat row ──────────────────────────────────────────────────
-  Widget _buildStatRow() {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Padding(
-        padding: const EdgeInsets.only(top: 20),
-        child: Row(
-          children: [
-            _statCard('Total',    '${_allEmployees.length}', Icons.groups_rounded,          AppColors.primary),
-            const SizedBox(width: 12),
-            _statCard('Admins',   '$_adminCount',            Icons.shield_rounded,           const Color(0xFF7C3AED)),
-            const SizedBox(width: 12),
-            _statCard('Managers', '$_managerCount',          Icons.manage_accounts_rounded,  const Color(0xFFEA580C)),
-            const SizedBox(width: 12),
-            _statCard('Staff',    '$_staffCount',            Icons.person_rounded,           AppColors.success),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _statCard(String label, String value, IconData icon, Color color) {
-    return Container(
-      width: 130,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.border),
-        boxShadow: const [
-          BoxShadow(color: AppColors.cardShadow, blurRadius: 8, offset: Offset(0, 3)),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(icon, color: color, size: 18),
-          ),
-          const SizedBox(height: 12),
-          Text(value,
-              style: AppTextStyles.displayMedium.copyWith(color: color, fontSize: 24)),
-          const SizedBox(height: 2),
-          Text(label, style: AppTextStyles.bodySmall),
-        ],
-      ),
-    );
-  }
-
-  // ── Search bar ────────────────────────────────────────────────
-  Widget _buildLeaveStatRow() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            const Icon(Icons.beach_access_rounded, size: 14, color: AppColors.textHint),
-            const SizedBox(width: 6),
-            Text('Leave Overview', style: AppTextStyles.labelBold.copyWith(
-                color: AppColors.textHint, letterSpacing: 1)),
-          ],
-        ),
-        const SizedBox(height: 10),
-        Row(
-          children: [
-            Expanded(child: _leaveStatCard('Pending',  '$_leavePending',  AppColors.warning)),
-            const SizedBox(width: 10),
-            Expanded(child: _leaveStatCard('Approved', '$_leaveApproved', AppColors.success)),
-            const SizedBox(width: 10),
-            Expanded(child: _leaveStatCard('Rejected', '$_leaveRejected', AppColors.error)),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _leaveStatCard(String label, String value, Color color) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withValues(alpha: 0.25)),
-      ),
-      child: Column(
-        children: [
-          Text(value, style: AppTextStyles.displayMedium.copyWith(
-              color: color, fontSize: 22)),
-          const SizedBox(height: 2),
-          Text(label, style: AppTextStyles.bodySmall.copyWith(color: color)),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSearchBar() {
-    return TextField(
-      controller: _searchController,
-      onChanged: _search,
-      decoration: AppTheme.inputDecoration(
-        'Search by name, email or position…',
-        icon: Icons.search_rounded,
-        suffix: _searchController.text.isNotEmpty
-            ? IconButton(
-                icon: const Icon(Icons.clear_rounded, size: 18),
-                onPressed: () { _searchController.clear(); _search(''); },
-              )
-            : null,
-      ),
-    );
-  }
-
-  // ── Employee card ─────────────────────────────────────────────
-  Widget _buildEmployeeCard(Employee emp) {
-    final initials = (emp.firstName.isNotEmpty ? emp.firstName[0] : '') +
-        (emp.lastName.isNotEmpty  ? emp.lastName[0]  : '');
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      decoration: AppTheme.cardDecoration(radius: 14),
-      child: ListTile(
-        onTap: () => Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (_) => EmployeeDetailScreen(employee: emp)),
-        ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        leading: CircleAvatar(
-          radius: 22,
-          backgroundColor: AppColors.primaryLight,
-          child: Text(
-            initials.toUpperCase(),
-            style: const TextStyle(
-              fontWeight: FontWeight.w700, color: AppColors.primary, fontSize: 14,
-            ),
-          ),
-        ),
-        title: Text(emp.fullName, style: AppTextStyles.titleMedium),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 2),
-            Text(emp.position, style: AppTextStyles.bodyMedium),
-            const SizedBox(height: 2),
-            Text(emp.email, style: AppTextStyles.bodySmall),
-            if (emp.departmentId != null) ...[
-              const SizedBox(height: 2),
-              Row(children: [
-                const Icon(Icons.corporate_fare_rounded, size: 10, color: AppColors.textHint),
-                const SizedBox(width: 4),
-                Text('Dept: ${emp.departmentId!.length > 8 ? '${emp.departmentId!.substring(0, 8)}...' : emp.departmentId!}',
-                    style: AppTextStyles.bodySmall),
-              ]),
-            ],
-          ],
-        ),
-        trailing: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            AppTheme.roleBadge(emp.role),
-            if (_userRole == 'ADMIN') ...[
-              const SizedBox(height: 6),
-              InkWell(
-                onTap: () => _confirmDelete(emp.id ?? ''),
-                borderRadius: BorderRadius.circular(6),
-                child: Padding(
-                  padding: const EdgeInsets.all(4),
-                  child: Icon(Icons.delete_outline_rounded,
-                      size: 18, color: AppColors.error),
-                ),
-              ),
-            ],
-          ],
-        ),
-        isThreeLine: true,
-      ),
-    );
-  }
-
-  // ── Delete dialog ─────────────────────────────────────────────
   void _confirmDelete(String id) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         icon: Container(
           padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: AppColors.errorLight,
-            shape: BoxShape.circle,
-          ),
+          decoration: const BoxDecoration(
+              color: AppColors.errorLight, shape: BoxShape.circle),
           child: const Icon(Icons.delete_forever_rounded,
               color: AppColors.error, size: 28),
         ),
-        title: const Text('Remove Employee', style: AppTextStyles.titleLarge),
-        content: Text(
+        title: const Text('Remove Employee'),
+        content: const Text(
           'This action cannot be undone. The employee record will be permanently deleted.',
-          style: AppTextStyles.bodyMedium,
           textAlign: TextAlign.center,
         ),
         actionsAlignment: MainAxisAlignment.center,
         actions: [
           OutlinedButton(
-            style: OutlinedButton.styleFrom(
-              side: const BorderSide(color: AppColors.border),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            ),
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel',
-                style: TextStyle(color: AppColors.textSecondary)),
+            child: const Text('Cancel'),
           ),
           const SizedBox(width: 8),
           ElevatedButton(
@@ -504,54 +366,282 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  // ── Icon button helper ────────────────────────────────────────
-  Widget _buildIconBtn(IconData icon, VoidCallback onTap) {
-    return Material(
-      color: AppColors.background,
-      borderRadius: BorderRadius.circular(10),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(10),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(8),
-          child: Icon(icon, size: 20, color: AppColors.textSecondary),
+  Widget _loadingView() => const Scaffold(
+        backgroundColor: AppColors.background,
+        body: Center(
+          child: CircularProgressIndicator(color: AppColors.primary),
+        ),
+      );
+
+  Widget _errorView() => Scaffold(
+        backgroundColor: AppColors.background,
+        body: SafeArea(
+          child: AppTheme.errorState(
+            message: _error,
+            onRetry: _loadEmployees,
+          ),
+        ),
+      );
+}
+
+// ─────────────────────────────────────────────────────────────────
+//  Stat Section
+// ─────────────────────────────────────────────────────────────────
+class _StatSection extends StatelessWidget {
+  final int total, admins, managers, staff;
+  const _StatSection({
+    required this.total,
+    required this.admins,
+    required this.managers,
+    required this.staff,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 20, 16, 4),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.groups_rounded, size: 13, color: AppColors.textHint),
+              const SizedBox(width: 6),
+              Text('WORKFORCE OVERVIEW',
+                  style: AppTextStyles.labelBold
+                      .copyWith(color: AppColors.textHint, letterSpacing: 0.8)),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(child: _StatCard('Total', '$total',
+                  Icons.groups_rounded, AppColors.primary)),
+              const SizedBox(width: 10),
+              Expanded(child: _StatCard('Admins', '$admins',
+                  Icons.shield_rounded, AppColors.secondary)),
+              const SizedBox(width: 10),
+              Expanded(child: _StatCard('Managers', '$managers',
+                  Icons.manage_accounts_rounded, const Color(0xFFEA580C))),
+              const SizedBox(width: 10),
+              Expanded(child: _StatCard('Staff', '$staff',
+                  Icons.person_rounded, AppColors.success)),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _StatCard extends StatelessWidget {
+  final String label, value;
+  final IconData icon;
+  final Color color;
+  const _StatCard(this.label, this.value, this.icon, this.color);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 10),
+      decoration: AppTheme.statCardDecoration(color),
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(7),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(icon, color: color, size: 16),
+          ),
+          const SizedBox(height: 8),
+          Text(value,
+              style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
+                  color: color,
+                  height: 1.1)),
+          const SizedBox(height: 2),
+          Text(label,
+              style: AppTextStyles.captionText,
+              textAlign: TextAlign.center),
+        ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────
+//  Leave Overview
+// ─────────────────────────────────────────────────────────────────
+class _LeaveOverview extends StatelessWidget {
+  final int pending, approved, rejected;
+  const _LeaveOverview({
+    required this.pending,
+    required this.approved,
+    required this.rejected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.beach_access_rounded,
+                  size: 13, color: AppColors.textHint),
+              const SizedBox(width: 6),
+              Text('LEAVE OVERVIEW',
+                  style: AppTextStyles.labelBold
+                      .copyWith(color: AppColors.textHint, letterSpacing: 0.8)),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(child: _LeaveChip('Pending', pending, AppColors.warning)),
+              const SizedBox(width: 10),
+              Expanded(child: _LeaveChip('Approved', approved, AppColors.success)),
+              const SizedBox(width: 10),
+              Expanded(child: _LeaveChip('Rejected', rejected, AppColors.error)),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LeaveChip extends StatelessWidget {
+  final String label;
+  final int count;
+  final Color color;
+  const _LeaveChip(this.label, this.count, this.color);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 10),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.07),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
+      ),
+      child: Column(
+        children: [
+          Text('$count',
+              style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w800,
+                  color: color,
+                  height: 1.1)),
+          const SizedBox(height: 3),
+          Text(label,
+              style: AppTextStyles.captionText.copyWith(color: color),
+              textAlign: TextAlign.center),
+        ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────
+//  Employee Card
+// ─────────────────────────────────────────────────────────────────
+class _EmployeeCard extends StatelessWidget {
+  final Employee employee;
+  final String userRole;
+  final ValueChanged<String> onDelete;
+
+  const _EmployeeCard({
+    required this.employee,
+    required this.userRole,
+    required this.onDelete,
+  });
+
+  String get _initials =>
+      ((employee.firstName.isNotEmpty ? employee.firstName[0] : '') +
+       (employee.lastName.isNotEmpty  ? employee.lastName[0]  : '')).toUpperCase();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      decoration: AppTheme.cardDecoration(radius: 14),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(14),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(14),
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (_) => EmployeeDetailScreen(employee: employee)),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Row(
+              children: [
+                // ── Avatar ─────────────────────────────────────
+                CircleAvatar(
+                  radius: 24,
+                  backgroundColor: AppColors.primaryLight,
+                  child: Text(_initials,
+                      style: const TextStyle(
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.primary,
+                          fontSize: 15)),
+                ),
+                const SizedBox(width: 14),
+
+                // ── Info ───────────────────────────────────────
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(employee.fullName, style: AppTextStyles.titleSmall),
+                      const SizedBox(height: 2),
+                      Text(employee.position, style: AppTextStyles.bodySmall),
+                      const SizedBox(height: 2),
+                      Text(employee.email,
+                          style: AppTextStyles.captionText,
+                          overflow: TextOverflow.ellipsis),
+                    ],
+                  ),
+                ),
+
+                // ── Trailing ───────────────────────────────────
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    AppTheme.roleBadge(employee.role),
+                    if (userRole == 'ADMIN') ...[
+                      const SizedBox(height: 6),
+                      GestureDetector(
+                        onTap: () => onDelete(employee.id ?? ''),
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: AppColors.errorLight,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: const Icon(Icons.delete_outline_rounded,
+                              size: 16, color: AppColors.error),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
   }
-
-  // ── Loading / Error states ────────────────────────────────────
-  Widget _buildLoader() => const Center(
-        child: CircularProgressIndicator(color: AppColors.primary),
-      );
-
-  Widget _buildError() => Center(
-        child: Padding(
-          padding: const EdgeInsets.all(32),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: const BoxDecoration(
-                  color: AppColors.errorLight,
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.wifi_off_rounded,
-                    size: 40, color: AppColors.error),
-              ),
-              const SizedBox(height: 16),
-              Text(_errorMessage,
-                  style: AppTextStyles.bodyMedium, textAlign: TextAlign.center),
-              const SizedBox(height: 20),
-              ElevatedButton.icon(
-                style: AppTheme.primaryButtonStyle(),
-                onPressed: _loadEmployees,
-                icon: const Icon(Icons.refresh_rounded, size: 18),
-                label: const Text('Retry'),
-              ),
-            ],
-          ),
-        ),
-      );
 }
