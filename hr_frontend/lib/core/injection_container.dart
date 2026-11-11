@@ -3,6 +3,7 @@ import 'package:get_it/get_it.dart';
 import 'package:dio/dio.dart';
 
 import '../features/auth/data/auth_api_service.dart';
+import '../features/auth/presentation/bloc/auth_bloc.dart';
 import '../features/employee/data/employee_api_service.dart';
 import '../features/employee/presentation/bloc/employee_bloc.dart';
 import '../features/leave/data/leave_api_service.dart';
@@ -15,17 +16,26 @@ import '../features/performance/presentation/bloc/performance_bloc.dart';
 import '../features/payroll/data/payroll_api_service.dart';
 import '../features/payroll/presentation/bloc/payroll_bloc.dart';
 import 'network/api_interceptor.dart';
+import 'network/secure_api_client.dart';
+import 'rbac/auth_session.dart';
 import 'utils/constants.dart';
 
 final sl = GetIt.instance;
 
 Future<void> init() async {
-  // ខ្មែរ: ចុះឈ្មោះ Dio ជា Single Instance ដែលមាន Base URL និង Auth Interceptor
+  // ── RBAC Core ────────────────────────────────────────────────
+  // AuthSession is a singleton — register the instance directly.
+  sl.registerSingleton<AuthSession>(AuthSession.instance);
+
+  // ── Network ──────────────────────────────────────────────────
   sl.registerLazySingleton<Dio>(() {
     final dio = Dio(BaseOptions(baseUrl: AppConstants.baseUrl));
     dio.interceptors.add(AuthInterceptor());
     return dio;
   });
+
+  // SecureApiClient wraps Dio with RBAC permission checks.
+  sl.registerLazySingleton<SecureApiClient>(() => SecureApiClient(sl<Dio>()));
 
   // ── API Services ─────────────────────────────────────────────
   sl.registerLazySingleton<AuthApiService>(() => AuthApiService(sl()));
@@ -37,6 +47,10 @@ Future<void> init() async {
   sl.registerLazySingleton<PayrollApiService>(() => PayrollApiService(sl()));
 
   // ── Blocs (registerFactory — each screen gets a fresh instance) ──
+  // AuthBloc is registered as a singleton so the auth state persists
+  // across screen transitions and is available app-wide.
+  sl.registerSingleton<AuthBloc>(AuthBloc(sl<AuthApiService>()));
+
   sl.registerFactory<EmployeeBloc>(() => EmployeeBloc(sl()));
   sl.registerFactory<LeaveBloc>(() => LeaveBloc(sl()));
   sl.registerFactory<AttendanceBloc>(() => AttendanceBloc(sl()));
