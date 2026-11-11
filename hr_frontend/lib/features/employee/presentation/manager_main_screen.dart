@@ -1,4 +1,10 @@
-// lib/features/employee/presentation/main_screen.dart
+// lib/features/employee/presentation/manager_main_screen.dart
+//
+// ManagerMainScreen — shell for MANAGER role.
+// Bottom nav: Dashboard / Leaves / Attendance / Profile
+// Drawer: Performance Reviews, Payroll
+// No employee add/delete (ADMIN-only).
+
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -10,31 +16,24 @@ import '../../leave/data/leave_api_service.dart';
 import '../../leave/presentation/leave_screen.dart';
 import '../../performance/presentation/performance_screen.dart';
 import '../../payroll/presentation/payroll_screen.dart';
-import 'dashboard.dart';
+import 'manager_dashboard.dart';
 
-// ─────────────────────────────────────────────────────────────────
-//  Shell — hosts BottomNav + Drawer + page switching
-// ─────────────────────────────────────────────────────────────────
-class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
+class ManagerMainScreen extends StatefulWidget {
+  const ManagerMainScreen({super.key});
 
   @override
-  State<MainScreen> createState() => _MainScreenState();
+  State<ManagerMainScreen> createState() => _ManagerMainScreenState();
 }
 
-class _MainScreenState extends State<MainScreen> {
-  // 0=Dashboard  1=Attendance  2=Leaves  3=Profile
+class _ManagerMainScreenState extends State<ManagerMainScreen> {
   int _navIndex = 0;
+  int? _drawerIndex; // null = bottom-nav controls; 0 = Reviews, 1 = Payroll
 
-  // null = bottom-nav controls content
-  // 0   = Reviews   1 = Payroll
-  int? _drawerIndex;
-
-  String _userRole  = '';
+  String _userRole = 'MANAGER';
   String _userEmail = '';
   String _firstName = '';
-  String _lastName  = '';
-  int    _pendingLeaves = 0;
+  String _lastName = '';
+  int _pendingLeaves = 0;
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final LeaveApiService _leaveApiService = GetIt.instance<LeaveApiService>();
@@ -49,10 +48,10 @@ class _MainScreenState extends State<MainScreen> {
     final prefs = await SharedPreferences.getInstance();
     if (!mounted) return;
     setState(() {
-      _userRole  = prefs.getString('role')       ?? 'STAFF';
-      _userEmail = prefs.getString('email')      ?? '';
+      _userRole = prefs.getString('role') ?? 'MANAGER';
+      _userEmail = prefs.getString('email') ?? '';
       _firstName = prefs.getString('first_name') ?? '';
-      _lastName  = prefs.getString('last_name')  ?? '';
+      _lastName = prefs.getString('last_name') ?? '';
     });
     _refreshPendingLeaves();
   }
@@ -66,14 +65,13 @@ class _MainScreenState extends State<MainScreen> {
 
   void _openDrawer() => _scaffoldKey.currentState?.openDrawer();
 
-  // ── Page resolver ─────────────────────────────────────────────
   Widget get _activePage {
     if (_drawerIndex == 0) return const PerformanceScreen();
     if (_drawerIndex == 1) return const PayrollScreen();
     return switch (_navIndex) {
-      0 => DashboardScreen(onMenuTap: _openDrawer),
-      1 => const AttendanceScreen(),
-      2 => const LeaveScreen(),
+      0 => ManagerDashboardScreen(onMenuTap: _openDrawer),
+      1 => const LeaveScreen(),
+      2 => const AttendanceScreen(),
       3 => _ProfilePage(
             userRole: _userRole,
             userEmail: _userEmail,
@@ -81,23 +79,22 @@ class _MainScreenState extends State<MainScreen> {
             lastName: _lastName,
             onLogout: _logout,
           ),
-      _ => DashboardScreen(onMenuTap: _openDrawer),
+      _ => ManagerDashboardScreen(onMenuTap: _openDrawer),
     };
   }
 
   Future<void> _logout() async {
-    // Close drawer if open
     if (_scaffoldKey.currentState?.isDrawerOpen ?? false) {
       Navigator.pop(context);
     }
-
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         icon: Container(
           padding: const EdgeInsets.all(12),
           decoration: const BoxDecoration(
-            color: AppColors.errorLight, shape: BoxShape.circle,
+            color: AppColors.errorLight,
+            shape: BoxShape.circle,
           ),
           child: const Icon(Icons.logout_rounded, color: AppColors.error, size: 28),
         ),
@@ -118,7 +115,6 @@ class _MainScreenState extends State<MainScreen> {
         ],
       ),
     );
-
     if (confirmed != true || !mounted) return;
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();
@@ -133,14 +129,14 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-      drawer: _Drawer(
+      drawer: _ManagerDrawer(
         userRole: _userRole,
         userEmail: _userEmail,
         firstName: _firstName,
         lastName: _lastName,
         drawerIndex: _drawerIndex,
         onSelectDrawer: (i) {
-          setState(() { _drawerIndex = i; });
+          setState(() => _drawerIndex = i);
           Navigator.pop(context);
         },
         onReload: () {
@@ -150,7 +146,7 @@ class _MainScreenState extends State<MainScreen> {
         onLogout: _logout,
       ),
       body: _activePage,
-      bottomNavigationBar: _BottomNav(
+      bottomNavigationBar: _ManagerBottomNav(
         currentIndex: _drawerIndex != null ? -1 : _navIndex,
         pendingLeaves: _pendingLeaves,
         onTap: (i) => setState(() { _navIndex = i; _drawerIndex = null; }),
@@ -160,16 +156,16 @@ class _MainScreenState extends State<MainScreen> {
 }
 
 // ─────────────────────────────────────────────────────────────────
-//  Navigation Drawer
+//  Drawer
 // ─────────────────────────────────────────────────────────────────
-class _Drawer extends StatelessWidget {
+class _ManagerDrawer extends StatelessWidget {
   final String userRole, userEmail, firstName, lastName;
   final int? drawerIndex;
   final ValueChanged<int> onSelectDrawer;
   final VoidCallback onReload;
   final VoidCallback onLogout;
 
-  const _Drawer({
+  const _ManagerDrawer({
     required this.userRole,
     required this.userEmail,
     required this.firstName,
@@ -188,7 +184,7 @@ class _Drawer extends StatelessWidget {
     if (firstName.isNotEmpty) {
       return (firstName[0] + (lastName.isNotEmpty ? lastName[0] : '')).toUpperCase();
     }
-    return userEmail.isNotEmpty ? userEmail[0].toUpperCase() : 'U';
+    return userEmail.isNotEmpty ? userEmail[0].toUpperCase() : 'M';
   }
 
   @override
@@ -197,13 +193,12 @@ class _Drawer extends StatelessWidget {
       child: SafeArea(
         child: Column(
           children: [
-            // ── User Header ───────────────────────────────────
             Container(
               width: double.infinity,
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [AppColors.primaryDark, AppColors.primary],
+                  colors: [Color(0xFFC2410C), Color(0xFFEA580C)],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
@@ -213,7 +208,6 @@ class _Drawer extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      // Avatar
                       Container(
                         width: 52, height: 52,
                         decoration: BoxDecoration(
@@ -259,17 +253,13 @@ class _Drawer extends StatelessWidget {
                 ],
               ),
             ),
-
             const SizedBox(height: 8),
-
-            // ── Section: More Features ────────────────────────
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
               child: Text('MORE FEATURES',
                   style: AppTextStyles.labelBold
                       .copyWith(color: AppColors.textHint, letterSpacing: 1)),
             ),
-
             _DrawerItem(
               icon: Icons.star_outline_rounded,
               selectedIcon: Icons.star_rounded,
@@ -286,20 +276,16 @@ class _Drawer extends StatelessWidget {
               selected: drawerIndex == 1,
               onTap: () => onSelectDrawer(1),
             ),
-
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Divider(),
             ),
-
-            // ── Section: Actions ──────────────────────────────
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
               child: Text('ACTIONS',
                   style: AppTextStyles.labelBold
                       .copyWith(color: AppColors.textHint, letterSpacing: 1)),
             ),
-
             _DrawerItem(
               icon: Icons.refresh_outlined,
               selectedIcon: Icons.refresh_rounded,
@@ -308,15 +294,11 @@ class _Drawer extends StatelessWidget {
               selected: false,
               onTap: onReload,
             ),
-
             const Spacer(),
-
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 16),
               child: Divider(),
             ),
-
-            // ── Sign Out ──────────────────────────────────────
             _DrawerItem(
               icon: Icons.logout_outlined,
               selectedIcon: Icons.logout_rounded,
@@ -399,14 +381,14 @@ class _DrawerItem extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────────────────────────
-//  Bottom Navigation Bar
+//  Bottom Navigation
 // ─────────────────────────────────────────────────────────────────
-class _BottomNav extends StatelessWidget {
-  final int currentIndex;   // -1 when drawer page is active
+class _ManagerBottomNav extends StatelessWidget {
+  final int currentIndex;
   final int pendingLeaves;
   final ValueChanged<int> onTap;
 
-  const _BottomNav({
+  const _ManagerBottomNav({
     required this.currentIndex,
     required this.pendingLeaves,
     required this.onTap,
@@ -415,7 +397,6 @@ class _BottomNav extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final active = currentIndex < 0 ? 0 : currentIndex;
-
     return Container(
       decoration: const BoxDecoration(
         border: Border(top: BorderSide(color: AppColors.border, width: 0.5)),
@@ -516,7 +497,7 @@ class _ProfilePage extends StatelessWidget {
     if (firstName.isNotEmpty) {
       return (firstName[0] + (lastName.isNotEmpty ? lastName[0] : '')).toUpperCase();
     }
-    return userEmail.isNotEmpty ? userEmail[0].toUpperCase() : 'U';
+    return userEmail.isNotEmpty ? userEmail[0].toUpperCase() : 'M';
   }
 
   @override
@@ -534,7 +515,6 @@ class _ProfilePage extends StatelessWidget {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              // ── Hero ─────────────────────────────────────────
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.fromLTRB(24, 32, 24, 32),
@@ -548,14 +528,14 @@ class _ProfilePage extends StatelessWidget {
                       width: 80, height: 80,
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
-                          colors: [AppColors.primary, AppColors.primaryDark],
+                          colors: [Color(0xFFEA580C), Color(0xFFC2410C)],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         ),
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: AppColors.primary.withValues(alpha: 0.3),
+                            color: const Color(0xFFEA580C).withValues(alpha: 0.3),
                             blurRadius: 16, offset: const Offset(0, 6),
                           ),
                         ],
@@ -577,8 +557,6 @@ class _ProfilePage extends StatelessWidget {
                   ],
                 ),
               ),
-
-              // ── Info ─────────────────────────────────────────
               Padding(
                 padding: const EdgeInsets.all(20),
                 child: Column(
@@ -590,45 +568,7 @@ class _ProfilePage extends StatelessWidget {
                       const Divider(height: 1),
                       _InfoRow(Icons.badge_outlined, 'Role', userRole),
                     ]),
-                    const SizedBox(height: 20),
-
-                    _SectionLabel('Settings'),
-                    const SizedBox(height: 10),
-                    _InfoCard(children: [
-                      _TileRow(
-                        icon: Icons.lock_outline_rounded,
-                        label: 'Change Password',
-                        onTap: () => _comingSoon(context, 'Change Password'),
-                      ),
-                      const Divider(height: 1),
-                      _TileRow(
-                        icon: Icons.notifications_outlined,
-                        label: 'Notifications',
-                        onTap: () => _comingSoon(context, 'Notifications'),
-                      ),
-                      const Divider(height: 1),
-                      _TileRow(
-                        icon: Icons.language_outlined,
-                        label: 'Language',
-                        trailing: Text('English',
-                            style: AppTextStyles.bodyMedium
-                                .copyWith(color: AppColors.textHint)),
-                        onTap: () => _comingSoon(context, 'Language'),
-                      ),
-                    ]),
-                    const SizedBox(height: 20),
-
-                    _SectionLabel('About'),
-                    const SizedBox(height: 10),
-                    _InfoCard(children: [
-                      _InfoRow(Icons.info_outline_rounded, 'Version', '1.0.0'),
-                      const Divider(height: 1),
-                      _InfoRow(Icons.corporate_fare_rounded,
-                          'System', 'HR Management'),
-                    ]),
                     const SizedBox(height: 28),
-
-                    // Sign out
                     SizedBox(
                       width: double.infinity,
                       height: 52,
@@ -651,16 +591,8 @@ class _ProfilePage extends StatelessWidget {
       ),
     );
   }
-
-  void _comingSoon(BuildContext context, String feature) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text('$feature — coming soon'),
-      backgroundColor: AppColors.warning,
-    ));
-  }
 }
 
-// ─── Profile sub-widgets ──────────────────────────────────────────
 class _SectionLabel extends StatelessWidget {
   final String label;
   const _SectionLabel(this.label);
@@ -700,37 +632,6 @@ class _InfoRow extends StatelessWidget {
                 style: AppTextStyles.bodyMedium
                     .copyWith(color: AppColors.textPrimary, fontWeight: FontWeight.w600)),
           ],
-        ),
-      );
-}
-
-class _TileRow extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-  final Widget? trailing;
-  const _TileRow({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-    this.trailing,
-  });
-  @override
-  Widget build(BuildContext context) => InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          child: Row(
-            children: [
-              Icon(icon, size: 18, color: AppColors.textHint),
-              const SizedBox(width: 12),
-              Expanded(child: Text(label, style: AppTextStyles.bodyMedium)),
-              trailing ??
-                  const Icon(Icons.chevron_right_rounded,
-                      size: 18, color: AppColors.textHint),
-            ],
-          ),
         ),
       );
 }

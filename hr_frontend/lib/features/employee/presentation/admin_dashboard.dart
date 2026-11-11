@@ -1,4 +1,4 @@
-// lib/features/employee/presentation/dashboard.dart
+// lib/features/employee/presentation/admin_dashboard.dart
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -10,15 +10,15 @@ import '../../leave/data/leave_api_service.dart';
 import 'add_employee.dart';
 import 'employee_detail_screen.dart';
 
-class DashboardScreen extends StatefulWidget {
+class AdminDashboardScreen extends StatefulWidget {
   final VoidCallback? onMenuTap;
-  const DashboardScreen({super.key, this.onMenuTap});
+  const AdminDashboardScreen({super.key, this.onMenuTap});
 
   @override
-  State<DashboardScreen> createState() => _DashboardScreenState();
+  State<AdminDashboardScreen> createState() => _AdminDashboardScreenState();
 }
 
-class _DashboardScreenState extends State<DashboardScreen> {
+class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   final EmployeeApiService   _empService   = GetIt.instance<EmployeeApiService>();
   final LeaveApiService      _leaveService = GetIt.instance<LeaveApiService>();
   final TextEditingController _searchCtrl  = TextEditingController();

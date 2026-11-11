@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 
 import '../../../core/theme/app_theme.dart';
-import '../../employee/presentation/main_screen.dart';
+import '../../../core/rbac/role_router.dart';
 import '../data/auth_api_service.dart';
 import 'register.dart';
 
@@ -55,10 +55,15 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         );
       },
-      (_) => Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const MainScreen()),
-      ),
+      (data) {
+        // Read the role returned by the API and route to the right shell.
+        final roleStr = (data['user'] as Map<String, dynamic>?)?['role']
+            as String?;
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => RoleRouter.forRole(roleStr)),
+        );
+      },
     );
   }
 
