@@ -13,10 +13,11 @@ from app.models import leave_enhanced as leave_enh_model   # noqa: F401 — leav
 from app.models import recruitment as recruitment_model    # noqa: F401 — job postings, candidates, interviews, offers
 from app.models import performance_enhanced as perf_enh_model  # noqa: F401 — goals, 360 reviews, PIPs
 from app.models import notification as notification_model   # noqa: F401 — notifications, announcements
+from app.models import audit as audit_model                # noqa: F401 — audit logs, companies, branches
 from app.core.database import engine
 from app.api import employee, auth, leave, department, attendance, performance, payroll
 from app.api import employee_enhanced, leave_enhanced, payroll_enhanced, recruitment, performance_enhanced
-from app.api import notification, reports
+from app.api import notification, reports, admin
 
 # ខ្មែរ: បង្កើតតារាងក្នុង Database (រួមមានតារាង attendances ផងដែរ)
 Base.metadata.create_all(bind=engine)
@@ -53,6 +54,7 @@ app.include_router(recruitment.router, prefix="/api/v1", tags=["Recruitment (ATS
 app.include_router(performance_enhanced.router, prefix="/api/v1", tags=["Performance Management"])
 app.include_router(notification.router, prefix="/api/v1", tags=["Notifications & Communication"])
 app.include_router(reports.router, prefix="/api/v1", tags=["Reports & Analytics"])
+app.include_router(admin.router, prefix="/api/v1", tags=["Admin & Security"])
 
 # ខ្មែរ: Health Check Endpoint សម្រាប់អោយ Server (ដូចជា AWS/Docker) ឆែកមើលថា App នៅរស់ឬអត់
 @app.get("/", tags=["Health Check"])

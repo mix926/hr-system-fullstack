@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from app.repositories import crud
@@ -50,7 +50,7 @@ def register(employee: schemas.EmployeeCreate, db: Session = Depends(get_db)):
     return crud.create_employee(db=db, employee=employee)
 
 @router.post("/login")
-def login(request: LoginRequest, db: Session = Depends(get_db)):
+def login(request: LoginRequest, http_request: Request = None, db: Session = Depends(get_db)):
     user = crud.get_employee_by_email(db, email=request.email)
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid email")
@@ -64,6 +64,21 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
     role_value = user.role.value if hasattr(user.role, "value") else user.role
     to_encode = {"sub": user.email, "role": role_value, "exp": expire}
     token = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+
+    # Audit log the login event
+    try:
+        from app.services.audit_service import log_action
+        from app.models.audit import AuditAction
+        log_action(
+            db=db, actor=user,
+            action=AuditAction.LOGIN,
+            entity_type="auth",
+            entity_id=user.id,
+            description=f"User {user.email} logged in",
+            request=http_request,
+        )
+    except Exception:
+        pass  # Never block login due to audit failure
     
     return {
         "access_token": token,
