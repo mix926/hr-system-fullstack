@@ -43,7 +43,7 @@ def create_department(
     current_user: dict = Depends(get_current_user)
 ):
     """Create a new department. Only ADMIN users can access."""
-    role = current_user.get("role")
+    role = current_user.role.value if hasattr(current_user.role, "value") else current_user.role
     if role != "ADMIN":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -67,7 +67,7 @@ def delete_department(
     current_user: dict = Depends(get_current_user)
 ):
     """Delete a department by ID. Only ADMIN users can access."""
-    role = current_user.get("role")
+    role = current_user.role.value if hasattr(current_user.role, "value") else current_user.role
     if role != "ADMIN":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,

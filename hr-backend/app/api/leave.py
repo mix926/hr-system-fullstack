@@ -20,8 +20,8 @@ def get_leave_stats(
     current_user: dict = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    """ខ្មែរ: ទាញយករាប់ចំនួនសំណើច្បាប់តាម Status (ADMIN/MANAGER ឃើញទាំងអស់ / STAFF ឃើញតែរបស់ខ្លួន)"""
-    role  = current_user.role
+    """Get leave request counts by status (ADMIN/MANAGER see all / STAFF sees own only)."""
+    role = current_user.role.value if hasattr(current_user.role, "value") else current_user.role
     if role in ["ADMIN", "MANAGER"]:
         query = db.query(LeaveModel)
     else:
@@ -75,8 +75,8 @@ def get_leave_requests(
     db: Session = Depends(get_db)
 ):
     """Retrieve leave requests. ADMIN/MANAGER see all; STAFF sees only their own."""
-    # ខ្មែរ: ADMIN/MANAGER ឃើញសំណើទាំងអស់ / STAFF ឃើញតែរបស់ខ្លួន
-    if current_user.role in ["ADMIN", "MANAGER"]:
+    role = current_user.role.value if hasattr(current_user.role, "value") else current_user.role
+    if role in ["ADMIN", "MANAGER"]:
         return db.query(LeaveModel).all()
 
     return db.query(LeaveModel).filter(LeaveModel.employee_id == current_user.id).all()
@@ -93,7 +93,7 @@ def update_leave_status(
     ខ្មែរ: Endpoint សម្រាប់ ADMIN/MANAGER ដើម្បីអនុម័ត (APPROVED) ឬបដិសេធ (REJECTED)
     សំណើសុំច្បាប់។ STAFF មិនមានសិទ្ធិប្រើ Endpoint នេះ។
     """
-    role = current_user.role
+    role = current_user.role.value if hasattr(current_user.role, "value") else current_user.role
     if role not in ["ADMIN", "MANAGER"]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,

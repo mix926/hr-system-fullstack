@@ -17,6 +17,14 @@ class EmployeeBase(BaseModel):
     
     position: Optional[str] = None
     department_id: Optional[str] = None
+    designation_id: Optional[str] = None
+    manager_id: Optional[str] = None
+    
+    # Additional personal info
+    phone: Optional[str] = None
+    address: Optional[str] = None
+    date_of_birth: Optional[datetime] = None
+    hire_date: Optional[datetime] = None
     
     # ខ្មែរ: ប្រើប្រាស់ RoleEnum ជំនួស String ធម្មតា
     role: RoleEnum = RoleEnum.STAFF
@@ -31,6 +39,9 @@ class EmployeeResponse(EmployeeBase):
     # ខ្មែរ: ត្រូវតែប្តូរពី int ទៅជា str វិញព្រោះ Database យើងប្រើ UUID
     id: str
     is_active: bool
+    status: Optional[str] = None
+    photo_path: Optional[str] = None
+    exit_date: Optional[datetime] = None
     
     # ខ្មែរ: បន្ថែមពេលវេលាប្រវត្តិទិន្នន័យ (Audit Trails)
     created_at: datetime

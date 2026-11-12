@@ -130,8 +130,8 @@ def update_employee(
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user)
 ):
-    """ខ្មែរ: ADMIN អាចកែប្រែព័ត៌មានបុគ្គលិក"""
-    role = current_user.get("role")
+    """Update employee info. Only ADMIN can update."""
+    role = current_user.role.value if hasattr(current_user.role, "value") else current_user.role
     if role != "ADMIN":
         raise HTTPException(status_code=403, detail="Only ADMIN can update employees")
     updated = crud.update_employee(db=db, employee_id=employee_id,

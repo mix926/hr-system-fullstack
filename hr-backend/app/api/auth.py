@@ -7,16 +7,20 @@ from app.models.models import RoleEnum
 from app.schemas import schemas
 from app.core.database import SessionLocal
 from app.core.security import verify_password
+import os
 import jwt
-# Import timezone to fix the instant-expiration bug
 from datetime import datetime, timedelta, timezone 
 from fastapi.security import OAuth2PasswordBearer
+from dotenv import load_dotenv
+
+load_dotenv()
 
 router = APIRouter(tags=["Authentication"])
 
-# Make the key 32+ characters long to remove the warning
-SECRET_KEY = "my_super_secret_hr_key_1234567890" 
-ALGORITHM = "HS256"
+# Load JWT config from environment
+SECRET_KEY = os.getenv("JWT_SECRET", "fallback-dev-secret-change-me-in-production-64chars")
+ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
+JWT_EXPIRE_HOURS = int(os.getenv("JWT_EXPIRE_HOURS", "24"))
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/login")
 
@@ -55,7 +59,7 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid password")
         
     # Use timezone-aware UTC time
-    expire = datetime.now(timezone.utc) + timedelta(hours=24) 
+    expire = datetime.now(timezone.utc) + timedelta(hours=JWT_EXPIRE_HOURS) 
     # Store the role value as a plain string so it survives JWT round-trip
     role_value = user.role.value if hasattr(user.role, "value") else user.role
     to_encode = {"sub": user.email, "role": role_value, "exp": expire}
