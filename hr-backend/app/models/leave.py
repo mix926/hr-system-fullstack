@@ -1,5 +1,5 @@
 import enum
-from sqlalchemy import Column, DateTime, Enum, ForeignKey, String, Text
+from sqlalchemy import Column, DateTime, Enum, ForeignKey, String, Text, Integer
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
@@ -23,14 +23,29 @@ class LeaveModel(Base):
     employee_id = Column(
         String(36), ForeignKey("employees.id", ondelete="CASCADE"), nullable=False
     )
-    leave_type = Column(String(50), nullable=False)  # e.g., Annual Leave, Sick Leave
+    leave_type = Column(String(50), nullable=False)  # e.g., Annual Leave, Sick Leave (legacy free-text)
+    leave_type_id = Column(
+        String(36), ForeignKey("leave_types.id", ondelete="SET NULL"), nullable=True
+    )  # Structured link to LeaveType
     start_date = Column(DateTime, nullable=False)
     end_date = Column(DateTime, nullable=False)
     reason = Column(Text, nullable=True)
     status = Column(
         Enum(LeaveStatus), default=LeaveStatus.PENDING, nullable=False
     )
+    # Multi-level approval tracking
+    current_approval_level = Column(Integer, default=1)  # Which level is currently pending
+    approved_by = Column(
+        String(36), ForeignKey("employees.id", ondelete="SET NULL"), nullable=True
+    )  # Final approver
+    approved_at = Column(DateTime(timezone=True), nullable=True)
+
+    # Number of days (calculated from start/end dates)
+    days_requested = Column(Integer, nullable=True)
+
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     # ខ្មែរ: ឈ្មោះ Class ត្រូវជា "Employee" (ដូចដែលកំណត់ក្នុង models.py)
-    employee = relationship("Employee", backref="leaves")
+    employee = relationship("Employee", backref="leaves", foreign_keys=[employee_id])
+    approver = relationship("Employee", foreign_keys=[approved_by])
+    leave_type_ref = relationship("LeaveType", backref="leave_requests")

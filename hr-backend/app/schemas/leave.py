@@ -5,6 +5,7 @@ from pydantic import BaseModel
 
 class LeaveBase(BaseModel):
     leave_type: str
+    leave_type_id: Optional[str] = None  # Link to structured LeaveType
     start_date: datetime
     end_date: datetime
     reason: Optional[str] = None

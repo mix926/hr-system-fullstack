@@ -8,9 +8,10 @@ from app.models import attendance as attendance_model  # noqa: F401 — ត្�
 from app.models import performance as performance_model  # noqa: F401
 from app.models import payroll as payroll_model        # noqa: F401 — ensures payrolls table is created
 from app.models import employee_enhanced as emp_enhanced_model  # noqa: F401 — documents, designations, lifecycle
+from app.models import leave_enhanced as leave_enh_model   # noqa: F401 — leave types, balances, approvals, encashment
 from app.core.database import engine
 from app.api import employee, auth, leave, department, attendance, performance, payroll
-from app.api import employee_enhanced
+from app.api import employee_enhanced, leave_enhanced
 
 # ខ្មែរ: បង្កើតតារាងក្នុង Database (រួមមានតារាង attendances ផងដែរ)
 Base.metadata.create_all(bind=engine)
@@ -41,6 +42,7 @@ app.include_router(attendance.router)  # prefix already set inside attendance.py
 app.include_router(performance.router, prefix="/api/v1", tags=["Performance Reviews"])
 app.include_router(payroll.router)     # prefix already set inside payroll.py as /api/v1/payroll
 app.include_router(employee_enhanced.router, prefix="/api/v1", tags=["Employee Management"])
+app.include_router(leave_enhanced.router, prefix="/api/v1", tags=["Leave Management"])
 
 # ខ្មែរ: Health Check Endpoint សម្រាប់អោយ Server (ដូចជា AWS/Docker) ឆែកមើលថា App នៅរស់ឬអត់
 @app.get("/", tags=["Health Check"])
