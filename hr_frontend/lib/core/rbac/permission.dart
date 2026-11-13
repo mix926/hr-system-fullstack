@@ -51,4 +51,10 @@ enum Permission {
 
   // ── Dashboard / stats ────────────────────────────────────────
   dashboardViewStats,
+
+  // ── Admin & Security ─────────────────────────────────────────
+  adminViewAuditLogs,     // view + export audit logs
+  adminManageCompanies,   // CRUD companies
+  adminManageBranches,    // CRUD branches
+  adminViewSystemStats,   // view system-wide counters
 }

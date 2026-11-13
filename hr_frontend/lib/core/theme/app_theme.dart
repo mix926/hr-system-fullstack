@@ -110,6 +110,10 @@ class AppTextStyles {
 class AppTheme {
   AppTheme._();
 
+  // ── Convenience color getters (used by feature screens) ───────
+  static Color get primaryColor => AppColors.primary;
+  static Color get bgColor      => AppColors.background;
+
   // ── Material 3 ThemeData ──────────────────────────────────────
   static ThemeData get themeData {
     final cs = ColorScheme.fromSeed(

@@ -10,6 +10,9 @@ import '../../leave/data/leave_api_service.dart';
 import '../../leave/presentation/leave_screen.dart';
 import '../../performance/presentation/performance_screen.dart';
 import '../../payroll/presentation/payroll_screen.dart';
+import '../../recruitment/presentation/recruitment_screen.dart';
+import '../../notification/presentation/notification_screen.dart';
+import '../../reports/presentation/reports_screen.dart';
 import 'admin_dashboard.dart';
 
 // ─────────────────────────────────────────────────────────────────
@@ -70,6 +73,9 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
   Widget get _activePage {
     if (_drawerIndex == 0) return const PerformanceScreen();
     if (_drawerIndex == 1) return const PayrollScreen();
+    if (_drawerIndex == 2) return const RecruitmentScreen();
+    if (_drawerIndex == 3) return const NotificationScreen();
+    if (_drawerIndex == 4) return const ReportsScreen();
     return switch (_navIndex) {
       0 => AdminDashboardScreen(onMenuTap: _openDrawer),
       1 => const AttendanceScreen(),
@@ -285,6 +291,30 @@ class _Drawer extends StatelessWidget {
               color: const Color(0xFF7C3AED),
               selected: drawerIndex == 1,
               onTap: () => onSelectDrawer(1),
+            ),
+            _DrawerItem(
+              icon: Icons.work_outline_rounded,
+              selectedIcon: Icons.work_rounded,
+              label: 'Recruitment',
+              color: const Color(0xFF0EA5E9),
+              selected: drawerIndex == 2,
+              onTap: () => onSelectDrawer(2),
+            ),
+            _DrawerItem(
+              icon: Icons.notifications_outlined,
+              selectedIcon: Icons.notifications_rounded,
+              label: 'Notifications',
+              color: const Color(0xFFF59E0B),
+              selected: drawerIndex == 3,
+              onTap: () => onSelectDrawer(3),
+            ),
+            _DrawerItem(
+              icon: Icons.bar_chart_outlined,
+              selectedIcon: Icons.bar_chart_rounded,
+              label: 'Reports & Analytics',
+              color: const Color(0xFF10B981),
+              selected: drawerIndex == 4,
+              onTap: () => onSelectDrawer(4),
             ),
 
             const Padding(

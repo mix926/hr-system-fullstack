@@ -79,6 +79,11 @@ enum UserRole {
           Permission.payrollUpdate,
           Permission.payrollDelete,
           Permission.dashboardViewStats,
+          // Admin-only capabilities
+          Permission.adminViewAuditLogs,
+          Permission.adminManageCompanies,
+          Permission.adminManageBranches,
+          Permission.adminViewSystemStats,
         ];
 
       case UserRole.manager:
@@ -101,6 +106,8 @@ enum UserRole {
           Permission.payrollReadAll,
           Permission.payrollReadOwn,
           Permission.dashboardViewStats,
+          // Managers can view system stats (matches backend _require_admin_or_manager)
+          Permission.adminViewSystemStats,
         ];
 
       case UserRole.staff:
