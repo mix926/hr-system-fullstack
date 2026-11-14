@@ -12,7 +12,7 @@ from app.schemas.payroll import (
 )
 from app.api.auth import get_current_user
 
-router = APIRouter(prefix="/api/v1/payroll", tags=["Payroll"])
+router = APIRouter(prefix="/payroll", tags=["Payroll"])
 
 
 def _role(current_user) -> str:

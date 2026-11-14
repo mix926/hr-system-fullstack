@@ -42,23 +42,21 @@ class RoleGuard extends StatelessWidget {
   /// [permissions].  Otherwise show [fallback] (or nothing).
   const RoleGuard.all({
     super.key,
-    required List<Permission> permissions,
+    required List<Permission> this._permissions,
     required this.child,
     this.fallback,
-  })  : _permissions = permissions,
-        _requireAll = true,
-        permission = Permission.employeeReadOwn; // dummy, unused in this mode
+  })  : _requireAll = true,
+        permission = Permission.employeeReadOwn;
 
   /// Show [child] only if the current role has **any** of [permissions].
   /// Otherwise show [fallback] (or nothing).
   const RoleGuard.any({
     super.key,
-    required List<Permission> permissions,
+    required List<Permission> this._permissions,
     required this.child,
     this.fallback,
-  })  : _permissions = permissions,
-        _requireAll = false,
-        permission = Permission.employeeReadOwn; // dummy, unused in this mode
+  })  : _requireAll = false,
+        permission = Permission.employeeReadOwn;
 
   final Permission permission;
   final Widget child;

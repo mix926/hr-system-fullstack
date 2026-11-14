@@ -1,10 +1,18 @@
 // lib/core/utils/constants.dart
 
+import 'dart:io';
 import 'package:flutter/material.dart';
 
 class AppConstants {
   // ── API Base URL ──────────────────────────────────────────────
-  static const String baseUrl = 'http://127.0.0.1:8000';
+  //
+  // Android emulator routes 10.0.2.2 → host machine's localhost.
+  // iOS simulator and desktop use 127.0.0.1 directly.
+  // For a physical device, replace with your machine's LAN IP (e.g. 192.168.x.x).
+  static String get baseUrl {
+    if (Platform.isAndroid) return 'http://10.0.2.2:8000';
+    return 'http://127.0.0.1:8000';
+  }
 
   // ── Auth ──────────────────────────────────────────────────────
   static const String loginEndpoint    = '/api/v1/login';
@@ -12,6 +20,7 @@ class AppConstants {
 
   // ── Employees ─────────────────────────────────────────────────
   static const String employeesEndpoint     = '/api/v1/employees';
+  static const String employeeSearchEndpoint = '/api/v1/employees/search';
   static const String employeeStatsEndpoint = '/api/v1/employees/stats';
   static const String designationsEndpoint  = '/api/v1/employees/designations';
   static const String expiringDocsEndpoint  = '/api/v1/employees/documents/expiring-soon';

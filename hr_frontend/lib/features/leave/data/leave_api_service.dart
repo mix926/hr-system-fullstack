@@ -20,7 +20,7 @@ class LeaveApiService {
 
   Future<Result<List<LeaveModel>>> getLeaves() async {
     try {
-      final r = await _dio.get(AppConstants.leavesEndpoint + '/');
+      final r = await _dio.get(AppConstants.leavesEndpoint);
       return Result.success((r.data as List).map((j) => LeaveModel.fromJson(j)).toList());
     } on DioException catch (e) {
       return Result.failure(ServerFailure(message: _detail(e, 'Failed to load leave requests')));
@@ -29,7 +29,7 @@ class LeaveApiService {
 
   Future<Result<LeaveModel>> createLeave(LeaveModel leave) async {
     try {
-      final r = await _dio.post(AppConstants.leavesEndpoint + '/', data: leave.toJson());
+      final r = await _dio.post(AppConstants.leavesEndpoint, data: leave.toJson());
       return Result.success(LeaveModel.fromJson(r.data));
     } on DioException catch (e) {
       return Result.failure(ServerFailure(message: _detail(e, 'Failed to create leave request')));

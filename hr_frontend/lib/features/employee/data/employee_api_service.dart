@@ -20,7 +20,7 @@ class EmployeeApiService {
 
   Future<Result<List<Employee>>> getEmployees() async {
     try {
-      final r = await _dio.get('${AppConstants.employeesEndpoint}/');
+      final r = await _dio.get(AppConstants.employeesEndpoint);
       return Result.success((r.data as List).map((j) => Employee.fromJson(j)).toList());
     } on DioException catch (e) {
       return Result.failure(ServerFailure(message: _detail(e, 'Failed to load employees')));
@@ -38,7 +38,7 @@ class EmployeeApiService {
 
   Future<Result<Employee>> createEmployee(Employee employee) async {
     try {
-      final r = await _dio.post('${AppConstants.employeesEndpoint}/', data: employee.toJson());
+      final r = await _dio.post(AppConstants.employeesEndpoint, data: employee.toJson());
       return Result.success(Employee.fromJson(r.data));
     } on DioException catch (e) {
       return Result.failure(ServerFailure(message: _detail(e, 'Failed to create employee')));
@@ -65,7 +65,7 @@ class EmployeeApiService {
 
   Future<Result<List<Employee>>> searchEmployees(String q) async {
     try {
-      final r = await _dio.get('${AppConstants.employeesEndpoint}/search', queryParameters: {'q': q});
+      final r = await _dio.get(AppConstants.employeeSearchEndpoint, queryParameters: {'q': q});
       return Result.success((r.data as List).map((j) => Employee.fromJson(j)).toList());
     } on DioException catch (e) {
       return Result.failure(ServerFailure(message: _detail(e, 'Search failed')));

@@ -40,17 +40,19 @@ class AdminApiService {
     int offset = 0,
   }) async {
     try {
+      final params = <String, dynamic>{
+        'limit':  limit,
+        'offset': offset,
+      };
+      if (actorId     != null) params['actor_id']    = actorId;
+      if (entityType  != null) params['entity_type'] = entityType;
+      if (action      != null) params['action']      = action;
+      if (dateFrom    != null) params['date_from']   = dateFrom;
+      if (dateTo      != null) params['date_to']     = dateTo;
+
       final r = await _dio.get(
         AppConstants.auditLogsEndpoint,
-        queryParameters: {
-          'limit':  limit,
-          'offset': offset,
-          if (actorId    != null) 'actor_id':    actorId,
-          if (entityType != null) 'entity_type': entityType,
-          if (action     != null) 'action':      action,
-          if (dateFrom   != null) 'date_from':   dateFrom,
-          if (dateTo     != null) 'date_to':     dateTo,
-        },
+        queryParameters: params,
       );
       return Result.success(
           (r.data as List).map((j) => AuditLog.fromJson(j as Map<String, dynamic>)).toList());
@@ -185,6 +187,32 @@ class AdminApiService {
       return Result.success(SystemStats.fromJson(r.data as Map<String, dynamic>));
     } on DioException catch (e) {
       return Result.failure(ServerFailure(message: _detail(e, 'Failed to load system stats')));
+    }
+  }
+
+  // ─── Manual Audit Log ──────────────────────────────────────────
+
+  /// Manually create an audit log entry for a system event. ADMIN only.
+  Future<Result<void>> createManualAuditLog({
+    required String entityType,
+    required String entityId,
+    required String action,
+    required String description,
+  }) async {
+    try {
+      await _dio.post(
+        AppConstants.auditLogsEndpoint,
+        queryParameters: {
+          'entity_type': entityType,
+          'entity_id':   entityId,
+          'action':      action,
+          'description': description,
+        },
+      );
+      return Result.success(null);
+    } on DioException catch (e) {
+      return Result.failure(
+          ServerFailure(message: _detail(e, 'Failed to create audit log')));
     }
   }
 }

@@ -40,7 +40,7 @@ from app.schemas.payroll_enhanced import (
 )
 from app.api.auth import get_current_user
 
-router = APIRouter(prefix="/api/v1/payroll", tags=["Payroll Management"])
+router = APIRouter(prefix="/payroll", tags=["Payroll Management"])
 
 # ── Helpers ────────────────────────────────────────────────────
 

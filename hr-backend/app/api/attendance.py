@@ -7,7 +7,7 @@ from app.models.attendance import AttendanceModel
 from app.api.auth import get_current_user
 from pydantic import BaseModel
 
-router = APIRouter(prefix="/api/v1/attendance", tags=["Attendance"])
+router = APIRouter(prefix="/attendance", tags=["Attendance"])
 
 
 class AttendanceResponse(BaseModel):
