@@ -298,7 +298,7 @@ class _ReportCard extends StatelessWidget {
           Row(children: [
             Container(
               width: 40, height: 40,
-              decoration: BoxDecoration(color: color.withOpacity(0.12), borderRadius: BorderRadius.circular(10)),
+              decoration: BoxDecoration(color: color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(10)),
               child: Icon(icon, color: color),
             ),
             const SizedBox(width: 12),
@@ -306,7 +306,7 @@ class _ReportCard extends StatelessWidget {
               Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
               Text(subtitle, style: const TextStyle(color: Colors.grey, fontSize: 12)),
             ])),
-            if (headerAction != null) headerAction!,
+            ?headerAction,
           ]),
 
           const SizedBox(height: 12),
@@ -378,7 +378,7 @@ class _StatRow extends StatelessWidget {
       Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
+          color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
         child: Text(value,
             style: TextStyle(fontWeight: FontWeight.bold, color: color, fontSize: 13)),
       ),
@@ -410,7 +410,7 @@ class _CustomExportCardState extends State<_CustomExportCard> {
             Container(
               width: 40, height: 40,
               decoration: BoxDecoration(
-                color: Colors.deepOrange.withOpacity(0.12),
+                color: Colors.deepOrange.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(10)),
               child: const Icon(Icons.table_chart, color: Colors.deepOrange),
             ),
@@ -427,7 +427,7 @@ class _CustomExportCardState extends State<_CustomExportCard> {
               label: Text(e),
               selected: _entity == e,
               onSelected: (_) => setState(() => _entity = e),
-              selectedColor: Colors.deepOrange.withOpacity(0.15),
+              selectedColor: Colors.deepOrange.withValues(alpha: 0.15),
             )).toList(),
           ),
           const SizedBox(height: 12),

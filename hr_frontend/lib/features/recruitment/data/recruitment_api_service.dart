@@ -126,7 +126,7 @@ class RecruitmentApiService {
   Future<Result<List<Interview>>> getInterviews({String? candidateId, bool upcomingOnly = false}) async {
     try {
       final r = await _dio.get(AppConstants.interviewsEndpoint, queryParameters: {
-        if (candidateId   != null) 'candidate_id':  candidateId,
+        'candidate_id':  ?candidateId,
         if (upcomingOnly) 'upcoming_only': true,
       });
       return Result.success((r.data as List).map((j) => Interview.fromJson(j)).toList());
@@ -148,10 +148,10 @@ class RecruitmentApiService {
       String id, {String? feedback, int? rating, String? recommendation, String? status}) async {
     try {
       final r = await _dio.patch(AppConstants.interviewFeedbackEndpoint(id), data: {
-        if (feedback       != null) 'feedback':       feedback,
-        if (rating         != null) 'rating':         rating,
-        if (recommendation != null) 'recommendation': recommendation,
-        if (status         != null) 'status':         status,
+        'feedback':       ?feedback,
+        'rating':         ?rating,
+        'recommendation': ?recommendation,
+        'status':         ?status,
       });
       return Result.success(Interview.fromJson(r.data));
     } on DioException catch (e) {

@@ -40,7 +40,7 @@ class ReportsApiService {
     try {
       final r = await _dio.get(AppConstants.reportAttendanceEndpoint, queryParameters: {
         'start_date': startDate, 'end_date': endDate,
-        if (employeeId != null) 'employee_id': employeeId,
+        'employee_id': ?employeeId,
       });
       return Result.success(r.data as Map<String, dynamic>);
     } on DioException catch (e) {

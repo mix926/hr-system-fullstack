@@ -116,7 +116,7 @@ class LeaveApiService {
   Future<Result<LeaveModel>> approveLeave(String leaveId, bool approved, {String? comments}) async {
     try {
       final r = await _dio.patch(AppConstants.leaveApproveEndpoint(leaveId),
-          data: {'approved': approved, if (comments != null) 'comments': comments});
+          data: {'approved': approved, 'comments': ?comments});
       return Result.success(LeaveModel.fromJson(r.data));
     } on DioException catch (e) {
       return Result.failure(ServerFailure(message: _detail(e, 'Failed to process approval')));

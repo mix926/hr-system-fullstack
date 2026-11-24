@@ -23,10 +23,10 @@ class PerformanceEnhancedApiService {
   }) async {
     try {
       final r = await _dio.get(AppConstants.goalsEndpoint, queryParameters: {
-        if (employeeId != null) 'employee_id': employeeId,
-        if (period     != null) 'period':      period,
-        if (goalType   != null) 'goal_type':   goalType,
-        if (status     != null) 'status_filter': status,
+        'employee_id': ?employeeId,
+        'period':      ?period,
+        'goal_type':   ?goalType,
+        'status_filter': ?status,
       });
       return Result.success((r.data as List).map((j) => PerformanceGoal.fromJson(j)).toList());
     } on DioException catch (e) {
@@ -47,7 +47,7 @@ class PerformanceEnhancedApiService {
     try {
       final r = await _dio.patch(AppConstants.goalProgressEndpoint(id), data: {
         'current_value': currentValue,
-        if (status != null) 'status': status,
+        'status': ?status,
       });
       return Result.success(PerformanceGoal.fromJson(r.data));
     } on DioException catch (e) {
@@ -69,8 +69,8 @@ class PerformanceEnhancedApiService {
   Future<Result<List<Review360>>> get360Reviews({String? employeeId, String? period}) async {
     try {
       final r = await _dio.get(AppConstants.reviews360Endpoint, queryParameters: {
-        if (employeeId != null) 'employee_id':   employeeId,
-        if (period     != null) 'review_period': period,
+        'employee_id':   ?employeeId,
+        'review_period': ?period,
       });
       return Result.success((r.data as List).map((j) => Review360.fromJson(j)).toList());
     } on DioException catch (e) {
@@ -101,8 +101,8 @@ class PerformanceEnhancedApiService {
   Future<Result<List<PIP>>> getPIPs({String? employeeId, String? status}) async {
     try {
       final r = await _dio.get(AppConstants.pipsEndpoint, queryParameters: {
-        if (employeeId != null) 'employee_id':    employeeId,
-        if (status     != null) 'status_filter':  status,
+        'employee_id':    ?employeeId,
+        'status_filter':  ?status,
       });
       return Result.success((r.data as List).map((j) => PIP.fromJson(j)).toList());
     } on DioException catch (e) {
@@ -150,7 +150,7 @@ class PerformanceEnhancedApiService {
       String pipId, String milestoneId, bool met, {String? notes}) async {
     try {
       final r = await _dio.patch(AppConstants.pipMilestoneEndpoint(pipId, milestoneId),
-          data: {'met': met, if (notes != null) 'notes': notes});
+          data: {'met': met, 'notes': ?notes});
       return Result.success(PIPMilestone.fromJson(r.data));
     } on DioException catch (e) {
       return Result.failure(ServerFailure(message: _detail(e, 'Failed to update milestone')));

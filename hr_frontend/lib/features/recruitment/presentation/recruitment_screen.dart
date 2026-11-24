@@ -159,7 +159,7 @@ class _JobsTab extends StatelessWidget {
                 label: Text(s),
                 selected: statusFilter == s,
                 onSelected: (_) => onFilterChange(s),
-                selectedColor: AppTheme.primaryColor.withOpacity(0.15),
+                selectedColor: AppTheme.primaryColor.withValues(alpha: 0.15),
               ),
             )).toList(),
           ),
@@ -226,7 +226,7 @@ class _JobCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: statusColor.withOpacity(0.1),
+                  color: statusColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(job.status, style: TextStyle(color: statusColor, fontSize: 11, fontWeight: FontWeight.w600)),
@@ -372,7 +372,7 @@ class _PipelineChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-    decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
+    decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
     child: Column(mainAxisSize: MainAxisSize.min, children: [
       Text('$count', style: TextStyle(fontWeight: FontWeight.bold, color: color, fontSize: 18)),
       Text(label, style: TextStyle(color: color, fontSize: 11)),
@@ -397,7 +397,7 @@ class _CandidateCard extends StatelessWidget {
         padding: const EdgeInsets.all(12),
         child: Row(children: [
           CircleAvatar(
-            backgroundColor: stageColor.withOpacity(0.15),
+            backgroundColor: stageColor.withValues(alpha: 0.15),
             child: Text(candidate.firstName.isNotEmpty ? candidate.firstName[0] : '?',
                 style: TextStyle(color: stageColor, fontWeight: FontWeight.bold)),
           ),
@@ -421,7 +421,7 @@ class _CandidateCard extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: stageColor.withOpacity(0.1),
+                color: stageColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Row(mainAxisSize: MainAxisSize.min, children: [
@@ -523,7 +523,7 @@ class _InterviewCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
+                color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
               child: Text(interview.status,
                   style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.w600)),
             ),

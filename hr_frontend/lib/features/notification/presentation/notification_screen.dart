@@ -258,13 +258,13 @@ class _NotificationTile extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         child: Container(
-          color: isUnread ? color.withOpacity(0.04) : null,
+          color: isUnread ? color.withValues(alpha: 0.04) : null,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Container(
               width: 42, height: 42,
               decoration: BoxDecoration(
-                color: color.withOpacity(0.12), shape: BoxShape.circle),
+                color: color.withValues(alpha: 0.12), shape: BoxShape.circle),
               child: Icon(icon, color: color, size: 20),
             ),
             const SizedBox(width: 12),
@@ -401,7 +401,7 @@ class _Tag extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
     decoration: BoxDecoration(
-      color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
+      color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
     child: Text(label, style: TextStyle(color: color, fontSize: 11)),
   );
 }
