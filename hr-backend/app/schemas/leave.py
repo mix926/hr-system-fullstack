@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, date
 from typing import Optional
 from pydantic import BaseModel
 
@@ -6,8 +6,8 @@ from pydantic import BaseModel
 class LeaveBase(BaseModel):
     leave_type: str
     leave_type_id: Optional[str] = None  # Link to structured LeaveType
-    start_date: datetime
-    end_date: datetime
+    start_date: date
+    end_date: date
     reason: Optional[str] = None
 
 

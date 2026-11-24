@@ -12,6 +12,7 @@ from datetime import datetime
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status, Request, Query
 from fastapi.responses import StreamingResponse
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -27,6 +28,12 @@ from app.schemas.audit import (
 )
 from app.api.auth import get_current_user
 from app.services.audit_service import log_action
+
+class AuditLogCreate(BaseModel):
+    entity_type: str
+    entity_id: str
+    action: str
+    description: str
 
 router = APIRouter(prefix="/admin", tags=["Admin & Security"])
 
@@ -417,10 +424,7 @@ def get_system_stats(
 
 @router.post("/audit-logs")
 def create_audit_log_manual(
-    entity_type: str,
-    entity_id: str,
-    action: str,
-    description: str,
+    body: AuditLogCreate,
     request: Request,
     current_user=Depends(get_current_user),
     db: Session = Depends(get_db),
@@ -428,16 +432,16 @@ def create_audit_log_manual(
     """Manually create an audit log entry. ADMIN only. Used for system events."""
     _require_admin(current_user)
     try:
-        audit_action = AuditAction(action)
+        audit_action = AuditAction(body.action)
     except ValueError:
         raise HTTPException(status_code=422, detail=f"Invalid action. Valid: {[a.value for a in AuditAction]}")
 
     log = log_action(
         db=db, actor=current_user,
         action=audit_action,
-        entity_type=entity_type,
-        entity_id=entity_id,
-        description=description,
+        entity_type=body.entity_type,
+        entity_id=body.entity_id,
+        description=body.description,
         request=request,
     )
     return {"message": "Audit log created", "id": log.id}

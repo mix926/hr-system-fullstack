@@ -66,19 +66,6 @@ def get_reviews(
     ).all()
 
 
-@router.get("/{review_id}", response_model=PerformanceReviewResponse)
-def get_review(
-    review_id: str,
-    current_user=Depends(get_current_user),
-    db: Session = Depends(get_db),
-):
-    review = db.query(PerformanceReview).filter(PerformanceReview.id == review_id).first()
-    if not review:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail="Performance review not found")
-    return review
-
-
 @router.get("/employee/{employee_id}", response_model=List[PerformanceReviewResponse])
 def get_reviews_by_employee(
     employee_id: str,
@@ -95,6 +82,19 @@ def get_reviews_by_employee(
     return db.query(PerformanceReview).filter(
         PerformanceReview.employee_id == employee_id
     ).all()
+
+
+@router.get("/{review_id}", response_model=PerformanceReviewResponse)
+def get_review(
+    review_id: str,
+    current_user=Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    review = db.query(PerformanceReview).filter(PerformanceReview.id == review_id).first()
+    if not review:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail="Performance review not found")
+    return review
 
 
 @router.patch("/{review_id}", response_model=PerformanceReviewResponse)

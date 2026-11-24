@@ -7,7 +7,7 @@
 //
 //   GoRoute(
 //     path: '/employees',
-//     builder: (_, __) => RBACRouteGuard(
+//     builder: (_, _) => RBACRouteGuard(
 //       requiredPermission: Permission.employeeReadAll,
 //       child: EmployeeListScreen(),
 //     ),

@@ -433,7 +433,7 @@ class _AuditLogsTab extends StatelessWidget {
                 return ListView.separated(
                   padding: const EdgeInsets.all(16),
                   itemCount: state.logs.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 8),
+                  separatorBuilder: (_, _) => const SizedBox(height: 8),
                   itemBuilder: (_, i) => _AuditLogCard(log: state.logs[i]),
                 );
               }
@@ -634,7 +634,7 @@ class _CompaniesTab extends StatelessWidget {
       return ListView.separated(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
         itemCount: state.companies.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 8),
+        separatorBuilder: (_, _) => const SizedBox(height: 8),
         itemBuilder: (_, i) => _CompanyCard(
           company: state.companies[i],
           onEdit: () =>
@@ -1158,7 +1158,7 @@ class _BranchesTab extends StatelessWidget {
       return ListView.separated(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
         itemCount: state.branches.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 8),
+        separatorBuilder: (_, _) => const SizedBox(height: 8),
         itemBuilder: (_, i) => _BranchCard(
           branch: state.branches[i],
           onEdit: () =>

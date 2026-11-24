@@ -1,5 +1,5 @@
 import enum
-from sqlalchemy import Column, DateTime, Enum, ForeignKey, String, Text, Integer
+from sqlalchemy import Column, Date, DateTime, Enum, ForeignKey, String, Text, Integer
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
@@ -27,8 +27,8 @@ class LeaveModel(Base):
     leave_type_id = Column(
         String(36), ForeignKey("leave_types.id", ondelete="SET NULL"), nullable=True
     )  # Structured link to LeaveType
-    start_date = Column(DateTime, nullable=False)
-    end_date = Column(DateTime, nullable=False)
+    start_date = Column(Date, nullable=False)
+    end_date = Column(Date, nullable=False)
     reason = Column(Text, nullable=True)
     status = Column(
         Enum(LeaveStatus), default=LeaveStatus.PENDING, nullable=False

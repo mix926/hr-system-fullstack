@@ -205,7 +205,7 @@ class _InboxTab extends StatelessWidget {
       return ListView.separated(
         padding: const EdgeInsets.symmetric(vertical: 8),
         itemCount: notifs.length,
-        separatorBuilder: (_, __) => const Divider(height: 1, indent: 72),
+        separatorBuilder: (_, _) => const Divider(height: 1, indent: 72),
         itemBuilder: (ctx, i) => _NotificationTile(
           notification: notifs[i],
           typeConfig: _typeIcons[notifs[i].notificationType] ??
@@ -327,7 +327,7 @@ class _AnnouncementsTab extends StatelessWidget {
       return ListView.separated(
         padding: const EdgeInsets.all(16),
         itemCount: list.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 10),
+        separatorBuilder: (_, _) => const SizedBox(height: 10),
         itemBuilder: (ctx, i) => _AnnouncementCard(
           announcement: list[i],
           onDelete: list[i].id != null

@@ -177,7 +177,7 @@ class _JobsTab extends StatelessWidget {
             return ListView.separated(
               padding: const EdgeInsets.all(16),
               itemCount: state.jobs.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 10),
+              separatorBuilder: (_, _) => const SizedBox(height: 10),
               itemBuilder: (ctx, i) => _JobCard(
                 job: state.jobs[i],
                 statusColor: _statusColors[state.jobs[i].status] ?? Colors.grey,
@@ -474,7 +474,7 @@ class _InterviewsTab extends StatelessWidget {
           return ListView.separated(
             padding: const EdgeInsets.all(16),
             itemCount: state.interviews.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 8),
+            separatorBuilder: (_, _) => const SizedBox(height: 8),
             itemBuilder: (_, i) => _InterviewCard(interview: state.interviews[i]),
           );
         }
