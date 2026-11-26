@@ -306,14 +306,7 @@ class _ManagerDrawer extends StatelessWidget {
                   style: AppTextStyles.labelBold
                       .copyWith(color: AppColors.textHint, letterSpacing: 1)),
             ),
-            _DrawerItem(
-              icon: Icons.refresh_outlined,
-              selectedIcon: Icons.refresh_rounded,
-              label: 'Reload Dashboard',
-              color: AppColors.success,
-              selected: false,
-              onTap: onReload,
-            ),
+
             const Spacer(),
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 16),

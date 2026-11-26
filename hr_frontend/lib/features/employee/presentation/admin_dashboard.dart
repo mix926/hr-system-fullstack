@@ -159,14 +159,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 onPressed: widget.onMenuTap,
                 tooltip: 'Menu',
               ),
-              actions: [
-                IconButton(
-                  icon: const Icon(Icons.refresh_rounded, color: Colors.white),
-                  onPressed: _refresh,
-                  tooltip: 'Refresh',
-                ),
-                const SizedBox(width: 4),
-              ],
+              actions: const [],
               flexibleSpace: FlexibleSpaceBar(
                 collapseMode: CollapseMode.parallax,
                 background: Container(
