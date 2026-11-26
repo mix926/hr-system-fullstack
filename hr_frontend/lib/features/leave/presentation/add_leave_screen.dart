@@ -95,7 +95,7 @@ class _AddLeaveScreenState extends State<AddLeaveScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppTheme.background(context),
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
@@ -111,7 +111,7 @@ class _AddLeaveScreenState extends State<AddLeaveScreen> {
         ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Container(height: 1, color: AppColors.border),
+          child: Container(height: 1, color: AppTheme.border(context)),
         ),
       ),
       body: SafeArea(
@@ -125,7 +125,7 @@ class _AddLeaveScreenState extends State<AddLeaveScreen> {
                 // Leave type
                 DropdownButtonFormField<String>(
                   initialValue: _leaveType,
-                  decoration: AppTheme.inputDecoration(
+                  decoration: AppTheme.inputDecorationOf(context, 
                     'Leave Type',
                     icon: Icons.beach_access_rounded,
                   ),
@@ -141,7 +141,7 @@ class _AddLeaveScreenState extends State<AddLeaveScreen> {
                   onTap: () => _pickDate(isStart: true),
                   child: AbsorbPointer(
                     child: TextFormField(
-                      decoration: AppTheme.inputDecoration(
+                      decoration: AppTheme.inputDecorationOf(context, 
                         _startDate.isEmpty ? 'Start Date' : _startDate,
                         icon: Icons.calendar_today_rounded,
                       ),
@@ -157,7 +157,7 @@ class _AddLeaveScreenState extends State<AddLeaveScreen> {
                   onTap: () => _pickDate(isStart: false),
                   child: AbsorbPointer(
                     child: TextFormField(
-                      decoration: AppTheme.inputDecoration(
+                      decoration: AppTheme.inputDecorationOf(context, 
                         _endDate.isEmpty ? 'End Date' : _endDate,
                         icon: Icons.calendar_today_rounded,
                       ),
@@ -170,7 +170,7 @@ class _AddLeaveScreenState extends State<AddLeaveScreen> {
 
                 // Reason
                 TextFormField(
-                  decoration: AppTheme.inputDecoration(
+                  decoration: AppTheme.inputDecorationOf(context, 
                     'Reason (optional)',
                     icon: Icons.note_rounded,
                   ),

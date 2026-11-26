@@ -46,63 +46,55 @@ class AppColors {
 }
 
 // ── Typography Tokens ─────────────────────────────────────────────
+// Colors are intentionally omitted so they inherit from the theme's
+// onSurface / onBackground colour, which adapts to light and dark mode.
 class AppTextStyles {
   AppTextStyles._();
 
   static const TextStyle displayLarge = TextStyle(
     fontSize: 30, fontWeight: FontWeight.w800,
-    color: AppColors.textPrimary, letterSpacing: -0.5, height: 1.2,
+    letterSpacing: -0.5, height: 1.2,
   );
   static const TextStyle displayMedium = TextStyle(
     fontSize: 24, fontWeight: FontWeight.w700,
-    color: AppColors.textPrimary, letterSpacing: -0.3, height: 1.25,
+    letterSpacing: -0.3, height: 1.25,
   );
   static const TextStyle displaySmall = TextStyle(
     fontSize: 20, fontWeight: FontWeight.w700,
-    color: AppColors.textPrimary, letterSpacing: -0.2, height: 1.3,
+    letterSpacing: -0.2, height: 1.3,
   );
   static const TextStyle titleLarge = TextStyle(
-    fontSize: 18, fontWeight: FontWeight.w700,
-    color: AppColors.textPrimary, height: 1.4,
+    fontSize: 18, fontWeight: FontWeight.w700, height: 1.4,
   );
   static const TextStyle titleMedium = TextStyle(
-    fontSize: 15, fontWeight: FontWeight.w600,
-    color: AppColors.textPrimary, height: 1.4,
+    fontSize: 15, fontWeight: FontWeight.w600, height: 1.4,
   );
   static const TextStyle titleSmall = TextStyle(
-    fontSize: 13, fontWeight: FontWeight.w600,
-    color: AppColors.textPrimary, height: 1.4,
+    fontSize: 13, fontWeight: FontWeight.w600, height: 1.4,
   );
   static const TextStyle bodyLarge = TextStyle(
-    fontSize: 15, fontWeight: FontWeight.w400,
-    color: AppColors.textSecondary, height: 1.5,
+    fontSize: 15, fontWeight: FontWeight.w400, height: 1.5,
   );
   static const TextStyle bodyMedium = TextStyle(
-    fontSize: 13, fontWeight: FontWeight.w400,
-    color: AppColors.textSecondary, height: 1.5,
+    fontSize: 13, fontWeight: FontWeight.w400, height: 1.5,
   );
   static const TextStyle bodySmall = TextStyle(
-    fontSize: 12, fontWeight: FontWeight.w400,
-    color: AppColors.textHint, height: 1.4,
+    fontSize: 12, fontWeight: FontWeight.w400, height: 1.4,
   );
   static const TextStyle labelLarge = TextStyle(
-    fontSize: 14, fontWeight: FontWeight.w600,
-    color: AppColors.textSecondary, letterSpacing: 0.1,
+    fontSize: 14, fontWeight: FontWeight.w600, letterSpacing: 0.1,
   );
   static const TextStyle labelMedium = TextStyle(
-    fontSize: 12, fontWeight: FontWeight.w600,
-    color: AppColors.textSecondary, letterSpacing: 0.5,
+    fontSize: 12, fontWeight: FontWeight.w600, letterSpacing: 0.5,
   );
   static const TextStyle labelBold = TextStyle(
-    fontSize: 11, fontWeight: FontWeight.w700,
-    color: AppColors.textSecondary, letterSpacing: 0.8,
+    fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.8,
   );
   static const TextStyle buttonText = TextStyle(
     fontSize: 15, fontWeight: FontWeight.w600, letterSpacing: 0.2,
   );
   static const TextStyle captionText = TextStyle(
-    fontSize: 11, fontWeight: FontWeight.w500,
-    color: AppColors.textHint, letterSpacing: 0.2,
+    fontSize: 11, fontWeight: FontWeight.w500, letterSpacing: 0.2,
   );
 }
 
@@ -113,6 +105,54 @@ class AppTheme {
   // ── Convenience color getters (used by feature screens) ───────
   static Color get primaryColor => AppColors.primary;
   static Color get bgColor      => AppColors.background;
+
+  // ── Theme-aware color helpers ─────────────────────────────────
+  // Use these everywhere instead of hardcoded AppColors.*
+  static Color surface(BuildContext context) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    return dark ? const Color(0xFF1E2130) : AppColors.surface;
+  }
+
+  static Color background(BuildContext context) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    return dark ? const Color(0xFF111827) : AppColors.background;
+  }
+
+  static Color border(BuildContext context) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    return dark ? const Color(0xFF334155) : AppColors.border;
+  }
+
+  static Color textPrimary(BuildContext context) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    return dark ? const Color(0xFFE2E8F0) : AppColors.textPrimary;
+  }
+
+  static Color textSecondary(BuildContext context) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    return dark ? const Color(0xFF94A3B8) : AppColors.textSecondary;
+  }
+
+  static Color surfaceVariant(BuildContext context) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    return dark ? const Color(0xFF263148) : AppColors.surfaceVar;
+  }
+
+  /// Theme-aware card decoration — use this instead of the static one.
+  static BoxDecoration cardDecorationOf(BuildContext context, {double radius = 16}) {
+    return BoxDecoration(
+      color: surface(context),
+      borderRadius: BorderRadius.circular(radius),
+      border: Border.all(color: border(context)),
+      boxShadow: const [
+        BoxShadow(
+          color: AppColors.cardShadow,
+          blurRadius: 8,
+          offset: Offset(0, 2),
+        ),
+      ],
+    );
+  }
 
   // ── Material 3 ThemeData ──────────────────────────────────────
   static ThemeData get themeData {
@@ -365,6 +405,56 @@ class AppTheme {
   }
 
   // ── Input Decoration Helper ───────────────────────────────────
+  // Context-aware: adapts to light/dark mode. Prefer this one.
+  static InputDecoration inputDecorationOf(
+    BuildContext context,
+    String label, {
+    IconData? icon,
+    Widget? suffix,
+  }) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final fillColor = dark ? const Color(0xFF263148) : AppColors.surface;
+    final border = dark ? const Color(0xFF334155) : AppColors.border;
+    final hint = dark ? const Color(0xFF64748B) : AppColors.textHint;
+
+    return InputDecoration(
+      labelText: label,
+      labelStyle: AppTextStyles.bodyMedium.copyWith(color: hint),
+      hintStyle: AppTextStyles.bodyMedium.copyWith(color: hint),
+      prefixIcon: icon != null
+          ? Padding(
+              padding: const EdgeInsets.only(left: 4),
+              child: Icon(icon, size: 20, color: hint),
+            )
+          : null,
+      suffixIcon: suffix,
+      filled: true,
+      fillColor: fillColor,
+      contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: border),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: border),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: AppColors.primary, width: 2),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: AppColors.error),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: AppColors.error, width: 2),
+      ),
+    );
+  }
+
+  // ── Legacy input decoration (light-only) — kept for compatibility ──
   static InputDecoration inputDecoration(
     String label, {
     IconData? icon,
@@ -402,6 +492,81 @@ class AppTheme {
       focusedErrorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: const BorderSide(color: AppColors.error, width: 2),
+      ),
+    );
+  }
+
+  // ── Dark ThemeData ────────────────────────────────────────────
+  static ThemeData get darkThemeData {
+    final cs = ColorScheme.fromSeed(
+      seedColor: AppColors.primary,
+      brightness: Brightness.dark,
+      primary: AppColors.primary,
+      onPrimary: Colors.white,
+      primaryContainer: const Color(0xFF1A3A6B),
+      onPrimaryContainer: const Color(0xFFBFD4FF),
+      secondary: AppColors.secondary,
+      onSecondary: Colors.white,
+      surface: const Color(0xFF1E2130),
+      onSurface: const Color(0xFFE2E8F0),
+      error: AppColors.error,
+      onError: Colors.white,
+      outline: const Color(0xFF334155),
+    );
+
+    return ThemeData(
+      useMaterial3: true,
+      colorScheme: cs,
+      scaffoldBackgroundColor: const Color(0xFF111827),
+      appBarTheme: const AppBarTheme(
+        backgroundColor: Color(0xFF1E2130),
+        foregroundColor: Color(0xFFE2E8F0),
+        elevation: 0,
+        scrolledUnderElevation: 2,
+        surfaceTintColor: Colors.transparent,
+        titleTextStyle: TextStyle(
+          fontSize: 18, fontWeight: FontWeight.w700,
+          color: Color(0xFFE2E8F0),
+        ),
+        centerTitle: false,
+        iconTheme: IconThemeData(color: Color(0xFF94A3B8), size: 22),
+        systemOverlayStyle: SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.light,
+        ),
+      ),
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: const Color(0xFF1E2130),
+        surfaceTintColor: Colors.transparent,
+        elevation: 8,
+        height: 68,
+        indicatorColor: const Color(0xFF1A3A6B),
+        indicatorShape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(14),
+        ),
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.primary);
+          }
+          return const TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: Color(0xFF64748B));
+        }),
+        iconTheme: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return const IconThemeData(color: AppColors.primary, size: 22);
+          }
+          return const IconThemeData(color: Color(0xFF64748B), size: 22);
+        }),
+      ),
+      cardTheme: CardThemeData(
+        color: const Color(0xFF1E2130),
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: Color(0xFF334155)),
+        ),
+      ),
+      dividerTheme: const DividerThemeData(
+        color: Color(0xFF334155), thickness: 1, space: 1,
       ),
     );
   }
@@ -448,6 +613,22 @@ class AppTheme {
   }
 
   // ── Stat Card Decoration ──────────────────────────────────────
+  static BoxDecoration statCardDecorationOf(BuildContext context, Color color) {
+    return BoxDecoration(
+      color: surface(context),
+      borderRadius: BorderRadius.circular(16),
+      border: Border.all(color: color.withValues(alpha: 0.2)),
+      boxShadow: [
+        BoxShadow(
+          color: color.withValues(alpha: 0.06),
+          blurRadius: 12,
+          offset: const Offset(0, 4),
+        ),
+      ],
+    );
+  }
+
+  // Legacy light-only version kept for compatibility
   static BoxDecoration statCardDecoration(Color color) {
     return BoxDecoration(
       color: AppColors.surface,
@@ -530,7 +711,28 @@ class AppTheme {
     }
   }
 
-  // ── Section Header ────────────────────────────────────────────
+  // ── Section Header (context-aware) ───────────────────────────
+  static Widget sectionHeaderOf(BuildContext context, String title, {Widget? trailing}) {
+    final hint = textSecondary(context);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              title.toUpperCase(),
+              style: AppTextStyles.labelBold.copyWith(
+                color: hint, letterSpacing: 1,
+              ),
+            ),
+          ),
+          ?trailing,
+        ],
+      ),
+    );
+  }
+
+  // ── Section Header (legacy, light-only) ──────────────────────
   static Widget sectionHeader(String title, {Widget? trailing}) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
@@ -588,7 +790,48 @@ class AppTheme {
     ));
   }
 
-  // ── Empty State ───────────────────────────────────────────────
+  // ── Empty State (context-aware) ───────────────────────────────
+  static Widget emptyStateOf(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    String? subtitle,
+    Widget? action,
+  }) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(40),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: AppColors.primaryLight, shape: BoxShape.circle,
+              ),
+              child: Icon(icon, size: 40, color: AppColors.primary),
+            ),
+            const SizedBox(height: 16),
+            Text(title, style: AppTextStyles.titleMedium, textAlign: TextAlign.center),
+            if (subtitle != null) ...[
+              const SizedBox(height: 6),
+              Text(
+                subtitle,
+                style: AppTextStyles.bodyMedium.copyWith(color: textSecondary(context)),
+                textAlign: TextAlign.center,
+              ),
+            ],
+            if (action != null) ...[
+              const SizedBox(height: 20),
+              action,
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ── Empty State (legacy, light-only) ──────────────────────────
   static Widget emptyState({
     required IconData icon,
     required String title,
@@ -624,7 +867,47 @@ class AppTheme {
     );
   }
 
-  // ── Error State ───────────────────────────────────────────────
+  // ── Error State (context-aware) ───────────────────────────────
+  static Widget errorStateOf(
+    BuildContext context, {
+    required String message,
+    required VoidCallback onRetry,
+  }) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(40),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: AppColors.errorLight.withValues(alpha: 0.15),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.wifi_off_rounded,
+                  size: 40, color: AppColors.error),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              message,
+              style: AppTextStyles.bodyMedium.copyWith(color: textSecondary(context)),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton.icon(
+              style: primaryButtonStyle(radius: 10),
+              onPressed: onRetry,
+              icon: const Icon(Icons.refresh_rounded, size: 18),
+              label: const Text('Retry'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ── Error State (legacy, light-only) ──────────────────────────
   static Widget errorState({
     required String message,
     required VoidCallback onRetry,

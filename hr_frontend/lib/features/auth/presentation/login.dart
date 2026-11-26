@@ -73,13 +73,13 @@ class _LoginScreenState extends State<LoginScreen> {
     final isWide = size.width > 800;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
-      body: isWide ? _buildWideLayout() : _buildMobileLayout(),
+      backgroundColor: AppTheme.background(context),
+      body: isWide ? _buildWideLayout(context) : _buildMobileLayout(context),
     );
   }
 
   // ── Wide / Desktop Layout (split panel) ──────────────────────
-  Widget _buildWideLayout() {
+  Widget _buildWideLayout(BuildContext context) {
     return Row(
       children: [
         // Left brand panel
@@ -97,7 +97,7 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildLogo(light: true),
+                  _buildLogo(light: true, context: context),
                   const Spacer(),
                   const Text(
                     'Manage your\nworkforce smarter.',
@@ -132,7 +132,7 @@ class _LoginScreenState extends State<LoginScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 64, vertical: 40),
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 420),
-                child: _buildFormCard(showCard: false),
+                child: _buildFormCard(context: context, showCard: false),
               ),
             ),
           ),
@@ -142,7 +142,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   // ── Mobile Layout ─────────────────────────────────────────────
-  Widget _buildMobileLayout() {
+  Widget _buildMobileLayout(BuildContext context) {
     return SafeArea(
       child: SingleChildScrollView(
         child: Column(
@@ -164,7 +164,7 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildLogo(light: true),
+                  _buildLogo(light: true, context: context),
                   const SizedBox(height: 24),
                   const Text(
                     'Welcome back 👋',
@@ -183,7 +183,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
-              child: _buildFormCard(showCard: true),
+              child: _buildFormCard(context: context, showCard: true),
             ),
           ],
         ),
@@ -192,14 +192,14 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   // ── Shared Form ───────────────────────────────────────────────
-  Widget _buildFormCard({required bool showCard}) {
+  Widget _buildFormCard({required BuildContext context, required bool showCard}) {
     final form = Form(
       key: _formKey,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           if (!showCard) ...[
-            _buildLogo(light: false),
+            _buildLogo(light: false, context: context),
             const SizedBox(height: 32),
             Text(
               'Sign in to your account',
@@ -218,7 +218,8 @@ class _LoginScreenState extends State<LoginScreen> {
             controller: _emailController,
             keyboardType: TextInputType.emailAddress,
             textInputAction: TextInputAction.next,
-            decoration: AppTheme.inputDecoration(
+            decoration: AppTheme.inputDecorationOf(
+              context,
               'Email Address',
               icon: Icons.email_outlined,
             ),
@@ -236,7 +237,8 @@ class _LoginScreenState extends State<LoginScreen> {
             obscureText: _obscurePassword,
             textInputAction: TextInputAction.done,
             onFieldSubmitted: (_) => _isLoading ? null : _login(),
-            decoration: AppTheme.inputDecoration(
+            decoration: AppTheme.inputDecorationOf(
+              context,
               'Password',
               icon: Icons.lock_outline_rounded,
               suffix: IconButton(
@@ -245,7 +247,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ? Icons.visibility_off_outlined
                       : Icons.visibility_outlined,
                   size: 20,
-                  color: AppColors.textHint,
+                  color: AppTheme.textSecondary(context),
                 ),
                 onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
               ),
@@ -298,14 +300,14 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!showCard) return form;
 
     return Container(
-      decoration: AppTheme.cardDecoration(),
+      decoration: AppTheme.cardDecorationOf(context),
       padding: const EdgeInsets.all(28),
       child: form,
     );
   }
 
   // ── Helpers ───────────────────────────────────────────────────
-  Widget _buildLogo({required bool light}) {
+  Widget _buildLogo({required bool light, required BuildContext context}) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -326,7 +328,7 @@ class _LoginScreenState extends State<LoginScreen> {
           'HR System',
           style: TextStyle(
             fontSize: 16, fontWeight: FontWeight.w800,
-            color: light ? Colors.white : AppColors.textPrimary,
+            color: light ? Colors.white : AppTheme.textPrimary(context),
             letterSpacing: -0.3,
           ),
         ),

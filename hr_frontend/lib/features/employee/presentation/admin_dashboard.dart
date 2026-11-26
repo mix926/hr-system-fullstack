@@ -139,7 +139,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   // ── Main body ─────────────────────────────────────────────────
   Widget _body() {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppTheme.background(context),
       body: RefreshIndicator(
         color: AppColors.primary,
         onRefresh: _refresh,
@@ -236,7 +236,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 child: TextField(
                   controller: _searchCtrl,
                   onChanged: _search,
-                  decoration: AppTheme.inputDecoration(
+                  decoration: AppTheme.inputDecorationOf(
+                    context,
                     'Search by name, email or position…',
                     icon: Icons.search_rounded,
                     suffix: _searchCtrl.text.isNotEmpty
@@ -286,7 +287,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             _filtered.isEmpty
                 ? SliverFillRemaining(
                     hasScrollBody: false,
-                    child: AppTheme.emptyState(
+                    child: AppTheme.emptyStateOf(
+                      context,
                       icon: Icons.search_off_rounded,
                       title: 'No employees found',
                       subtitle: 'Try a different search term',
@@ -359,17 +361,18 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     );
   }
 
-  Widget _loadingView() => const Scaffold(
-        backgroundColor: AppColors.background,
-        body: Center(
+  Widget _loadingView() => Scaffold(
+        backgroundColor: AppTheme.background(context),
+        body: const Center(
           child: CircularProgressIndicator(color: AppColors.primary),
         ),
       );
 
   Widget _errorView() => Scaffold(
-        backgroundColor: AppColors.background,
+        backgroundColor: AppTheme.background(context),
         body: SafeArea(
-          child: AppTheme.errorState(
+          child: AppTheme.errorStateOf(
+            context,
             message: _error,
             onRetry: _loadEmployees,
           ),
@@ -398,11 +401,11 @@ class _StatSection extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(Icons.groups_rounded, size: 13, color: AppColors.textHint),
+              Icon(Icons.groups_rounded, size: 13, color: AppTheme.textSecondary(context)),
               const SizedBox(width: 6),
               Text('WORKFORCE OVERVIEW',
                   style: AppTextStyles.labelBold
-                      .copyWith(color: AppColors.textHint, letterSpacing: 0.8)),
+                      .copyWith(color: AppTheme.textSecondary(context), letterSpacing: 0.8)),
             ],
           ),
           const SizedBox(height: 12),
@@ -437,7 +440,7 @@ class _StatCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 10),
-      decoration: AppTheme.statCardDecoration(color),
+      decoration: AppTheme.statCardDecorationOf(context, color),
       child: Column(
         children: [
           Container(
@@ -485,12 +488,12 @@ class _LeaveOverview extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(Icons.beach_access_rounded,
-                  size: 13, color: AppColors.textHint),
+              Icon(Icons.beach_access_rounded,
+                  size: 13, color: AppTheme.textSecondary(context)),
               const SizedBox(width: 6),
               Text('LEAVE OVERVIEW',
                   style: AppTextStyles.labelBold
-                      .copyWith(color: AppColors.textHint, letterSpacing: 0.8)),
+                      .copyWith(color: AppTheme.textSecondary(context), letterSpacing: 0.8)),
             ],
           ),
           const SizedBox(height: 12),
@@ -564,7 +567,7 @@ class _EmployeeCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
-      decoration: AppTheme.cardDecoration(radius: 14),
+      decoration: AppTheme.cardDecorationOf(context, radius: 14),
       child: Material(
         color: Colors.transparent,
         borderRadius: BorderRadius.circular(14),

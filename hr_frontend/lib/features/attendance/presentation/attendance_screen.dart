@@ -30,8 +30,10 @@ class _AttendanceBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bg = AppTheme.background(context);
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: bg,
       body: BlocConsumer<AttendanceBloc, AttendanceState>(
         listener: (context, state) {
           if (state is AttendanceOperationSuccessState) {
@@ -62,14 +64,12 @@ class _AttendanceBody extends StatelessWidget {
             child: RefreshIndicator(
               color: AppColors.primary,
               onRefresh: () async {
-                context
-                    .read<AttendanceBloc>()
-                    .add(LoadAttendancesEvent());
+                context.read<AttendanceBloc>().add(LoadAttendancesEvent());
               },
               child: CustomScrollView(
                 slivers: [
                   // ── App Bar ──────────────────────────────────
-                  SliverToBoxAdapter(child: _buildHeader()),
+                  SliverToBoxAdapter(child: _buildHeader(context)),
 
                   // ── Today card ───────────────────────────────
                   SliverToBoxAdapter(
@@ -77,15 +77,15 @@ class _AttendanceBody extends StatelessWidget {
                   ),
 
                   // ── Section label ────────────────────────────
-                  const SliverToBoxAdapter(
+                  SliverToBoxAdapter(
                     child: Padding(
-                      padding: EdgeInsets.fromLTRB(20, 24, 20, 10),
+                      padding: const EdgeInsets.fromLTRB(20, 24, 20, 10),
                       child: Text(
                         'HISTORY',
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w700,
-                          color: AppColors.textHint,
+                          color: AppTheme.textSecondary(context),
                           letterSpacing: 1.2,
                         ),
                       ),
@@ -101,7 +101,7 @@ class _AttendanceBody extends StatelessWidget {
                       ),
                     )
                   else if (state is AttendanceLoadedState)
-                    _buildHistoryList(state.attendances)
+                    _buildHistoryList(context, state.attendances)
                   else if (state is AttendanceErrorState)
                     SliverFillRemaining(
                       child: _buildErrorView(context, state.message),
@@ -118,7 +118,7 @@ class _AttendanceBody extends StatelessWidget {
   }
 
   // ── Header ──────────────────────────────────────────────────
-  Widget _buildHeader() {
+  Widget _buildHeader(BuildContext context) {
     final now = DateTime.now();
     final dayNames = [
       'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'
@@ -130,7 +130,7 @@ class _AttendanceBody extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
-      color: AppColors.surface,
+      color: AppTheme.surface(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -149,7 +149,9 @@ class _AttendanceBody extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Attendance', style: AppTextStyles.titleLarge),
+                  Text('Attendance',
+                      style: AppTextStyles.titleLarge.copyWith(
+                          color: AppTheme.textPrimary(context))),
                   Text(
                     '${dayNames[now.weekday - 1]}, ${monthNames[now.month - 1]} ${now.day}, ${now.year}',
                     style: AppTextStyles.bodySmall,
@@ -198,10 +200,8 @@ class _AttendanceBody extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Status pill
           Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(20),
@@ -213,15 +213,11 @@ class _AttendanceBody extends StatelessWidget {
                       ? '🟢 Checked In'
                       : '⚪ Not Started',
               style: const TextStyle(
-                color: Colors.white,
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
+                color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600,
               ),
             ),
           ),
           const SizedBox(height: 16),
-
-          // Times row
           Row(
             children: [
               _timeBox(
@@ -242,12 +238,8 @@ class _AttendanceBody extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 20),
-
-          // Action buttons
           if (isLoading)
-            const Center(
-              child: CircularProgressIndicator(color: Colors.white),
-            )
+            const Center(child: CircularProgressIndicator(color: Colors.white))
           else
             Row(
               children: [
@@ -262,13 +254,12 @@ class _AttendanceBody extends StatelessWidget {
                         context,
                         title: 'Check In',
                         message: 'Confirm your attendance check-in for today?',
-                        onConfirm: () => context
-                            .read<AttendanceBloc>()
-                            .add(CheckInEvent()),
+                        onConfirm: () =>
+                            context.read<AttendanceBloc>().add(CheckInEvent()),
                       ),
                     ),
                   ),
-                if (hasCheckedIn && !hasCheckedOut) ...[
+                if (hasCheckedIn && !hasCheckedOut)
                   Expanded(
                     child: _actionButton(
                       label: 'Check Out',
@@ -278,15 +269,12 @@ class _AttendanceBody extends StatelessWidget {
                       onTap: () => _confirmAction(
                         context,
                         title: 'Check Out',
-                        message:
-                            'Confirm your attendance check-out for today?',
-                        onConfirm: () => context
-                            .read<AttendanceBloc>()
-                            .add(CheckOutEvent()),
+                        message: 'Confirm your attendance check-out for today?',
+                        onConfirm: () =>
+                            context.read<AttendanceBloc>().add(CheckOutEvent()),
                       ),
                     ),
                   ),
-                ],
                 if (hasCheckedOut)
                   Expanded(
                     child: Container(
@@ -341,17 +329,12 @@ class _AttendanceBody extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  label,
-                  style: const TextStyle(
-                      color: Colors.white70, fontSize: 10),
-                ),
+                Text(label,
+                    style: const TextStyle(color: Colors.white70, fontSize: 10)),
                 Text(
                   time,
                   style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
+                    color: Colors.white, fontSize: 15, fontWeight: FontWeight.w700,
                   ),
                 ),
               ],
@@ -374,22 +357,16 @@ class _AttendanceBody extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 14),
         decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(12),
+          color: color, borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(icon, color: textColor, size: 18),
             const SizedBox(width: 6),
-            Text(
-              label,
-              style: TextStyle(
-                color: textColor,
-                fontWeight: FontWeight.w700,
-                fontSize: 14,
-              ),
-            ),
+            Text(label,
+                style: TextStyle(
+                    color: textColor, fontWeight: FontWeight.w700, fontSize: 14)),
           ],
         ),
       ),
@@ -397,25 +374,25 @@ class _AttendanceBody extends StatelessWidget {
   }
 
   // ── History List ─────────────────────────────────────────────
-  Widget _buildHistoryList(List<AttendanceModel> attendances) {
+  Widget _buildHistoryList(BuildContext context, List<AttendanceModel> attendances) {
     if (attendances.isEmpty) {
-      return const SliverFillRemaining(
+      return SliverFillRemaining(
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(Icons.history_outlined,
-                  size: 56, color: AppColors.textHint),
-              SizedBox(height: 12),
+                  size: 56, color: AppTheme.textSecondary(context)),
+              const SizedBox(height: 12),
               Text('No attendance records yet',
-                  style: AppTextStyles.bodyMedium),
+                  style: AppTextStyles.bodyMedium.copyWith(
+                      color: AppTheme.textSecondary(context))),
             ],
           ),
         ),
       );
     }
 
-    // Sort newest first
     final sorted = [...attendances]
       ..sort((a, b) => b.date.compareTo(a.date));
 
@@ -436,11 +413,11 @@ class _AttendanceBody extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.cloud_off_outlined,
-              size: 56, color: AppColors.textHint),
+          Icon(Icons.cloud_off_outlined,
+              size: 56, color: AppTheme.textSecondary(context)),
           const SizedBox(height: 12),
-          Text(message, style: AppTextStyles.bodyMedium,
-              textAlign: TextAlign.center),
+          Text(message,
+              style: AppTextStyles.bodyMedium, textAlign: TextAlign.center),
           const SizedBox(height: 16),
           ElevatedButton.icon(
             style: AppTheme.primaryButtonStyle(radius: 10),
@@ -464,16 +441,14 @@ class _AttendanceBody extends StatelessWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(title, style: AppTextStyles.titleLarge),
         content: Text(message, style: AppTextStyles.bodyMedium),
         actionsAlignment: MainAxisAlignment.end,
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel',
-                style: TextStyle(color: AppColors.textSecondary)),
+            child: const Text('Cancel'),
           ),
           ElevatedButton(
             style: AppTheme.primaryButtonStyle(radius: 10),
@@ -506,7 +481,6 @@ class _AttendanceBody extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 class _AttendanceCard extends StatelessWidget {
   final AttendanceModel record;
-
   const _AttendanceCard({required this.record});
 
   @override
@@ -517,13 +491,12 @@ class _AttendanceCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(16),
-      decoration: AppTheme.cardDecoration(radius: 14),
+      decoration: AppTheme.cardDecorationOf(context, radius: 14),
       child: Row(
         children: [
           // Date badge
           Container(
-            width: 46,
-            height: 52,
+            width: 46, height: 52,
             decoration: BoxDecoration(
               color: AppColors.primaryLight,
               borderRadius: BorderRadius.circular(10),
@@ -534,30 +507,27 @@ class _AttendanceCard extends StatelessWidget {
                 Text(
                   _dayNumber(record.date),
                   style: const TextStyle(
-                    color: AppColors.primary,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w800,
+                    color: AppColors.primary, fontSize: 18, fontWeight: FontWeight.w800,
                   ),
                 ),
                 Text(
                   _monthAbbr(record.date),
                   style: const TextStyle(
-                    color: AppColors.primary,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w600,
+                    color: AppColors.primary, fontSize: 10, fontWeight: FontWeight.w600,
                   ),
                 ),
               ],
             ),
           ),
           const SizedBox(width: 14),
-
           // Time info
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(record.date, style: AppTextStyles.titleMedium),
+                Text(record.date,
+                    style: AppTextStyles.titleMedium.copyWith(
+                        color: AppTheme.textPrimary(context))),
                 const SizedBox(height: 4),
                 Row(
                   children: [
@@ -585,21 +555,16 @@ class _AttendanceCard extends StatelessWidget {
               ],
             ),
           ),
-
           // Status chip
           Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
-              color: statusBg,
-              borderRadius: BorderRadius.circular(20),
+              color: statusBg, borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
               record.status,
               style: TextStyle(
-                color: statusColor,
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
+                color: statusColor, fontSize: 11, fontWeight: FontWeight.w700,
               ),
             ),
           ),
@@ -613,7 +578,7 @@ class _AttendanceCard extends StatelessWidget {
       case 'PRESENT': return AppColors.success;
       case 'LATE':    return AppColors.warning;
       case 'ABSENT':  return AppColors.error;
-      default:        return AppColors.textHint;
+      default:        return AppColors.textSecondary;
     }
   }
 

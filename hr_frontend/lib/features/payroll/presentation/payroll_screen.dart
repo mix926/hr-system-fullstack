@@ -56,12 +56,12 @@ class _PayrollViewState extends State<_PayrollView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppTheme.background(context),
       appBar: AppBar(
         title: const Text('Payroll'),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Container(height: 1, color: AppColors.border),
+          child: Container(height: 1, color: AppTheme.border(context)),
         ),
       ),
       body: BlocConsumer<PayrollBloc, PayrollState>(
@@ -176,10 +176,10 @@ class _PayrollViewState extends State<_PayrollView> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(children: [
-            const Icon(Icons.insights_rounded, size: 14, color: AppColors.textHint),
+            Icon(Icons.insights_rounded, size: 14, color: AppTheme.textSecondary(context)),
             const SizedBox(width: 6),
             Text('Payroll Overview', style: AppTextStyles.labelBold.copyWith(
-                color: AppColors.textHint, letterSpacing: 1)),
+                color: AppTheme.textSecondary(context), letterSpacing: 1)),
           ]),
           const SizedBox(height: 12),
           // Total paid amount hero card
@@ -272,7 +272,7 @@ class _PayrollViewState extends State<_PayrollView> {
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      decoration: AppTheme.cardDecoration(radius: 14),
+      decoration: AppTheme.cardDecorationOf(context, radius: 14),
       child: ExpansionTile(
         tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
@@ -305,7 +305,7 @@ class _PayrollViewState extends State<_PayrollView> {
                   Text(
                     '\$${payroll.netSalary.toStringAsFixed(2)}',
                     style: AppTextStyles.bodyMedium.copyWith(
-                      color: AppColors.textPrimary,
+                      color: AppTheme.textPrimary(context),
                       fontWeight: FontWeight.w700,
                       fontSize: 14,
                     ),
@@ -342,10 +342,10 @@ class _PayrollViewState extends State<_PayrollView> {
               '\$${payroll.netSalary.toStringAsFixed(2)}', AppColors.primary),
           const Divider(height: 20),
           _sectionRow(Icons.person_outline_rounded, 'Employee',
-              payroll.employeeId ?? '—', AppColors.textSecondary),
+              payroll.employeeId ?? '—', AppTheme.textSecondary(context)),
           if (payroll.createdAt != null)
             _sectionRow(Icons.schedule_outlined, 'Created',
-                payroll.createdAt!, AppColors.textSecondary),
+                payroll.createdAt!, AppTheme.textSecondary(context)),
 
           // Admin actions
           if (_userRole == 'ADMIN') ...[
@@ -393,7 +393,7 @@ class _PayrollViewState extends State<_PayrollView> {
           Text(label, style: AppTextStyles.bodyMedium),
           const Spacer(),
           Text(value, style: AppTextStyles.bodyMedium.copyWith(
-              color: AppColors.textPrimary, fontWeight: FontWeight.w600)),
+              color: AppTheme.textPrimary(context), fontWeight: FontWeight.w600)),
         ],
       ),
     );
@@ -442,7 +442,7 @@ class _PayrollViewState extends State<_PayrollView> {
               children: [
                 // Employee dropdown
                 DropdownButtonFormField<Employee>(
-                  decoration: AppTheme.inputDecoration('Select Employee',
+                  decoration: AppTheme.inputDecorationOf(context, 'Select Employee',
                       icon: Icons.person_outline_rounded),
                   items: employees
                       .map((e) => DropdownMenuItem(
@@ -459,7 +459,7 @@ class _PayrollViewState extends State<_PayrollView> {
                 // Month/Year
                 TextField(
                   controller: monthYearController,
-                  decoration: AppTheme.inputDecoration('Month/Year',
+                  decoration: AppTheme.inputDecorationOf(context, 'Month/Year',
                       icon: Icons.calendar_today_outlined,
                       suffix: Text('e.g. 2026-10',
                           style: AppTextStyles.bodySmall)),
@@ -470,7 +470,7 @@ class _PayrollViewState extends State<_PayrollView> {
                 TextField(
                   controller: baseSalaryController,
                   keyboardType: TextInputType.number,
-                  decoration: AppTheme.inputDecoration('Base Salary',
+                  decoration: AppTheme.inputDecorationOf(context, 'Base Salary',
                       icon: Icons.monetization_on_outlined,
                       suffix: Text('\$', style: AppTextStyles.bodyMedium)),
                 ),
@@ -480,7 +480,7 @@ class _PayrollViewState extends State<_PayrollView> {
                 TextField(
                   controller: bonusController,
                   keyboardType: TextInputType.number,
-                  decoration: AppTheme.inputDecoration('Bonus',
+                  decoration: AppTheme.inputDecorationOf(context, 'Bonus',
                       icon: Icons.card_giftcard_rounded,
                       suffix: Text('\$', style: AppTextStyles.bodyMedium)),
                 ),
@@ -490,7 +490,7 @@ class _PayrollViewState extends State<_PayrollView> {
                 TextField(
                   controller: deductionsController,
                   keyboardType: TextInputType.number,
-                  decoration: AppTheme.inputDecoration('Deductions',
+                  decoration: AppTheme.inputDecorationOf(context, 'Deductions',
                       icon: Icons.remove_circle_outline,
                       suffix: Text('\$', style: AppTextStyles.bodyMedium)),
                 ),
@@ -500,8 +500,8 @@ class _PayrollViewState extends State<_PayrollView> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancel',
-                  style: TextStyle(color: AppColors.textSecondary)),
+              child: Text('Cancel',
+                  style: TextStyle(color: AppTheme.textSecondary(context))),
             ),
             ElevatedButton(
               style: AppTheme.primaryButtonStyle(radius: 10),
@@ -571,7 +571,7 @@ class _PayrollViewState extends State<_PayrollView> {
             Text(
               payroll.monthYear,
               style: AppTextStyles.bodySmall.copyWith(
-                  color: AppColors.textHint),
+                  color: AppTheme.textSecondary(context)),
             ),
           ],
         ),
@@ -583,7 +583,7 @@ class _PayrollViewState extends State<_PayrollView> {
                 controller: baseSalaryController,
                 keyboardType:
                     const TextInputType.numberWithOptions(decimal: true),
-                decoration: AppTheme.inputDecoration(
+                decoration: AppTheme.inputDecorationOf(context, 
                   'Base Salary',
                   icon: Icons.monetization_on_outlined,
                   suffix: Text('\$', style: AppTextStyles.bodyMedium),
@@ -594,7 +594,7 @@ class _PayrollViewState extends State<_PayrollView> {
                 controller: bonusController,
                 keyboardType:
                     const TextInputType.numberWithOptions(decimal: true),
-                decoration: AppTheme.inputDecoration(
+                decoration: AppTheme.inputDecorationOf(context, 
                   'Bonus',
                   icon: Icons.card_giftcard_rounded,
                   suffix: Text('\$', style: AppTextStyles.bodyMedium),
@@ -605,7 +605,7 @@ class _PayrollViewState extends State<_PayrollView> {
                 controller: deductionsController,
                 keyboardType:
                     const TextInputType.numberWithOptions(decimal: true),
-                decoration: AppTheme.inputDecoration(
+                decoration: AppTheme.inputDecorationOf(context, 
                   'Deductions',
                   icon: Icons.remove_circle_outline,
                   suffix: Text('\$', style: AppTextStyles.bodyMedium),
@@ -617,8 +617,8 @@ class _PayrollViewState extends State<_PayrollView> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel',
-                style: TextStyle(color: AppColors.textSecondary)),
+            child: Text('Cancel',
+                style: TextStyle(color: AppTheme.textSecondary(context))),
           ),
           ElevatedButton(
             style: AppTheme.primaryButtonStyle(radius: 10),
@@ -692,7 +692,7 @@ class _PayrollViewState extends State<_PayrollView> {
                     border: Border.all(
                       color: isSelected
                           ? color
-                          : AppColors.border,
+                          : AppTheme.border(ctx),
                     ),
                   ),
                   child: Row(
@@ -714,8 +714,8 @@ class _PayrollViewState extends State<_PayrollView> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancel',
-                  style: TextStyle(color: AppColors.textSecondary)),
+              child: Text('Cancel',
+                  style: TextStyle(color: AppTheme.textSecondary(context))),
             ),
             ElevatedButton(
               style: AppTheme.primaryButtonStyle(radius: 10),
@@ -760,13 +760,13 @@ class _PayrollViewState extends State<_PayrollView> {
         actions: [
           OutlinedButton(
             style: OutlinedButton.styleFrom(
-              side: const BorderSide(color: AppColors.border),
+              side: BorderSide(color: AppTheme.border(ctx)),
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10)),
             ),
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel',
-                style: TextStyle(color: AppColors.textSecondary)),
+            child: Text('Cancel',
+                style: TextStyle(color: AppTheme.textSecondary(context))),
           ),
           const SizedBox(width: 8),
           ElevatedButton(
@@ -810,8 +810,8 @@ class _PayrollViewState extends State<_PayrollView> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.payments_outlined,
-              size: 48, color: AppColors.textHint),
+          Icon(Icons.payments_outlined,
+              size: 48, color: AppTheme.textSecondary(context)),
           const SizedBox(height: 12),
           Text('No payroll records yet', style: AppTextStyles.bodyMedium),
           if (_userRole == 'ADMIN') ...[

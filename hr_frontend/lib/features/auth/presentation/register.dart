@@ -88,7 +88,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppTheme.background(context),
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
@@ -97,7 +97,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         title: const Text('Create Account'),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Container(height: 1, color: AppColors.border),
+          child: Container(height: 1, color: AppTheme.border(context)),
         ),
       ),
       body: SafeArea(
@@ -120,10 +120,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     const SizedBox(height: 28),
 
                     // ── Section 1: Personal Info ──────────────────────
-                    _buildSectionLabel('Personal Information'),
+                    _buildSectionLabel(context, 'Personal Information'),
                     const SizedBox(height: 12),
                     Container(
-                      decoration: AppTheme.cardDecoration(),
+                      decoration: AppTheme.cardDecorationOf(context),
                       padding: const EdgeInsets.all(20),
                       child: Column(
                         children: [
@@ -134,7 +134,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   controller: _firstNameController,
                                   textInputAction: TextInputAction.next,
                                   textCapitalization: TextCapitalization.words,
-                                  decoration: AppTheme.inputDecoration(
+                                  decoration: AppTheme.inputDecorationOf(
+                                    context,
                                     'First Name',
                                     icon: Icons.person_outline_rounded,
                                   ),
@@ -148,7 +149,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   controller: _lastNameController,
                                   textInputAction: TextInputAction.next,
                                   textCapitalization: TextCapitalization.words,
-                                  decoration: AppTheme.inputDecoration('Last Name'),
+                                  decoration: AppTheme.inputDecorationOf(context, 'Last Name'),
                                   validator: (v) => (v == null || v.trim().isEmpty)
                                       ? 'Required' : null,
                                 ),
@@ -160,7 +161,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             controller: _emailController,
                             keyboardType: TextInputType.emailAddress,
                             textInputAction: TextInputAction.next,
-                            decoration: AppTheme.inputDecoration(
+                            decoration: AppTheme.inputDecorationOf(
+                              context,
                               'Email Address',
                               icon: Icons.email_outlined,
                             ),
@@ -176,16 +178,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     const SizedBox(height: 20),
 
                     // ── Section 2: Security ───────────────────────────
-                    _buildSectionLabel('Security'),
+                    _buildSectionLabel(context, 'Security'),
                     const SizedBox(height: 12),
                     Container(
-                      decoration: AppTheme.cardDecoration(),
+                      decoration: AppTheme.cardDecorationOf(context),
                       padding: const EdgeInsets.all(20),
                       child: TextFormField(
                         controller: _passwordController,
                         obscureText: _obscurePassword,
                         textInputAction: TextInputAction.next,
-                        decoration: AppTheme.inputDecoration(
+                        decoration: AppTheme.inputDecorationOf(
+                          context,
                           'Password',
                           icon: Icons.lock_outline_rounded,
                           suffix: IconButton(
@@ -194,7 +197,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   ? Icons.visibility_off_outlined
                                   : Icons.visibility_outlined,
                               size: 20,
-                              color: AppColors.textHint,
+                              color: AppTheme.textSecondary(context),
                             ),
                             onPressed: () =>
                                 setState(() => _obscurePassword = !_obscurePassword),
@@ -210,16 +213,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     const SizedBox(height: 20),
 
                     // ── Section 3: Job Info ───────────────────────────
-                    _buildSectionLabel('Job Details'),
+                    _buildSectionLabel(context, 'Job Details'),
                     const SizedBox(height: 12),
                     Container(
-                      decoration: AppTheme.cardDecoration(),
+                      decoration: AppTheme.cardDecorationOf(context),
                       padding: const EdgeInsets.all(20),
                       child: TextFormField(
                         controller: _positionController,
                         textInputAction: TextInputAction.done,
                         textCapitalization: TextCapitalization.words,
-                        decoration: AppTheme.inputDecoration(
+                        decoration: AppTheme.inputDecorationOf(
+                          context,
                           'Job Position / Title',
                           icon: Icons.work_outline_rounded,
                         ),
@@ -311,13 +315,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  Widget _buildSectionLabel(String label) {
+  Widget _buildSectionLabel(BuildContext context, String label) {
     return Row(
       children: [
         Text(
           label.toUpperCase(),
           style: AppTextStyles.labelBold.copyWith(
-            color: AppColors.textHint,
+            color: AppTheme.textSecondary(context),
             letterSpacing: 1,
           ),
         ),

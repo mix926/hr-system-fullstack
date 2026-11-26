@@ -1,5 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+import os
 
 # ខ្មែរ: ទាញយកពីទីតាំងថ្មីដោយប្រើ Absolute Imports (ចាប់ផ្តើមដោយពាក្យ app)
 from app.models.models import Base
@@ -38,6 +40,11 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Serve uploaded files (photos, documents) as static assets
+_uploads_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "uploads")
+os.makedirs(_uploads_dir, exist_ok=True)
+app.mount("/uploads", StaticFiles(directory=_uploads_dir), name="uploads")
 
 # ខ្មែរ: បញ្ចូល Routers ព្រមទាំងបន្ថែម Prefix /api/v1 និង Tags សម្រាប់រៀបចំឯកសារ Swagger UI
 app.include_router(auth.router,       prefix="/api/v1", tags=["Authentication"])

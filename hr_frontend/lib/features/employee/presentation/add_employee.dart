@@ -106,7 +106,7 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppTheme.background(context),
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
@@ -137,7 +137,7 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
         ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Container(height: 1, color: AppColors.border),
+          child: Container(height: 1, color: AppTheme.border(context)),
         ),
       ),
       body: SafeArea(
@@ -159,7 +159,7 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
                     _sectionLabel('Personal Information'),
                     const SizedBox(height: 12),
                     Container(
-                      decoration: AppTheme.cardDecoration(),
+                      decoration: AppTheme.cardDecorationOf(context, ),
                       padding: const EdgeInsets.all(20),
                       child: Column(
                         children: [
@@ -170,7 +170,7 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
                                   controller: _firstNameController,
                                   textInputAction: TextInputAction.next,
                                   textCapitalization: TextCapitalization.words,
-                                  decoration: AppTheme.inputDecoration(
+                                  decoration: AppTheme.inputDecorationOf(context, 
                                     'First Name',
                                     icon: Icons.person_outline_rounded,
                                   ),
@@ -184,7 +184,7 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
                                   controller: _lastNameController,
                                   textInputAction: TextInputAction.next,
                                   textCapitalization: TextCapitalization.words,
-                                  decoration: AppTheme.inputDecoration('Last Name'),
+                                  decoration: AppTheme.inputDecorationOf(context, 'Last Name'),
                                   validator: (v) => (v == null || v.trim().isEmpty)
                                       ? 'Required' : null,
                                 ),
@@ -196,7 +196,7 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
                             controller: _emailController,
                             keyboardType: TextInputType.emailAddress,
                             textInputAction: TextInputAction.next,
-                            decoration: AppTheme.inputDecoration(
+                            decoration: AppTheme.inputDecorationOf(context, 
                               'Email Address',
                               icon: Icons.email_outlined,
                             ),
@@ -216,7 +216,7 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
                     _sectionLabel('Job Details'),
                     const SizedBox(height: 12),
                     Container(
-                      decoration: AppTheme.cardDecoration(),
+                      decoration: AppTheme.cardDecorationOf(context, ),
                       padding: const EdgeInsets.all(20),
                       child: Column(
                         children: [
@@ -224,7 +224,7 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
                             controller: _positionController,
                             textInputAction: TextInputAction.next,
                             textCapitalization: TextCapitalization.words,
-                            decoration: AppTheme.inputDecoration(
+                            decoration: AppTheme.inputDecorationOf(context, 
                               'Job Position / Title',
                               icon: Icons.work_outline_rounded,
                             ),
@@ -235,7 +235,7 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
                             const SizedBox(height: 14),
                             DropdownButtonFormField<String>(
                               initialValue: _departmentId,
-                              decoration: AppTheme.inputDecoration(
+                              decoration: AppTheme.inputDecorationOf(context, 
                                 'Department (optional)',
                                 icon: Icons.corporate_fare_rounded,
                               ),
@@ -258,7 +258,7 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
                     _sectionLabel('System Role'),
                     const SizedBox(height: 12),
                     Container(
-                      decoration: AppTheme.cardDecoration(),
+                      decoration: AppTheme.cardDecorationOf(context, ),
                       padding: const EdgeInsets.all(16),
                       child: Row(
                         children: _roleOptions.map((opt) {
@@ -275,10 +275,10 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
                                 decoration: BoxDecoration(
                                   color: isSelected
                                       ? color.withValues(alpha: 0.1)
-                                      : AppColors.background,
+                                      : AppTheme.background(context),
                                   borderRadius: BorderRadius.circular(10),
                                   border: Border.all(
-                                    color: isSelected ? color : AppColors.border,
+                                    color: isSelected ? color : AppTheme.border(context),
                                     width: isSelected ? 1.8 : 1,
                                   ),
                                 ),
@@ -287,7 +287,7 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
                                     Icon(
                                       opt['icon'] as IconData,
                                       size: 22,
-                                      color: isSelected ? color : AppColors.textHint,
+                                      color: isSelected ? color : AppTheme.textSecondary(context),
                                     ),
                                     const SizedBox(height: 6),
                                     Text(
@@ -297,7 +297,7 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
                                         fontWeight: isSelected
                                             ? FontWeight.w700 : FontWeight.w500,
                                         color: isSelected
-                                            ? color : AppColors.textSecondary,
+                                            ? color : AppTheme.textSecondary(context),
                                       ),
                                     ),
                                   ],
@@ -314,7 +314,7 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
                     _sectionLabel('Temporary Password'),
                     const SizedBox(height: 12),
                     Container(
-                      decoration: AppTheme.cardDecoration(),
+                      decoration: AppTheme.cardDecorationOf(context, ),
                       padding: const EdgeInsets.all(20),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -324,7 +324,7 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
                             obscureText: _obscurePassword,
                             textInputAction: TextInputAction.done,
                             onFieldSubmitted: (_) => _isLoading ? null : _submit(),
-                            decoration: AppTheme.inputDecoration(
+                            decoration: AppTheme.inputDecorationOf(context, 
                               'Set Initial Password',
                               icon: Icons.lock_outline_rounded,
                               suffix: IconButton(
@@ -333,7 +333,7 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
                                       ? Icons.visibility_off_outlined
                                       : Icons.visibility_outlined,
                                   size: 20,
-                                  color: AppColors.textHint,
+                                  color: AppTheme.textSecondary(context),
                                 ),
                                 onPressed: () => setState(
                                     () => _obscurePassword = !_obscurePassword),
@@ -348,8 +348,8 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
                           const SizedBox(height: 10),
                           Row(
                             children: [
-                              const Icon(Icons.info_outline_rounded,
-                                  size: 14, color: AppColors.textHint),
+                              Icon(Icons.info_outline_rounded,
+                                  size: 14, color: AppTheme.textSecondary(context)),
                               const SizedBox(width: 6),
                               Text(
                                 'Employee should change this on first login.',
@@ -426,7 +426,7 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
         Text(
           label.toUpperCase(),
           style: AppTextStyles.labelBold.copyWith(
-            color: AppColors.textHint, letterSpacing: 1,
+            color: AppTheme.textSecondary(context), letterSpacing: 1,
           ),
         ),
         const SizedBox(width: 8),

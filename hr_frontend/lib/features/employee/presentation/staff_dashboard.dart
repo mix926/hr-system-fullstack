@@ -160,7 +160,7 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
 
   Widget _body() {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppTheme.background(context),
       body: RefreshIndicator(
         color: AppColors.primary,
         onRefresh: _refresh,
@@ -292,7 +292,6 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
   }
 
   Widget _loadingView() => const Scaffold(
-        backgroundColor: AppColors.background,
         body: Center(
           child: CircularProgressIndicator(color: AppColors.primary),
         ),
@@ -315,7 +314,7 @@ class _TodayAttendanceCard extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
       child: Container(
         padding: const EdgeInsets.all(20),
-        decoration: AppTheme.cardDecoration(radius: 16),
+        decoration: AppTheme.cardDecorationOf(context, radius: 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -326,7 +325,7 @@ class _TodayAttendanceCard extends StatelessWidget {
                 const SizedBox(width: 8),
                 Text('TODAY\'S ATTENDANCE',
                     style: AppTextStyles.labelBold.copyWith(
-                        color: AppColors.textHint, letterSpacing: 0.8)),
+                        color: AppTheme.textSecondary(context), letterSpacing: 0.8)),
               ],
             ),
             const SizedBox(height: 16),
@@ -345,7 +344,7 @@ class _TodayAttendanceCard extends StatelessWidget {
                 Container(
                   width: 1,
                   height: 50,
-                  color: AppColors.border,
+                  color: AppTheme.border(context),
                   margin: const EdgeInsets.symmetric(horizontal: 12),
                 ),
                 // Check-out
@@ -385,12 +384,12 @@ class _TodayAttendanceCard extends StatelessWidget {
             else
               Row(
                 children: [
-                  const Icon(Icons.info_outline_rounded,
-                      size: 16, color: AppColors.textHint),
+                  Icon(Icons.info_outline_rounded,
+                      size: 16, color: AppTheme.textSecondary(context)),
                   const SizedBox(width: 6),
                   Text('No attendance recorded today',
                       style: AppTextStyles.bodyMedium
-                          .copyWith(color: AppColors.textHint)),
+                          .copyWith(color: AppTheme.textSecondary(context))),
                 ],
               ),
           ],
@@ -420,19 +419,19 @@ class _TimeChip extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: done ? color.withValues(alpha: 0.1) : AppColors.background,
+            color: done ? color.withValues(alpha: 0.1) : AppTheme.background(context),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-                color: done ? color : AppColors.border,
+                color: done ? color : AppTheme.border(context),
                 width: done ? 1.5 : 1),
           ),
-          child: Icon(icon, color: done ? color : AppColors.textHint, size: 20),
+          child: Icon(icon, color: done ? color : AppTheme.textSecondary(context), size: 20),
         ),
         const SizedBox(height: 8),
         Text(time,
             style: AppTextStyles.titleSmall.copyWith(
               fontWeight: FontWeight.w800,
-              color: done ? AppColors.textPrimary : AppColors.textHint,
+              color: done ? AppTheme.textPrimary(context) : AppTheme.textSecondary(context),
             )),
         const SizedBox(height: 2),
         Text(label, style: AppTextStyles.captionText),
@@ -461,12 +460,12 @@ class _MyAttendanceStats extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(Icons.calendar_month_rounded,
-                  size: 13, color: AppColors.textHint),
+              Icon(Icons.calendar_month_rounded,
+                  size: 13, color: AppTheme.textSecondary(context)),
               const SizedBox(width: 6),
               Text('MY ATTENDANCE',
                   style: AppTextStyles.labelBold
-                      .copyWith(color: AppColors.textHint, letterSpacing: 0.8)),
+                      .copyWith(color: AppTheme.textSecondary(context), letterSpacing: 0.8)),
             ],
           ),
           const SizedBox(height: 12),
@@ -538,12 +537,12 @@ class _MyLeaveSummary extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(Icons.beach_access_rounded,
-                  size: 13, color: AppColors.textHint),
+              Icon(Icons.beach_access_rounded,
+                  size: 13, color: AppTheme.textSecondary(context)),
               const SizedBox(width: 6),
               Text('MY LEAVES',
                   style: AppTextStyles.labelBold
-                      .copyWith(color: AppColors.textHint, letterSpacing: 0.8)),
+                      .copyWith(color: AppTheme.textSecondary(context), letterSpacing: 0.8)),
             ],
           ),
           const SizedBox(height: 12),
@@ -576,7 +575,7 @@ class _MyPayslipPreview extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
       child: Container(
         padding: const EdgeInsets.all(20),
-        decoration: AppTheme.cardDecoration(radius: 16),
+        decoration: AppTheme.cardDecorationOf(context, radius: 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -587,7 +586,7 @@ class _MyPayslipPreview extends StatelessWidget {
                 const SizedBox(width: 8),
                 Text('LATEST PAYSLIP',
                     style: AppTextStyles.labelBold.copyWith(
-                        color: AppColors.textHint, letterSpacing: 0.8)),
+                        color: AppTheme.textSecondary(context), letterSpacing: 0.8)),
               ],
             ),
             const SizedBox(height: 14),
@@ -637,7 +636,7 @@ class _MyPayslipPreview extends StatelessWidget {
             ] else
               Text('No payslip records available',
                   style: AppTextStyles.bodyMedium
-                      .copyWith(color: AppColors.textHint)),
+                      .copyWith(color: AppTheme.textSecondary(context))),
           ],
         ),
       ),
@@ -659,7 +658,7 @@ class _MyPerformanceSummary extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
       child: Container(
         padding: const EdgeInsets.all(20),
-        decoration: AppTheme.cardDecoration(radius: 16),
+        decoration: AppTheme.cardDecorationOf(context, radius: 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -670,7 +669,7 @@ class _MyPerformanceSummary extends StatelessWidget {
                 const SizedBox(width: 8),
                 Text('MY PERFORMANCE',
                     style: AppTextStyles.labelBold.copyWith(
-                        color: AppColors.textHint, letterSpacing: 0.8)),
+                        color: AppTheme.textSecondary(context), letterSpacing: 0.8)),
               ],
             ),
             const SizedBox(height: 14),
@@ -696,7 +695,7 @@ class _MyPerformanceSummary extends StatelessWidget {
                       size: 18,
                       color: i < latest.rating
                           ? AppColors.warning
-                          : AppColors.textHint,
+                          : AppTheme.textSecondary(context),
                     );
                   }),
                   const SizedBox(width: 6),
@@ -708,7 +707,7 @@ class _MyPerformanceSummary extends StatelessWidget {
             ] else
               Text('No performance reviews yet',
                   style: AppTextStyles.bodyMedium
-                      .copyWith(color: AppColors.textHint)),
+                      .copyWith(color: AppTheme.textSecondary(context))),
           ],
         ),
       ),

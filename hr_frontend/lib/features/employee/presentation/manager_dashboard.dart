@@ -111,7 +111,7 @@ class _ManagerDashboardScreenState extends State<ManagerDashboardScreen> {
 
   Widget _body() {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppTheme.background(context),
       body: RefreshIndicator(
         color: const Color(0xFFEA580C),
         onRefresh: _refresh,
@@ -256,11 +256,11 @@ class _ManagerDashboardScreenState extends State<ManagerDashboardScreen> {
         children: [
           Row(
             children: [
-              const Icon(Icons.bolt_rounded, size: 13, color: AppColors.textHint),
+              Icon(Icons.bolt_rounded, size: 13, color: AppTheme.textSecondary(context)),
               const SizedBox(width: 6),
               Text('QUICK ACTIONS',
                   style: AppTextStyles.labelBold
-                      .copyWith(color: AppColors.textHint, letterSpacing: 0.8)),
+                      .copyWith(color: AppTheme.textSecondary(context), letterSpacing: 0.8)),
             ],
           ),
           const SizedBox(height: 12),
@@ -299,17 +299,18 @@ class _ManagerDashboardScreenState extends State<ManagerDashboardScreen> {
     );
   }
 
-  Widget _loadingView() => const Scaffold(
-        backgroundColor: AppColors.background,
-        body: Center(
+  Widget _loadingView() => Scaffold(
+        backgroundColor: AppTheme.background(context),
+        body: const Center(
           child: CircularProgressIndicator(color: Color(0xFFEA580C)),
         ),
       );
 
   Widget _errorView() => Scaffold(
-        backgroundColor: AppColors.background,
+        backgroundColor: AppTheme.background(context),
         body: SafeArea(
-          child: AppTheme.errorState(
+          child: AppTheme.errorStateOf(
+            context,
             message: _error,
             onRetry: _refresh,
           ),
@@ -338,11 +339,11 @@ class _TeamStatSection extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(Icons.groups_rounded, size: 13, color: AppColors.textHint),
+              Icon(Icons.groups_rounded, size: 13, color: AppTheme.textSecondary(context)),
               const SizedBox(width: 6),
               Text('TEAM OVERVIEW',
                   style: AppTextStyles.labelBold
-                      .copyWith(color: AppColors.textHint, letterSpacing: 0.8)),
+                      .copyWith(color: AppTheme.textSecondary(context), letterSpacing: 0.8)),
             ],
           ),
           const SizedBox(height: 12),
@@ -377,7 +378,7 @@ class _StatCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 10),
-      decoration: AppTheme.statCardDecoration(color),
+      decoration: AppTheme.statCardDecorationOf(context, color),
       child: Column(
         children: [
           Container(
@@ -425,12 +426,12 @@ class _LeaveApprovalSection extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(Icons.beach_access_rounded,
-                  size: 13, color: AppColors.textHint),
+              Icon(Icons.beach_access_rounded,
+                  size: 13, color: AppTheme.textSecondary(context)),
               const SizedBox(width: 6),
               Text('LEAVE APPROVAL QUEUE',
                   style: AppTextStyles.labelBold
-                      .copyWith(color: AppColors.textHint, letterSpacing: 0.8)),
+                      .copyWith(color: AppTheme.textSecondary(context), letterSpacing: 0.8)),
             ],
           ),
           const SizedBox(height: 12),
@@ -528,7 +529,7 @@ class _ActionChip extends StatelessWidget {
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
-        decoration: AppTheme.cardDecoration(radius: 14),
+        decoration: AppTheme.cardDecorationOf(context, radius: 14),
         child: Column(
           children: [
             Container(
@@ -568,7 +569,7 @@ class _TeamMemberCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
-      decoration: AppTheme.cardDecoration(radius: 14),
+      decoration: AppTheme.cardDecorationOf(context, radius: 14),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: Row(

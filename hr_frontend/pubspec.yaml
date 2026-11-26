@@ -39,6 +39,7 @@ dependencies:
   shared_preferences: ^2.5.6
   # Fix: LeaveBloc uses flutter_bloc but it was missing in pubspec.yaml
   flutter_bloc: ^8.1.6
+  image_picker: ^1.1.2
 
 dev_dependencies:
   flutter_test:

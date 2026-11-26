@@ -56,12 +56,12 @@ class _PerformanceViewState extends State<_PerformanceView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppTheme.background(context),
       appBar: AppBar(
         title: const Text('Performance Reviews'),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Container(height: 1, color: AppColors.border),
+          child: Container(height: 1, color: AppTheme.border(context)),
         ),
       ),
       body: BlocConsumer<PerformanceBloc, PerformanceState>(
@@ -143,7 +143,7 @@ class _PerformanceViewState extends State<_PerformanceView> {
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      decoration: AppTheme.cardDecoration(radius: 14),
+      decoration: AppTheme.cardDecorationOf(context, radius: 14),
       child: ExpansionTile(
         tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
@@ -222,7 +222,7 @@ class _PerformanceViewState extends State<_PerformanceView> {
           if (review.comments != null &&
               review.comments!.isNotEmpty) ...[
             _sectionRow(Icons.comment_outlined, 'Comments',
-                review.comments!, AppColors.textSecondary),
+                review.comments!, AppTheme.textSecondary(context)),
           ],
           if (_userRole == 'ADMIN') ...[
             const SizedBox(height: 8),
@@ -308,7 +308,7 @@ class _PerformanceViewState extends State<_PerformanceView> {
               children: [
                 // Employee dropdown
                 DropdownButtonFormField<Employee>(
-                  decoration: AppTheme.inputDecoration('Select Employee',
+                  decoration: AppTheme.inputDecorationOf(context, 'Select Employee',
                       icon: Icons.person_outline_rounded),
                   items: employees
                       .map((e) => DropdownMenuItem(
@@ -325,7 +325,7 @@ class _PerformanceViewState extends State<_PerformanceView> {
                 // Review period
                 TextField(
                   controller: periodController,
-                  decoration: AppTheme.inputDecoration('Review Period',
+                  decoration: AppTheme.inputDecorationOf(context, 'Review Period',
                       icon: Icons.calendar_today_outlined,
                       suffix: Text('e.g. 2025-Q3',
                           style: AppTextStyles.bodySmall)),
@@ -355,7 +355,7 @@ class _PerformanceViewState extends State<_PerformanceView> {
                 TextField(
                   controller: strengthsController,
                   maxLines: 2,
-                  decoration: AppTheme.inputDecoration('Strengths',
+                  decoration: AppTheme.inputDecorationOf(context, 'Strengths',
                       icon: Icons.check_circle_outline),
                 ),
                 const SizedBox(height: 12),
@@ -364,7 +364,7 @@ class _PerformanceViewState extends State<_PerformanceView> {
                 TextField(
                   controller: improvementsController,
                   maxLines: 2,
-                  decoration: AppTheme.inputDecoration(
+                  decoration: AppTheme.inputDecorationOf(context, 
                       'Areas for Improvement',
                       icon: Icons.trending_up_rounded),
                 ),
@@ -374,7 +374,7 @@ class _PerformanceViewState extends State<_PerformanceView> {
                 TextField(
                   controller: goalsController,
                   maxLines: 2,
-                  decoration: AppTheme.inputDecoration('Goals',
+                  decoration: AppTheme.inputDecorationOf(context, 'Goals',
                       icon: Icons.flag_outlined),
                 ),
                 const SizedBox(height: 12),
@@ -383,7 +383,7 @@ class _PerformanceViewState extends State<_PerformanceView> {
                 TextField(
                   controller: commentsController,
                   maxLines: 2,
-                  decoration: AppTheme.inputDecoration('Comments',
+                  decoration: AppTheme.inputDecorationOf(context, 'Comments',
                       icon: Icons.comment_outlined),
                 ),
               ],
@@ -392,8 +392,8 @@ class _PerformanceViewState extends State<_PerformanceView> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancel',
-                  style: TextStyle(color: AppColors.textSecondary)),
+              child: Text('Cancel',
+                  style: TextStyle(color: AppTheme.textSecondary(context))),
             ),
             ElevatedButton(
               style: AppTheme.primaryButtonStyle(radius: 10),
@@ -461,13 +461,13 @@ class _PerformanceViewState extends State<_PerformanceView> {
         actions: [
           OutlinedButton(
             style: OutlinedButton.styleFrom(
-              side: const BorderSide(color: AppColors.border),
+              side: BorderSide(color: AppTheme.border(context)),
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10)),
             ),
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel',
-                style: TextStyle(color: AppColors.textSecondary)),
+            child: Text('Cancel',
+                style: TextStyle(color: AppTheme.textSecondary(context))),
           ),
           const SizedBox(width: 8),
           ElevatedButton(
@@ -506,7 +506,7 @@ class _PerformanceViewState extends State<_PerformanceView> {
   Color _statusColor(String status) {
     switch (status.toUpperCase()) {
       case 'DRAFT':
-        return AppColors.textHint;
+        return AppTheme.textSecondary(context);
       case 'ACKNOWLEDGED':
         return AppColors.success;
       default:
@@ -519,8 +519,8 @@ class _PerformanceViewState extends State<_PerformanceView> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.rate_review_outlined,
-              size: 48, color: AppColors.textHint),
+          Icon(Icons.rate_review_outlined,
+              size: 48, color: AppTheme.textSecondary(context)),
           const SizedBox(height: 12),
           Text('No performance reviews yet',
               style: AppTextStyles.bodyMedium),

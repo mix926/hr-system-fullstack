@@ -31,6 +31,7 @@ class AppConstants {
   static String employeeOrgChartEndpoint(String id)      => '/api/v1/employees/$id/org-chart';
   static String employeeDocumentsEndpoint(String id)     => '/api/v1/employees/$id/documents';
   static String employeeDocUploadEndpoint(String id)     => '/api/v1/employees/$id/documents/upload';
+  static String employeePhotoEndpoint(String id)         => '/api/v1/employees/$id/photo';
   static String documentEndpoint(String docId)           => '/api/v1/employees/documents/$docId';
   static String designationEndpoint(String id)           => '/api/v1/employees/designations/$id';
 

@@ -31,7 +31,7 @@ class _LeaveScreenBody extends StatefulWidget {
 
 class _LeaveScreenBodyState extends State<_LeaveScreenBody> {
   String _userRole   = '';
-  String _filterStatus = 'ALL'; // ALL | PENDING | APPROVED | REJECTED
+  String _filterStatus = 'ALL';
   String _searchQuery = '';
   final _searchController = TextEditingController();
 
@@ -43,7 +43,7 @@ class _LeaveScreenBodyState extends State<_LeaveScreenBody> {
 
   Future<void> _loadRole() async {
     final prefs = await SharedPreferences.getInstance();
-    setState(() => _userRole = prefs.getString('role') ?? 'STAFF');
+    if (mounted) setState(() => _userRole = prefs.getString('role') ?? 'STAFF');
   }
 
   @override
@@ -54,8 +54,11 @@ class _LeaveScreenBodyState extends State<_LeaveScreenBody> {
 
   @override
   Widget build(BuildContext context) {
+    final bg      = AppTheme.background(context);
+    final surface = AppTheme.surface(context);
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: bg,
       body: BlocConsumer<LeaveBloc, LeaveState>(
         listener: (context, state) {
           if (state is LeaveOperationSuccessState) {
@@ -83,8 +86,8 @@ class _LeaveScreenBodyState extends State<_LeaveScreenBody> {
             child: Column(
               children: [
                 _buildHeader(context),
-                _buildSearchBar(),
-                _buildFilterBar(),
+                _buildSearchBar(context, surface),
+                _buildFilterBar(context, surface),
                 Expanded(child: _buildContent(context, state)),
               ],
             ),
@@ -103,20 +106,56 @@ class _LeaveScreenBodyState extends State<_LeaveScreenBody> {
     );
   }
 
-  // ── Search bar ────────────────────────────────────────────────
-  Widget _buildSearchBar() {
+  // ── Header ─────────────────────────────────────────────────
+  Widget _buildHeader(BuildContext context) {
+    final surface = AppTheme.surface(context);
+    final border  = AppTheme.border(context);
     return Container(
-      color: AppColors.surface,
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+      decoration: BoxDecoration(
+        color: surface,
+        border: Border(bottom: BorderSide(color: border)),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('My Leaves',
+                    style: AppTextStyles.displayMedium.copyWith(
+                        color: AppTheme.textPrimary(context))),
+                const SizedBox(height: 2),
+                Text('View and manage your leave requests',
+                    style: AppTextStyles.bodyMedium.copyWith(
+                        color: AppTheme.textSecondary(context))),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ── Search bar ─────────────────────────────────────────────
+  Widget _buildSearchBar(BuildContext context, Color surface) {
+    final bg     = AppTheme.background(context);
+    final border = AppTheme.border(context);
+    return Container(
+      color: surface,
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
       child: TextField(
         controller: _searchController,
+        style: TextStyle(color: AppTheme.textPrimary(context)),
         decoration: InputDecoration(
           hintText: 'Search by leave type or status…',
-          hintStyle: AppTextStyles.bodyMedium.copyWith(color: AppColors.textHint),
-          prefixIcon: const Icon(Icons.search_rounded, size: 18, color: AppColors.textHint),
+          hintStyle: AppTextStyles.bodyMedium.copyWith(color: AppTheme.textSecondary(context)),
+          prefixIcon:
+              Icon(Icons.search_rounded, size: 18, color: AppTheme.textSecondary(context)),
           suffixIcon: _searchQuery.isNotEmpty
               ? IconButton(
-                  icon: const Icon(Icons.clear_rounded, size: 18, color: AppColors.textHint),
+                  icon: Icon(Icons.clear_rounded,
+                      size: 18, color: AppTheme.textSecondary(context)),
                   onPressed: () {
                     _searchController.clear();
                     setState(() => _searchQuery = '');
@@ -126,14 +165,14 @@ class _LeaveScreenBodyState extends State<_LeaveScreenBody> {
           isDense: true,
           contentPadding: const EdgeInsets.symmetric(vertical: 8),
           filled: true,
-          fillColor: AppColors.background,
+          fillColor: bg,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(color: AppColors.border),
+            borderSide: BorderSide(color: border),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(color: AppColors.border),
+            borderSide: BorderSide(color: border),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
@@ -145,11 +184,13 @@ class _LeaveScreenBodyState extends State<_LeaveScreenBody> {
     );
   }
 
-  // ── Filter bar ────────────────────────────────────────────────
-  Widget _buildFilterBar() {
+  // ── Filter bar ─────────────────────────────────────────────
+  Widget _buildFilterBar(BuildContext context, Color surface) {
     const filters = ['ALL', 'PENDING', 'APPROVED', 'REJECTED'];
+    final bg     = AppTheme.background(context);
+    final border = AppTheme.border(context);
     return Container(
-      color: AppColors.surface,
+      color: surface,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
@@ -162,16 +203,18 @@ class _LeaveScreenBodyState extends State<_LeaveScreenBody> {
                 label: Text(f),
                 selected: selected,
                 onSelected: (_) => setState(() => _filterStatus = f),
-                backgroundColor: AppColors.background,
+                backgroundColor: bg,
                 selectedColor: AppColors.primaryLight,
                 checkmarkColor: AppColors.primary,
                 labelStyle: TextStyle(
                   fontSize: 12,
                   fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-                  color: selected ? AppColors.primary : AppColors.textSecondary,
+                  color: selected
+                      ? AppColors.primary
+                      : AppTheme.textSecondary(context),
                 ),
                 side: BorderSide(
-                  color: selected ? AppColors.primary : AppColors.border,
+                  color: selected ? AppColors.primary : border,
                 ),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20)),
@@ -183,45 +226,15 @@ class _LeaveScreenBodyState extends State<_LeaveScreenBody> {
     );
   }
 
-  // ── Header ────────────────────────────────────────────────────
-  Widget _buildHeader(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
-      decoration: const BoxDecoration(
-        color: AppColors.surface,
-        border: Border(bottom: BorderSide(color: AppColors.border)),
-      ),
-      child: Row(
-        children: [
-          const Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('My Leaves', style: AppTextStyles.displayMedium),
-                SizedBox(height: 2),
-                Text('View and manage your leave requests',
-                    style: AppTextStyles.bodyMedium),
-              ],
-            ),
-          ),
-
-        ],
-      ),
-    );
-  }
-
-  // ── Content ───────────────────────────────────────────────────
+  // ── Content ─────────────────────────────────────────────────
   Widget _buildContent(BuildContext context, LeaveState state) {
     if (state is LeaveLoadingState) {
       return const Center(
-        child: CircularProgressIndicator(color: AppColors.primary),
-      );
+          child: CircularProgressIndicator(color: AppColors.primary));
     }
-
     if (state is LeaveErrorState) {
       return _buildError(context, state.message);
     }
-
     if (state is LeaveLoadedState || state is LeaveOperationSuccessState) {
       final leaves = state is LeaveLoadedState
           ? state.leaves
@@ -230,20 +243,17 @@ class _LeaveScreenBodyState extends State<_LeaveScreenBody> {
               : <LeaveModel>[]);
       return _buildList(context, leaves);
     }
-
     return const Center(
-      child: CircularProgressIndicator(color: AppColors.primary),
-    );
+        child: CircularProgressIndicator(color: AppColors.primary));
   }
 
-  // ── Leave list ────────────────────────────────────────────────
+  // ── Leave list ──────────────────────────────────────────────
   Widget _buildList(BuildContext context, List<LeaveModel> leaves) {
     if (leaves.isEmpty) {
       return RefreshIndicator(
         onRefresh: () async =>
             context.read<LeaveBloc>().add(LoadLeavesEvent()),
         color: AppColors.primary,
-        backgroundColor: AppColors.surface,
         child: ListView(
           children: [
             const SizedBox(height: 120),
@@ -254,17 +264,19 @@ class _LeaveScreenBodyState extends State<_LeaveScreenBody> {
                   Container(
                     padding: const EdgeInsets.all(20),
                     decoration: const BoxDecoration(
-                      color: AppColors.primaryLight,
-                      shape: BoxShape.circle,
+                      color: AppColors.primaryLight, shape: BoxShape.circle,
                     ),
                     child: const Icon(Icons.beach_access_rounded,
                         size: 40, color: AppColors.primary),
                   ),
                   const SizedBox(height: 16),
-                  const Text('No leave requests yet', style: AppTextStyles.titleMedium),
+                  Text('No leave requests yet',
+                      style: AppTextStyles.titleMedium.copyWith(
+                          color: AppTheme.textPrimary(context))),
                   const SizedBox(height: 6),
-                  const Text('Tap + to submit a new request',
-                      style: AppTextStyles.bodyMedium),
+                  Text('Tap + to submit a new request',
+                      style: AppTextStyles.bodyMedium.copyWith(
+                          color: AppTheme.textSecondary(context))),
                 ],
               ),
             ),
@@ -281,18 +293,15 @@ class _LeaveScreenBodyState extends State<_LeaveScreenBody> {
     final filtered = q.isEmpty
         ? statusFiltered
         : statusFiltered.where((l) {
-            final typeMatch = l.leaveType.toLowerCase().contains(q);
-            final statusMatch = l.status.toLowerCase().contains(q);
-            final nameMatch =
+            return l.leaveType.toLowerCase().contains(q) ||
+                l.status.toLowerCase().contains(q) ||
                 (l.employeeName ?? '').toLowerCase().contains(q);
-            return typeMatch || statusMatch || nameMatch;
           }).toList();
 
     return RefreshIndicator(
       onRefresh: () async =>
           context.read<LeaveBloc>().add(LoadLeavesEvent()),
       color: AppColors.primary,
-      backgroundColor: AppColors.surface,
       child: ListView.builder(
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 120),
         itemCount: filtered.length,
@@ -301,7 +310,7 @@ class _LeaveScreenBodyState extends State<_LeaveScreenBody> {
     );
   }
 
-  // ── Leave card ────────────────────────────────────────────────
+  // ── Leave card ──────────────────────────────────────────────
   Widget _buildLeaveCard(BuildContext context, LeaveModel leave) {
     final statusColor = _statusColor(leave.status);
     final statusBg    = _statusBg(leave.status);
@@ -311,13 +320,12 @@ class _LeaveScreenBodyState extends State<_LeaveScreenBody> {
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
-      decoration: AppTheme.cardDecoration(radius: 14),
+      decoration: AppTheme.cardDecorationOf(context, radius: 14),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Top row: type + status badge
             Row(
               children: [
                 Container(
@@ -331,14 +339,14 @@ class _LeaveScreenBodyState extends State<_LeaveScreenBody> {
                 ),
                 const SizedBox(width: 10),
                 Expanded(
-                  child: Text(leave.leaveType, style: AppTextStyles.titleMedium),
+                  child: Text(leave.leaveType,
+                      style: AppTextStyles.titleMedium.copyWith(
+                          color: AppTheme.textPrimary(context))),
                 ),
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: statusBg,
-                    borderRadius: BorderRadius.circular(20),
+                    color: statusBg, borderRadius: BorderRadius.circular(20),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -348,10 +356,9 @@ class _LeaveScreenBodyState extends State<_LeaveScreenBody> {
                       Text(
                         leave.status,
                         style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          color: statusColor,
-                        ),
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: statusColor),
                       ),
                     ],
                   ),
@@ -359,20 +366,17 @@ class _LeaveScreenBodyState extends State<_LeaveScreenBody> {
               ],
             ),
             const SizedBox(height: 12),
-            const Divider(height: 1),
+            Divider(height: 1, color: AppTheme.border(context)),
             const SizedBox(height: 12),
-            // Date row
             Row(
               children: [
-                _infoChip(Icons.calendar_today_outlined,
-                    _formatDate(leave.startDate)),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 8),
+                _infoChip(Icons.calendar_today_outlined, _formatDate(leave.startDate)),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
                   child: Icon(Icons.arrow_forward_rounded,
-                      size: 14, color: AppColors.textHint),
+                      size: 14, color: AppTheme.textSecondary(context)),
                 ),
-                _infoChip(
-                    Icons.event_outlined, _formatDate(leave.endDate)),
+                _infoChip(Icons.event_outlined, _formatDate(leave.endDate)),
               ],
             ),
             if (leave.reason != null && leave.reason!.isNotEmpty) ...[
@@ -380,27 +384,27 @@ class _LeaveScreenBodyState extends State<_LeaveScreenBody> {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(Icons.notes_rounded,
-                      size: 14, color: AppColors.textHint),
+                  Icon(Icons.notes_rounded,
+                      size: 14, color: AppTheme.textSecondary(context)),
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(leave.reason!,
-                        style: AppTextStyles.bodyMedium,
+                        style: AppTextStyles.bodyMedium.copyWith(
+                            color: AppTheme.textSecondary(context)),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis),
                   ),
                 ],
               ),
             ],
-            // ── Show employee name for ADMIN/MANAGER ────────────
             if ((_userRole == 'ADMIN' || _userRole == 'MANAGER') &&
                 leave.employeeName != null &&
                 leave.employeeName!.isNotEmpty) ...[
               const SizedBox(height: 8),
               Row(
                 children: [
-                  const Icon(Icons.person_outline_rounded,
-                      size: 14, color: AppColors.textHint),
+                  Icon(Icons.person_outline_rounded,
+                      size: 14, color: AppTheme.textSecondary(context)),
                   const SizedBox(width: 6),
                   Text('By: ${leave.employeeName}',
                       style: AppTextStyles.bodySmall.copyWith(
@@ -409,10 +413,9 @@ class _LeaveScreenBodyState extends State<_LeaveScreenBody> {
                 ],
               ),
             ],
-            // ── Approve / Reject buttons for ADMIN/MANAGER ──────
             if (canAct) ...[
               const SizedBox(height: 12),
-              const Divider(height: 1),
+              Divider(height: 1, color: AppTheme.border(context)),
               const SizedBox(height: 10),
               Row(
                 children: [
@@ -426,11 +429,11 @@ class _LeaveScreenBodyState extends State<_LeaveScreenBody> {
                         padding: const EdgeInsets.symmetric(vertical: 8),
                       ),
                       onPressed: () => context.read<LeaveBloc>().add(
-                            UpdateLeaveStatusEvent(leave.id!, 'REJECTED'),
-                          ),
+                            UpdateLeaveStatusEvent(leave.id!, 'REJECTED')),
                       icon: const Icon(Icons.cancel_outlined, size: 16),
                       label: const Text('Reject',
-                          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                          style: TextStyle(
+                              fontSize: 13, fontWeight: FontWeight.w600)),
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -445,11 +448,11 @@ class _LeaveScreenBodyState extends State<_LeaveScreenBody> {
                         padding: const EdgeInsets.symmetric(vertical: 8),
                       ),
                       onPressed: () => context.read<LeaveBloc>().add(
-                            UpdateLeaveStatusEvent(leave.id!, 'APPROVED'),
-                          ),
+                            UpdateLeaveStatusEvent(leave.id!, 'APPROVED')),
                       icon: const Icon(Icons.check_circle_outline, size: 16),
                       label: const Text('Approve',
-                          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                          style: TextStyle(
+                              fontSize: 13, fontWeight: FontWeight.w600)),
                     ),
                   ),
                 ],
@@ -465,14 +468,14 @@ class _LeaveScreenBodyState extends State<_LeaveScreenBody> {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 13, color: AppColors.textHint),
+        Icon(icon, size: 13, color: AppTheme.textSecondary(context)),
         const SizedBox(width: 4),
         Text(label, style: AppTextStyles.bodySmall),
       ],
     );
   }
 
-  // ── Error state ───────────────────────────────────────────────
+  // ── Error state ─────────────────────────────────────────────
   Widget _buildError(BuildContext context, String message) {
     return Center(
       child: Padding(
@@ -483,8 +486,7 @@ class _LeaveScreenBodyState extends State<_LeaveScreenBody> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: const BoxDecoration(
-                color: AppColors.errorLight, shape: BoxShape.circle,
-              ),
+                  color: AppColors.errorLight, shape: BoxShape.circle),
               child: const Icon(Icons.wifi_off_rounded,
                   size: 40, color: AppColors.error),
             ),
@@ -505,7 +507,6 @@ class _LeaveScreenBodyState extends State<_LeaveScreenBody> {
     );
   }
 
-  // ── Submit form modal ─────────────────────────────────────────
   void _showSubmitForm(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -518,7 +519,6 @@ class _LeaveScreenBodyState extends State<_LeaveScreenBody> {
     );
   }
 
-  // ── Helpers ───────────────────────────────────────────────────
   Color _statusColor(String status) {
     switch (status.toUpperCase()) {
       case 'APPROVED': return AppColors.success;
@@ -547,16 +547,13 @@ class _LeaveScreenBodyState extends State<_LeaveScreenBody> {
     try {
       final dt = DateTime.parse(raw);
       return '${dt.year}-${dt.month.toString().padLeft(2, '0')}-${dt.day.toString().padLeft(2, '0')}';
-    } catch (_) {
-      return raw;
-    }
+    } catch (_) { return raw; }
   }
 }
 
-// ─────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────
 //  Leave Request Form (Bottom Sheet)
-// ─────────────────────────────────────────────
-
+// ─────────────────────────────────────────────────────────────────
 class _LeaveFormSheet extends StatefulWidget {
   const _LeaveFormSheet();
 
@@ -567,18 +564,14 @@ class _LeaveFormSheet extends StatefulWidget {
 class _LeaveFormSheetState extends State<_LeaveFormSheet> {
   final _formKey = GlobalKey<FormState>();
 
-  String  _leaveType  = 'Annual Leave';
+  String    _leaveType = 'Annual Leave';
   DateTime? _startDate;
   DateTime? _endDate;
   final _reasonController = TextEditingController();
 
   static const List<String> _leaveTypes = [
-    'Annual Leave',
-    'Sick Leave',
-    'Maternity Leave',
-    'Paternity Leave',
-    'Emergency Leave',
-    'Unpaid Leave',
+    'Annual Leave', 'Sick Leave', 'Maternity Leave',
+    'Paternity Leave', 'Emergency Leave', 'Unpaid Leave',
   ];
 
   @override
@@ -607,9 +600,7 @@ class _LeaveFormSheetState extends State<_LeaveFormSheet> {
     setState(() {
       if (isStart) {
         _startDate = picked;
-        if (_endDate != null && _endDate!.isBefore(picked)) {
-          _endDate = picked;
-        }
+        if (_endDate != null && _endDate!.isBefore(picked)) _endDate = picked;
       } else {
         _endDate = picked;
       }
@@ -632,17 +623,14 @@ class _LeaveFormSheetState extends State<_LeaveFormSheet> {
       ));
       return;
     }
-
     final leave = LeaveModel(
       leaveType:  _leaveType,
       startDate:  _startDate!.toIso8601String(),
       endDate:    _endDate!.toIso8601String(),
       reason:     _reasonController.text.trim().isEmpty
-                    ? null
-                    : _reasonController.text.trim(),
+                    ? null : _reasonController.text.trim(),
       status: 'PENDING',
     );
-
     context.read<LeaveBloc>().add(CreateLeaveEvent(leave));
     Navigator.pop(context);
   }
@@ -652,61 +640,57 @@ class _LeaveFormSheetState extends State<_LeaveFormSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final surface      = AppTheme.surface(context);
+    final borderColor  = AppTheme.border(context);
+    final textPrimary  = AppTheme.textPrimary(context);
     final bottomPadding = MediaQuery.of(context).viewInsets.bottom;
 
     return Container(
-      decoration: const BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      decoration: BoxDecoration(
+        color: surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       padding: EdgeInsets.fromLTRB(24, 0, 24, 24 + bottomPadding),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Handle
           Center(
             child: Container(
               margin: const EdgeInsets.only(top: 12, bottom: 20),
               width: 40, height: 4,
               decoration: BoxDecoration(
-                color: AppColors.border,
-                borderRadius: BorderRadius.circular(2),
+                color: borderColor, borderRadius: BorderRadius.circular(2),
               ),
             ),
           ),
-
-          // Title
-          const Row(
+          Row(
             children: [
-              Icon(Icons.beach_access_rounded,
+              const Icon(Icons.beach_access_rounded,
                   color: AppColors.primary, size: 22),
-              SizedBox(width: 10),
-              Text('New Leave Request', style: AppTextStyles.titleLarge),
+              const SizedBox(width: 10),
+              Text('New Leave Request',
+                  style: AppTextStyles.titleLarge.copyWith(color: textPrimary)),
             ],
           ),
           const SizedBox(height: 20),
-
           Form(
             key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Leave type dropdown
                 DropdownButtonFormField<String>(
                   initialValue: _leaveType,
-                  decoration: AppTheme.inputDecoration(
-                    'Leave Type',
-                    icon: Icons.category_outlined,
-                  ),
+                  dropdownColor: surface,
+                  style: TextStyle(color: textPrimary, fontSize: 14),
+                  decoration: AppTheme.inputDecorationOf(context, 
+                      'Leave Type', icon: Icons.category_outlined),
                   items: _leaveTypes
                       .map((t) => DropdownMenuItem(value: t, child: Text(t)))
                       .toList(),
                   onChanged: (v) => setState(() => _leaveType = v!),
                 ),
                 const SizedBox(height: 14),
-
-                // Date row
                 Row(
                   children: [
                     Expanded(
@@ -716,14 +700,14 @@ class _LeaveFormSheetState extends State<_LeaveFormSheet> {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 14, vertical: 15),
                           decoration: BoxDecoration(
-                            color: AppColors.surface,
+                            color: surface,
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: AppColors.border),
+                            border: Border.all(color: borderColor),
                           ),
                           child: Row(
                             children: [
-                              const Icon(Icons.calendar_today_outlined,
-                                  size: 16, color: AppColors.textHint),
+                              Icon(Icons.calendar_today_outlined,
+                                  size: 16, color: AppTheme.textSecondary(context)),
                               const SizedBox(width: 8),
                               Text(
                                 _startDate != null
@@ -731,8 +715,8 @@ class _LeaveFormSheetState extends State<_LeaveFormSheet> {
                                     : 'Start Date',
                                 style: AppTextStyles.bodyMedium.copyWith(
                                   color: _startDate != null
-                                      ? AppColors.textPrimary
-                                      : AppColors.textHint,
+                                      ? textPrimary
+                                      : AppTheme.textSecondary(context),
                                 ),
                               ),
                             ],
@@ -740,10 +724,10 @@ class _LeaveFormSheetState extends State<_LeaveFormSheet> {
                         ),
                       ),
                     ),
-                    const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 8),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
                       child: Icon(Icons.arrow_forward_rounded,
-                          size: 16, color: AppColors.textHint),
+                          size: 16, color: AppTheme.textSecondary(context)),
                     ),
                     Expanded(
                       child: GestureDetector(
@@ -752,14 +736,14 @@ class _LeaveFormSheetState extends State<_LeaveFormSheet> {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 14, vertical: 15),
                           decoration: BoxDecoration(
-                            color: AppColors.surface,
+                            color: surface,
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: AppColors.border),
+                            border: Border.all(color: borderColor),
                           ),
                           child: Row(
                             children: [
-                              const Icon(Icons.event_outlined,
-                                  size: 16, color: AppColors.textHint),
+                              Icon(Icons.event_outlined,
+                                  size: 16, color: AppTheme.textSecondary(context)),
                               const SizedBox(width: 8),
                               Text(
                                 _endDate != null
@@ -767,8 +751,8 @@ class _LeaveFormSheetState extends State<_LeaveFormSheet> {
                                     : 'End Date',
                                 style: AppTextStyles.bodyMedium.copyWith(
                                   color: _endDate != null
-                                      ? AppColors.textPrimary
-                                      : AppColors.textHint,
+                                      ? textPrimary
+                                      : AppTheme.textSecondary(context),
                                 ),
                               ),
                             ],
@@ -779,20 +763,15 @@ class _LeaveFormSheetState extends State<_LeaveFormSheet> {
                   ],
                 ),
                 const SizedBox(height: 14),
-
-                // Reason (optional)
                 TextFormField(
                   controller: _reasonController,
                   maxLines: 3,
+                  style: TextStyle(color: textPrimary),
                   textInputAction: TextInputAction.done,
-                  decoration: AppTheme.inputDecoration(
-                    'Reason (optional)',
-                    icon: Icons.notes_rounded,
-                  ),
+                  decoration: AppTheme.inputDecorationOf(context, 
+                      'Reason (optional)', icon: Icons.notes_rounded),
                 ),
                 const SizedBox(height: 20),
-
-                // Submit button
                 SizedBox(
                   height: 52,
                   child: ElevatedButton.icon(

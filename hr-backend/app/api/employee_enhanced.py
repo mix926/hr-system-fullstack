@@ -395,6 +395,70 @@ def get_org_chart(
 
 # ─── Extended Employee Profile ─────────────────────────────────
 
+PHOTO_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "uploads", "photos")
+os.makedirs(PHOTO_DIR, exist_ok=True)
+
+ALLOWED_IMAGE_TYPES = {"image/jpeg", "image/png", "image/webp", "image/gif"}
+
+
+@router.post("/{employee_id}/photo", response_model=EmployeeDetailResponse)
+async def upload_photo(
+    employee_id: str,
+    file: UploadFile = File(...),
+    current_user=Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Upload or replace a profile photo. STAFF can update their own; ADMIN/MANAGER can update anyone."""
+    if _role(current_user) == "STAFF" and employee_id != current_user.id:
+        raise HTTPException(status_code=403, detail="You can only update your own photo")
+
+    emp = db.query(Employee).filter(Employee.id == employee_id).first()
+    if not emp:
+        raise HTTPException(status_code=404, detail="Employee not found")
+
+    if file.content_type not in ALLOWED_IMAGE_TYPES:
+        raise HTTPException(status_code=422, detail="Only JPEG, PNG, WebP or GIF images are allowed")
+
+    # Remove old photo file if it exists
+    if emp.photo_path and os.path.exists(emp.photo_path):
+        os.remove(emp.photo_path)
+
+    # Save new photo
+    ext = os.path.splitext(file.filename)[1] or ".jpg"
+    saved_name = f"{uuid.uuid4()}{ext}"
+    file_path = os.path.join(PHOTO_DIR, saved_name)
+    content = await file.read()
+    with open(file_path, "wb") as f:
+        f.write(content)
+
+    emp.photo_path = file_path
+    db.commit()
+    db.refresh(emp)
+    return emp
+
+
+@router.delete("/{employee_id}/photo", response_model=EmployeeDetailResponse)
+def remove_photo(
+    employee_id: str,
+    current_user=Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Remove the profile photo. STAFF can remove their own; ADMIN/MANAGER can remove anyone's."""
+    if _role(current_user) == "STAFF" and employee_id != current_user.id:
+        raise HTTPException(status_code=403, detail="You can only remove your own photo")
+
+    emp = db.query(Employee).filter(Employee.id == employee_id).first()
+    if not emp:
+        raise HTTPException(status_code=404, detail="Employee not found")
+
+    if emp.photo_path and os.path.exists(emp.photo_path):
+        os.remove(emp.photo_path)
+
+    emp.photo_path = None
+    db.commit()
+    db.refresh(emp)
+    return emp
+
 @router.get("/{employee_id}/profile", response_model=EmployeeDetailResponse)
 def get_employee_profile(
     employee_id: str,

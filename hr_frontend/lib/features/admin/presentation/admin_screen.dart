@@ -95,18 +95,16 @@ class _AdminViewState extends State<_AdminView>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppTheme.background(context),
       appBar: AppBar(
         title: const Text('Administration'),
-        backgroundColor: AppColors.surface,
-        foregroundColor: AppColors.textPrimary,
         elevation: 0,
         scrolledUnderElevation: 2,
         bottom: TabBar(
           controller: _tabs,
           indicatorColor: AppColors.primary,
           labelColor: AppColors.primary,
-          unselectedLabelColor: AppColors.textHint,
+          unselectedLabelColor: AppTheme.textSecondary(context),
           labelStyle: AppTextStyles.titleSmall,
           unselectedLabelStyle: AppTextStyles.bodySmall,
           isScrollable: true,
@@ -184,7 +182,8 @@ class _SystemStatsTab extends StatelessWidget {
       );
     }
     if (state is AdminError) {
-      return AppTheme.errorState(
+      return AppTheme.errorStateOf(
+        context,
         message: state.message,
         onRetry: onRefresh,
       );
@@ -197,7 +196,8 @@ class _SystemStatsTab extends StatelessWidget {
       children: [
         SizedBox(
           height: 300,
-          child: AppTheme.emptyState(
+          child: AppTheme.emptyStateOf(
+            context,
             icon: Icons.bar_chart_rounded,
             title: 'No stats loaded',
             subtitle: 'Pull down to refresh',
@@ -293,7 +293,7 @@ class _StatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: AppTheme.statCardDecoration(data.color),
+      decoration: AppTheme.statCardDecorationOf(context, data.color),
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -354,7 +354,7 @@ class _AuditLogsTab extends StatelessWidget {
     return Column(
       children: [
         Container(
-          color: AppColors.surface,
+          color: AppTheme.surface(context),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           child: Row(
             children: [
@@ -362,9 +362,9 @@ class _AuditLogsTab extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   decoration: BoxDecoration(
-                    color: AppColors.background,
+                    color: AppTheme.background(context),
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: AppColors.border),
+                    border: Border.all(color: AppTheme.border(context)),
                   ),
                   child: DropdownButtonHideUnderline(
                     child: DropdownButton<String?>(
@@ -373,7 +373,7 @@ class _AuditLogsTab extends StatelessWidget {
                           style: AppTextStyles.bodyMedium),
                       isExpanded: true,
                       style: AppTextStyles.bodyMedium
-                          .copyWith(color: AppColors.textPrimary),
+                          .copyWith(color: AppTheme.textPrimary(context)),
                       items: [
                         const DropdownMenuItem(
                           value: null,
@@ -415,7 +415,8 @@ class _AuditLogsTab extends StatelessWidget {
                 );
               }
               if (state is AdminError) {
-                return AppTheme.errorState(
+                return AppTheme.errorStateOf(
+                  context,
                   message: state.message,
                   onRetry: () => context.read<AdminBloc>().add(
                         LoadAuditLogsEvent(action: actionFilter),
@@ -424,7 +425,8 @@ class _AuditLogsTab extends StatelessWidget {
               }
               if (state is AuditLogsLoaded) {
                 if (state.logs.isEmpty) {
-                  return AppTheme.emptyState(
+                  return AppTheme.emptyStateOf(
+                    context,
                     icon: Icons.history_rounded,
                     title: 'No audit logs',
                     subtitle: 'Nothing to show for the selected filter',
@@ -437,7 +439,8 @@ class _AuditLogsTab extends StatelessWidget {
                   itemBuilder: (_, i) => _AuditLogCard(log: state.logs[i]),
                 );
               }
-              return AppTheme.emptyState(
+              return AppTheme.emptyStateOf(
+                context,
                 icon: Icons.history_rounded,
                 title: 'No audit logs loaded',
                 subtitle: 'Select a filter and tap reload',
@@ -470,7 +473,7 @@ class _AuditLogCard extends StatelessWidget {
       case 'EXPORT':
         return AppColors.info;
       default:
-        return AppColors.textHint;
+        return AppColors.textSecondary;
     }
   }
 
@@ -478,7 +481,7 @@ class _AuditLogCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = _actionColor(log.action);
     return Container(
-      decoration: AppTheme.cardDecoration(radius: 12),
+      decoration: AppTheme.cardDecorationOf(context, radius: 12),
       padding: const EdgeInsets.all(14),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -527,7 +530,7 @@ class _AuditLogCard extends StatelessWidget {
                   children: [
                     if (log.ipAddress != null) ...[
                       Icon(Icons.language_rounded,
-                          size: 11, color: AppColors.textHint),
+                          size: 11, color: AppTheme.textSecondary(context)),
                       const SizedBox(width: 3),
                       Text(log.ipAddress!,
                           style: AppTextStyles.captionText),
@@ -535,7 +538,7 @@ class _AuditLogCard extends StatelessWidget {
                     ],
                     if (log.createdAt != null) ...[
                       Icon(Icons.access_time_rounded,
-                          size: 11, color: AppColors.textHint),
+                          size: 11, color: AppTheme.textSecondary(context)),
                       const SizedBox(width: 3),
                       Expanded(
                         child: Text(
@@ -598,7 +601,7 @@ class _CompaniesTab extends StatelessWidget {
       },
       builder: (context, state) {
         return Scaffold(
-          backgroundColor: AppColors.background,
+          backgroundColor: AppTheme.background(context),
           floatingActionButton: FloatingActionButton(
             onPressed: () => _showCompanyForm(context, company: null),
             backgroundColor: AppColors.primary,
@@ -618,14 +621,16 @@ class _CompaniesTab extends StatelessWidget {
       );
     }
     if (state is AdminError) {
-      return AppTheme.errorState(
+      return AppTheme.errorStateOf(
+        context,
         message: state.message,
         onRetry: () => context.read<AdminBloc>().add(LoadCompaniesEvent()),
       );
     }
     if (state is CompaniesLoaded) {
       if (state.companies.isEmpty) {
-        return AppTheme.emptyState(
+        return AppTheme.emptyStateOf(
+          context,
           icon: Icons.business_rounded,
           title: 'No companies yet',
           subtitle: 'Tap + to add the first company',
@@ -644,7 +649,8 @@ class _CompaniesTab extends StatelessWidget {
         ),
       );
     }
-    return AppTheme.emptyState(
+    return AppTheme.emptyStateOf(
+      context,
       icon: Icons.business_rounded,
       title: 'Companies',
       subtitle: 'Loading…',
@@ -655,7 +661,6 @@ class _CompaniesTab extends StatelessWidget {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: AppColors.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -708,7 +713,7 @@ class _CompanyCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: AppTheme.cardDecoration(radius: 12),
+      decoration: AppTheme.cardDecorationOf(context, radius: 12),
       child: ListTile(
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -751,7 +756,7 @@ class _CompanyCard extends StatelessWidget {
             IconButton(
               onPressed: onEdit,
               icon: const Icon(Icons.edit_rounded, size: 18),
-              color: AppColors.textSecondary,
+              color: AppTheme.textSecondary(context),
               tooltip: 'Edit',
             ),
             IconButton(
@@ -879,7 +884,7 @@ class _CompanyFormSheetState extends State<_CompanyFormSheet> {
               const SizedBox(height: 20),
               TextFormField(
                 controller: _name,
-                decoration: AppTheme.inputDecoration('Company Name *',
+                decoration: AppTheme.inputDecorationOf(context, 'Company Name *',
                     icon: Icons.business_rounded),
                 validator: (v) =>
                     v == null || v.trim().isEmpty ? 'Required' : null,
@@ -888,14 +893,14 @@ class _CompanyFormSheetState extends State<_CompanyFormSheet> {
               const SizedBox(height: 14),
               TextFormField(
                 controller: _legalName,
-                decoration: AppTheme.inputDecoration('Legal Name',
+                decoration: AppTheme.inputDecorationOf(context, 'Legal Name',
                     icon: Icons.gavel_rounded),
                 textInputAction: TextInputAction.next,
               ),
               const SizedBox(height: 14),
               TextFormField(
                 controller: _regNumber,
-                decoration: AppTheme.inputDecoration(
+                decoration: AppTheme.inputDecorationOf(context, 
                     'Registration Number',
                     icon: Icons.numbers_rounded),
                 textInputAction: TextInputAction.next,
@@ -903,21 +908,21 @@ class _CompanyFormSheetState extends State<_CompanyFormSheet> {
               const SizedBox(height: 14),
               TextFormField(
                 controller: _country,
-                decoration: AppTheme.inputDecoration('Country',
+                decoration: AppTheme.inputDecorationOf(context, 'Country',
                     icon: Icons.flag_rounded),
                 textInputAction: TextInputAction.next,
               ),
               const SizedBox(height: 14),
               TextFormField(
                 controller: _timezone,
-                decoration: AppTheme.inputDecoration('Timezone',
+                decoration: AppTheme.inputDecorationOf(context, 'Timezone',
                     icon: Icons.schedule_rounded),
                 textInputAction: TextInputAction.next,
               ),
               const SizedBox(height: 14),
               TextFormField(
                 controller: _currency,
-                decoration: AppTheme.inputDecoration('Currency (e.g. USD)',
+                decoration: AppTheme.inputDecorationOf(context, 'Currency (e.g. USD)',
                     icon: Icons.attach_money_rounded),
                 textCapitalization: TextCapitalization.characters,
                 textInputAction: TextInputAction.done,
@@ -985,7 +990,7 @@ class _BranchesTab extends StatelessWidget {
       },
       builder: (context, state) {
         return Scaffold(
-          backgroundColor: AppColors.background,
+          backgroundColor: AppTheme.background(context),
           floatingActionButton: selectedCompanyId != null
               ? FloatingActionButton(
                   onPressed: () =>
@@ -1010,7 +1015,7 @@ class _BranchesTab extends StatelessWidget {
     return GestureDetector(
       onTap: () => _showCompanyPickerDialog(context),
       child: Container(
-        color: AppColors.surface,
+        color: AppTheme.surface(context),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         child: Row(
           children: [
@@ -1033,15 +1038,15 @@ class _BranchesTab extends StatelessWidget {
                     selectedCompanyName ?? 'Select a company',
                     style: AppTextStyles.titleSmall.copyWith(
                       color: selectedCompanyName != null
-                          ? AppColors.textPrimary
-                          : AppColors.textHint,
+                          ? AppTheme.textPrimary(context)
+                          : AppTheme.textSecondary(context),
                     ),
                   ),
                 ],
               ),
             ),
-            const Icon(Icons.arrow_drop_down_rounded,
-                color: AppColors.textHint),
+            Icon(Icons.arrow_drop_down_rounded,
+                color: AppTheme.textSecondary(context)),
           ],
         ),
       ),
@@ -1128,7 +1133,8 @@ class _BranchesTab extends StatelessWidget {
 
   Widget _buildBody(BuildContext context, AdminState state) {
     if (selectedCompanyId == null) {
-      return AppTheme.emptyState(
+      return AppTheme.emptyStateOf(
+        context,
         icon: Icons.account_tree_rounded,
         title: 'Select a company to view branches',
         subtitle: 'Tap the company picker above',
@@ -1140,7 +1146,8 @@ class _BranchesTab extends StatelessWidget {
       );
     }
     if (state is AdminError) {
-      return AppTheme.errorState(
+      return AppTheme.errorStateOf(
+        context,
         message: state.message,
         onRetry: () => context
             .read<AdminBloc>()
@@ -1149,7 +1156,8 @@ class _BranchesTab extends StatelessWidget {
     }
     if (state is BranchesLoaded) {
       if (state.branches.isEmpty) {
-        return AppTheme.emptyState(
+        return AppTheme.emptyStateOf(
+          context,
           icon: Icons.location_city_rounded,
           title: 'No branches yet',
           subtitle: 'Tap + to add the first branch',
@@ -1168,7 +1176,8 @@ class _BranchesTab extends StatelessWidget {
         ),
       );
     }
-    return AppTheme.emptyState(
+    return AppTheme.emptyStateOf(
+      context,
       icon: Icons.location_city_rounded,
       title: 'Loading branches…',
     );
@@ -1179,7 +1188,6 @@ class _BranchesTab extends StatelessWidget {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: AppColors.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -1235,7 +1243,7 @@ class _BranchCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: AppTheme.cardDecoration(radius: 12),
+      decoration: AppTheme.cardDecorationOf(context, radius: 12),
       child: ListTile(
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -1278,7 +1286,7 @@ class _BranchCard extends StatelessWidget {
             IconButton(
               onPressed: onEdit,
               icon: const Icon(Icons.edit_rounded, size: 18),
-              color: AppColors.textSecondary,
+              color: AppTheme.textSecondary(context),
               tooltip: 'Edit',
             ),
             IconButton(
@@ -1416,7 +1424,7 @@ class _BranchFormSheetState extends State<_BranchFormSheet> {
               const SizedBox(height: 20),
               TextFormField(
                 controller: _name,
-                decoration: AppTheme.inputDecoration('Branch Name *',
+                decoration: AppTheme.inputDecorationOf(context, 'Branch Name *',
                     icon: Icons.location_city_rounded),
                 validator: (v) =>
                     v == null || v.trim().isEmpty ? 'Required' : null,
@@ -1425,35 +1433,35 @@ class _BranchFormSheetState extends State<_BranchFormSheet> {
               const SizedBox(height: 14),
               TextFormField(
                 controller: _code,
-                decoration: AppTheme.inputDecoration('Branch Code',
+                decoration: AppTheme.inputDecorationOf(context, 'Branch Code',
                     icon: Icons.tag_rounded),
                 textInputAction: TextInputAction.next,
               ),
               const SizedBox(height: 14),
               TextFormField(
                 controller: _address,
-                decoration: AppTheme.inputDecoration('Address',
+                decoration: AppTheme.inputDecorationOf(context, 'Address',
                     icon: Icons.home_rounded),
                 textInputAction: TextInputAction.next,
               ),
               const SizedBox(height: 14),
               TextFormField(
                 controller: _city,
-                decoration: AppTheme.inputDecoration('City',
+                decoration: AppTheme.inputDecorationOf(context, 'City',
                     icon: Icons.location_on_rounded),
                 textInputAction: TextInputAction.next,
               ),
               const SizedBox(height: 14),
               TextFormField(
                 controller: _country,
-                decoration: AppTheme.inputDecoration('Country',
+                decoration: AppTheme.inputDecorationOf(context, 'Country',
                     icon: Icons.flag_rounded),
                 textInputAction: TextInputAction.next,
               ),
               const SizedBox(height: 14),
               TextFormField(
                 controller: _phone,
-                decoration: AppTheme.inputDecoration('Phone',
+                decoration: AppTheme.inputDecorationOf(context, 'Phone',
                     icon: Icons.phone_rounded),
                 keyboardType: TextInputType.phone,
                 textInputAction: TextInputAction.next,
@@ -1461,7 +1469,7 @@ class _BranchFormSheetState extends State<_BranchFormSheet> {
               const SizedBox(height: 14),
               TextFormField(
                 controller: _email,
-                decoration: AppTheme.inputDecoration('Email',
+                decoration: AppTheme.inputDecorationOf(context, 'Email',
                     icon: Icons.email_rounded),
                 keyboardType: TextInputType.emailAddress,
                 textInputAction: TextInputAction.done,

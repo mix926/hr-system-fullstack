@@ -15,7 +15,7 @@ class EmployeeDetailScreen extends StatelessWidget {
             (employee.lastName.isNotEmpty ? employee.lastName[0] : '');
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppTheme.background(context),
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
@@ -24,7 +24,7 @@ class EmployeeDetailScreen extends StatelessWidget {
         title: const Text('Employee Profile'),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Container(height: 1, color: AppColors.border),
+          child: Container(height: 1, color: AppTheme.border(context)),
         ),
       ),
       body: SafeArea(
@@ -35,10 +35,9 @@ class EmployeeDetailScreen extends StatelessWidget {
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.fromLTRB(24, 32, 24, 32),
-                decoration: const BoxDecoration(
-                  color: AppColors.surface,
-                  border:
-                      Border(bottom: BorderSide(color: AppColors.border)),
+                decoration: BoxDecoration(
+                  color: AppTheme.surface(context),
+                  border: Border(bottom: BorderSide(color: AppTheme.border(context))),
                 ),
                 child: Column(
                   children: [
@@ -86,9 +85,9 @@ class EmployeeDetailScreen extends StatelessWidget {
                 padding: const EdgeInsets.all(20),
                 child: Column(
                   children: [
-                    _sectionLabel('Contact'),
+                    _sectionLabel(context, 'Contact'),
                     const SizedBox(height: 10),
-                    _infoCard([
+                    _infoCard(context, [
                       InkWell(
                         onTap: () {
                           Clipboard.setData(
@@ -103,36 +102,34 @@ class EmployeeDetailScreen extends StatelessWidget {
                             backgroundColor: AppColors.success,
                           ));
                         },
-                        child: _row(
-                            Icons.email_outlined, 'Email', employee.email,
+                        child: _row(context, Icons.email_outlined, 'Email', employee.email,
                             valueColor: AppColors.primary),
                       ),
                     ]),
                     const SizedBox(height: 20),
-                    _sectionLabel('Employment'),
+                    _sectionLabel(context, 'Employment'),
                     const SizedBox(height: 10),
-                    _infoCard([
-                      _row(Icons.work_outline_rounded, 'Position',
+                    _infoCard(context, [
+                      _row(context, Icons.work_outline_rounded, 'Position',
                           employee.position),
                       const Divider(height: 1),
-                      _row(Icons.badge_outlined, 'Role', employee.role),
+                      _row(context, Icons.badge_outlined, 'Role', employee.role),
                       if (employee.departmentId != null) ...[
                         const Divider(height: 1),
-                        _row(Icons.corporate_fare_rounded, 'Department ID',
+                        _row(context, Icons.corporate_fare_rounded, 'Department ID',
                             employee.departmentId!),
                       ],
                       if (employee.id != null) ...[
                         const Divider(height: 1),
-                        _row(Icons.fingerprint_rounded, 'Employee ID',
+                        _row(context, Icons.fingerprint_rounded, 'Employee ID',
                             employee.id!),
                       ],
                     ]),
                     const SizedBox(height: 20),
-                    _sectionLabel('Status'),
+                    _sectionLabel(context, 'Status'),
                     const SizedBox(height: 10),
-                    _infoCard([
-                      _row(
-                        Icons.circle,
+                    _infoCard(context, [
+                      _row(context, Icons.circle,
                         'Account Status',
                         'Active',
                         valueColor: AppColors.success,
@@ -148,31 +145,31 @@ class EmployeeDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _sectionLabel(String label) {
+  Widget _sectionLabel(BuildContext context, String label) {
     return Align(
       alignment: Alignment.centerLeft,
       child: Text(
         label.toUpperCase(),
         style: AppTextStyles.labelBold.copyWith(
-            color: AppColors.textHint, letterSpacing: 1),
+            color: AppTheme.textSecondary(context), letterSpacing: 1),
       ),
     );
   }
 
-  Widget _infoCard(List<Widget> children) {
+  Widget _infoCard(BuildContext context, List<Widget> children) {
     return Container(
-      decoration: AppTheme.cardDecoration(radius: 14),
+      decoration: AppTheme.cardDecorationOf(context, radius: 14),
       child: Column(children: children),
     );
   }
 
-  Widget _row(IconData icon, String label, String value,
+  Widget _row(BuildContext context, IconData icon, String label, String value,
       {Color? valueColor}) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       child: Row(
         children: [
-          Icon(icon, size: 18, color: AppColors.textHint),
+          Icon(icon, size: 18, color: AppTheme.textSecondary(context)),
           const SizedBox(width: 12),
           Text(label, style: AppTextStyles.bodyMedium),
           const Spacer(),
@@ -180,7 +177,7 @@ class EmployeeDetailScreen extends StatelessWidget {
             child: Text(
               value,
               style: AppTextStyles.bodyMedium.copyWith(
-                color: valueColor ?? AppColors.textPrimary,
+                color: valueColor ?? AppTheme.textPrimary(context),
                 fontWeight: FontWeight.w600,
               ),
               textAlign: TextAlign.end,
