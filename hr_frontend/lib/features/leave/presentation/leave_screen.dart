@@ -204,20 +204,7 @@ class _LeaveScreenBodyState extends State<_LeaveScreenBody> {
               ],
             ),
           ),
-          Material(
-            color: AppColors.background,
-            borderRadius: BorderRadius.circular(10),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(10),
-              onTap: () =>
-                  context.read<LeaveBloc>().add(LoadLeavesEvent()),
-              child: const Padding(
-                padding: EdgeInsets.all(8),
-                child: Icon(Icons.refresh_rounded,
-                    size: 20, color: AppColors.textSecondary),
-              ),
-            ),
-          ),
+
         ],
       ),
     );
