@@ -642,7 +642,7 @@ class _ProfilePageState extends State<_ProfilePage> {
                     child: ClipOval(child: _uploading
                         ? const Center(child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                         : (_photoPath != null
-                            ? Image.network('${AppConstants.baseUrl}/uploads/photos/${_photoPath!.split('/').last}', fit: BoxFit.cover, errorBuilder: (_, __, ___) => _initialsWidget())
+                            ? Image.network('${AppConstants.baseUrl}/uploads/photos/${_photoPath!.split('/').last}', fit: BoxFit.cover, errorBuilder: (_, _, _) => _initialsWidget())
                             : _initialsWidget())),
                   ),
                   GestureDetector(onTap: _uploading ? null : _pickAndUpload,
@@ -685,7 +685,7 @@ class _ProfilePageState extends State<_ProfilePage> {
                     Text('Dark Mode', style: AppTextStyles.bodyMedium),
                     const Spacer(),
                     ValueListenableBuilder<ThemeMode>(valueListenable: themeNotifier,
-                      builder: (_, mode, __) => Switch.adaptive(value: mode == ThemeMode.dark, onChanged: (_) => _toggleTheme(), activeColor: AppColors.primary)),
+                      builder: (_, mode, _) => Switch.adaptive(value: mode == ThemeMode.dark, onChanged: (_) => _toggleTheme(), activeThumbColor: AppColors.primary)),
                   ])),
               ),
               const SizedBox(height: 28),

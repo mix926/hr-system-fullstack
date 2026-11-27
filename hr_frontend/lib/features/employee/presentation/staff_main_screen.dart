@@ -685,7 +685,7 @@ class _ProfilePageState extends State<_ProfilePage> {
                                     ? Image.network(
                                         '${AppConstants.baseUrl}/uploads/photos/${_photoPath!.split('/').last}',
                                         fit: BoxFit.cover,
-                                        errorBuilder: (_, __, ___) => _initialsWidget(),
+                                        errorBuilder: (_, _, _) => _initialsWidget(),
                                       )
                                     : _initialsWidget()),
                           ),
@@ -757,10 +757,10 @@ class _ProfilePageState extends State<_ProfilePage> {
                             const Spacer(),
                             ValueListenableBuilder<ThemeMode>(
                               valueListenable: themeNotifier,
-                              builder: (_, mode, __) => Switch.adaptive(
+                              builder: (_, mode, _) => Switch.adaptive(
                                 value: mode == ThemeMode.dark,
                                 onChanged: (_) => _toggleTheme(),
-                                activeColor: AppColors.primary,
+                                activeThumbColor: AppColors.primary,
                               ),
                             ),
                           ],

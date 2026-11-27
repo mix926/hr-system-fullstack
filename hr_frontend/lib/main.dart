@@ -33,7 +33,7 @@ class HRApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return ValueListenableBuilder<ThemeMode>(
       valueListenable: themeNotifier,
-      builder: (_, mode, __) => MaterialApp(
+      builder: (_, mode, _) => MaterialApp(
         title: 'HR System Pro',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.themeData,
