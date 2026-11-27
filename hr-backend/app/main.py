@@ -48,17 +48,31 @@ app.mount("/uploads", StaticFiles(directory=_uploads_dir), name="uploads")
 
 # ខ្មែរ: បញ្ចូល Routers ព្រមទាំងបន្ថែម Prefix /api/v1 និង Tags សម្រាប់រៀបចំឯកសារ Swagger UI
 app.include_router(auth.router,       prefix="/api/v1", tags=["Authentication"])
-app.include_router(employee.router,   prefix="/api/v1", tags=["Employees"])
-app.include_router(leave.router,      prefix="/api/v1", tags=["Leaves"])
 app.include_router(department.router, prefix="/api/v1", tags=["Departments"])
-app.include_router(attendance.router, prefix="/api/v1", tags=["Attendance"])
-app.include_router(performance.router, prefix="/api/v1", tags=["Performance Reviews"])
-app.include_router(payroll.router, prefix="/api/v1", tags=["Payroll"])
+
+# ── Employee: enhanced first (has specific sub-paths like /designations, /documents)
+#    then base (has /{id} catch-all)
 app.include_router(employee_enhanced.router, prefix="/api/v1", tags=["Employee Management"])
+app.include_router(employee.router,   prefix="/api/v1", tags=["Employees"])
+
+# ── Leave: enhanced first (has /types, /requests, /balances, /encashments)
+#    then base (has /{id} catch-all)
 app.include_router(leave_enhanced.router, prefix="/api/v1", tags=["Leave Management"])
-app.include_router(payroll_enhanced.router, prefix="/api/v1", tags=["Payroll Management"])
-app.include_router(recruitment.router, prefix="/api/v1", tags=["Recruitment (ATS)"])
+app.include_router(leave.router,      prefix="/api/v1", tags=["Leaves"])
+
+app.include_router(attendance.router, prefix="/api/v1", tags=["Attendance"])
+
+# ── Performance: enhanced first (has /goals, /reviews360, /pips sub-paths)
+#    then base (has /{review_id} catch-all that would swallow "goals")
 app.include_router(performance_enhanced.router, prefix="/api/v1", tags=["Performance Management"])
+app.include_router(performance.router, prefix="/api/v1", tags=["Performance Reviews"])
+
+# ── Payroll: enhanced first (has /structures, /tax-brackets, /generate sub-paths)
+#    then base (has /{payroll_id} int catch-all that would swallow "structures")
+app.include_router(payroll_enhanced.router, prefix="/api/v1", tags=["Payroll Management"])
+app.include_router(payroll.router, prefix="/api/v1", tags=["Payroll"])
+
+app.include_router(recruitment.router, prefix="/api/v1", tags=["Recruitment (ATS)"])
 app.include_router(notification.router, prefix="/api/v1", tags=["Notifications & Communication"])
 app.include_router(reports.router, prefix="/api/v1", tags=["Reports & Analytics"])
 app.include_router(admin.router, prefix="/api/v1", tags=["Admin & Security"])

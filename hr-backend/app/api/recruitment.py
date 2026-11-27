@@ -86,7 +86,8 @@ def get_job_postings(
     current_user=Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """List job postings. Optionally filter by status or public visibility."""
+    """List job postings. Optionally filter by status or public visibility. ADMIN/MANAGER only."""
+    _require_admin_or_manager(current_user)
     query = db.query(JobPosting)
     if status_filter:
         try:
