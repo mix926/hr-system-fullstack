@@ -37,6 +37,7 @@ class _PerformanceView extends StatefulWidget {
 
 class _PerformanceViewState extends State<_PerformanceView> {
   String _userRole = '';
+  String _userId = '';
 
   @override
   void initState() {
@@ -49,6 +50,7 @@ class _PerformanceViewState extends State<_PerformanceView> {
     if (mounted) {
       setState(() {
         _userRole = prefs.getString('role') ?? 'STAFF';
+        _userId   = prefs.getString('user_id') ?? '';
       });
     }
   }
@@ -268,7 +270,7 @@ class _PerformanceViewState extends State<_PerformanceView> {
     final messenger = ScaffoldMessenger.of(context);
     List<Employee> employees = [];
 
-    // Fetch employees for the dropdown
+    // Fetch all employees for the dropdown
     final empService = GetIt.instance<EmployeeApiService>();
     final result = await empService.getEmployees();
     result.fold(
@@ -278,9 +280,28 @@ class _PerformanceViewState extends State<_PerformanceView> {
 
     if (!mounted || !context.mounted) return;
 
-    if (employees.isEmpty) {
-      messenger.showSnackBar(const SnackBar(
-        content: Text('No employees found to review'),
+    // ── Role-based filtering ──────────────────────────────────
+    // ADMIN  → can only review MANAGERs
+    // MANAGER → can only review STAFFs
+    final String targetRole;
+    final String targetLabel;
+    if (_userRole == 'ADMIN') {
+      targetRole  = 'MANAGER';
+      targetLabel = 'Select Manager to Review';
+    } else {
+      targetRole  = 'STAFF';
+      targetLabel = 'Select Staff to Review';
+    }
+
+    final reviewableEmployees = employees
+        .where((e) =>
+            e.role.toUpperCase() == targetRole &&
+            e.id != _userId) // exclude self just in case
+        .toList();
+
+    if (reviewableEmployees.isEmpty) {
+      messenger.showSnackBar(SnackBar(
+        content: Text('No ${targetRole.toLowerCase()} accounts found to review'),
         backgroundColor: AppColors.warning,
       ));
       return;
@@ -308,9 +329,9 @@ class _PerformanceViewState extends State<_PerformanceView> {
               children: [
                 // Employee dropdown
                 DropdownButtonFormField<Employee>(
-                  decoration: AppTheme.inputDecorationOf(context, 'Select Employee',
+                  decoration: AppTheme.inputDecorationOf(context, targetLabel,
                       icon: Icons.person_outline_rounded),
-                  items: employees
+                  items: reviewableEmployees
                       .map((e) => DropdownMenuItem(
                             value: e,
                             child: Text(e.fullName,
@@ -338,13 +359,16 @@ class _PerformanceViewState extends State<_PerformanceView> {
                     Text('Rating', style: AppTextStyles.bodyMedium),
                     const SizedBox(width: 12),
                     ...List.generate(5, (i) {
-                      return IconButton(
-                        icon: Icon(
-                          i < rating ? Icons.star : Icons.star_border,
-                          color: AppColors.warning,
-                          size: 28,
+                      return GestureDetector(
+                        onTap: () => setState(() => rating = i + 1),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4),
+                          child: Icon(
+                            i < rating ? Icons.star : Icons.star_border,
+                            color: AppColors.warning,
+                            size: 28,
+                          ),
                         ),
-                        onPressed: () => setState(() => rating = i + 1),
                       );
                     }),
                   ],

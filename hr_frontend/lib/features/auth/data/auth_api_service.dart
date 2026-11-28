@@ -36,6 +36,7 @@ class AuthApiService {
       // ខ្មែរ: ជួសជុល — រក្សាទុកព័ត៌មានអ្នកប្រើប្រាស់ ដើម្បីឱ្យ Profile Page អាចបង្ហាញបាន
       final user = response.data['user'];
       if (user != null) {
+        await prefs.setString('user_id',    user['id']?.toString() ?? '');
         await prefs.setString('role',       user['role']       ?? '');
         await prefs.setString('email',      user['email']      ?? '');
         await prefs.setString('first_name', user['first_name'] ?? '');
