@@ -80,8 +80,8 @@ class _ManagerMainScreenState extends State<ManagerMainScreen> {
     if (_drawerIndex == 3) return const ReportsScreen();
     return switch (_navIndex) {
       0 => ManagerDashboardScreen(onMenuTap: _openDrawer),
-      1 => const LeaveScreen(),
-      2 => const AttendanceScreen(),
+      1 => const AttendanceScreen(),
+      2 => const LeaveScreen(),
       3 => _ProfilePage(
             userId: _userId,
             userRole: _userRole,

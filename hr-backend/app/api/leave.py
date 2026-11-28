@@ -10,7 +10,7 @@ from app.schemas.leave import LeaveCreate, LeaveResponse
 from app.models.models import Employee
 from app.api.auth import get_current_user
 
-router = APIRouter(prefix="/leaves", tags=["Leaves"])
+router = APIRouter(prefix="/leaves", tags=["Leaves"], redirect_slashes=False)
 
 
 # ---- API Endpoints ----
@@ -47,7 +47,7 @@ class LeaveStatusUpdate(BaseModel):
 
 # ---- API Endpoints ----
 
-@router.post("/", response_model=LeaveResponse, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=LeaveResponse, status_code=status.HTTP_201_CREATED)
 def create_leave_request(
     leave: LeaveCreate,
     current_user: dict = Depends(get_current_user),
@@ -69,7 +69,7 @@ def create_leave_request(
     return db_leave
 
 
-@router.get("/", response_model=List[LeaveResponse])
+@router.get("", response_model=List[LeaveResponse])
 def get_leave_requests(
     current_user: dict = Depends(get_current_user),
     db: Session = Depends(get_db)
